@@ -21,10 +21,6 @@ dependencies {
         exclude("net.kyori")
     }
     api(libs.threadutil.common)
-
-    // Messaging service clients
-    compileOnly(libs.bundles.messagingclients)
-
     // Testing - Core
     testImplementation(libs.annotations)
     testImplementation(platform(libs.junit.bom))
@@ -33,7 +29,4 @@ dependencies {
     testImplementation(platform(libs.testcontainers.bom))
     testImplementation(libs.bundles.testcontainers)
     testRuntimeOnly(libs.paper.api)
-
-    // Testing - Messaging service clients
-    testImplementation(libs.bundles.messagingclients)
 }
