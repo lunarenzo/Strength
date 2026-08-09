@@ -4,14 +4,12 @@ import io.github.exampleuser.example.api.ExampleAPI;
 import io.github.exampleuser.example.command.CommandHandler;
 import io.github.exampleuser.example.config.ConfigHandler;
 import io.github.exampleuser.example.cooldown.CooldownHandler;
-import io.github.exampleuser.example.database.handler.DatabaseHandler;
 import io.github.exampleuser.example.hook.HookManager;
 import io.github.exampleuser.example.listener.ListenerHandler;
 import io.github.exampleuser.example.messaging.MessagingHandler;
 import io.github.exampleuser.example.threadutil.SchedulerHandler;
 import io.github.exampleuser.example.translation.TranslationHandler;
 import io.github.exampleuser.example.updatechecker.UpdateHandler;
-import io.github.exampleuser.example.utility.DB;
 import io.github.exampleuser.example.utility.Logger;
 import io.github.exampleuser.example.utility.Messaging;
 import io.github.milkdrinkers.colorparser.paper.ColorParser;
@@ -27,10 +25,8 @@ import java.util.List;
 public class Example extends AbstractExample {
     private static Example instance;
 
-    // Handlers/Managers
     private ConfigHandler configHandler;
     private TranslationHandler translationHandler;
-    private DatabaseHandler databaseHandler;
     private MessagingHandler messagingHandler;
     private HookManager hookManager;
     private CommandHandler commandHandler;
@@ -49,11 +45,6 @@ public class Example extends AbstractExample {
 
         configHandler = new ConfigHandler(this);
         translationHandler = new TranslationHandler(configHandler);
-        databaseHandler = DatabaseHandler.builder()
-            .withConfigHandler(configHandler)
-            .withLogger(getComponentLogger())
-            .withMigrate(true)
-            .build();
         messagingHandler = MessagingHandler.builder()
             .withLogger(getComponentLogger())
             .withName(getName())
@@ -69,7 +60,6 @@ public class Example extends AbstractExample {
         handlers = List.of(
             configHandler,
             translationHandler,
-            databaseHandler,
             messagingHandler,
             hookManager,
             commandHandler,
@@ -80,7 +70,6 @@ public class Example extends AbstractExample {
             apiHandler
         );
 
-        DB.init(databaseHandler);
         Messaging.init(messagingHandler);
         for (Reloadable handler : handlers)
             handler.onLoad(instance);
@@ -91,12 +80,7 @@ public class Example extends AbstractExample {
         for (Reloadable handler : handlers)
             handler.onEnable(instance);
 
-        if (!DB.isStarted()) {
-            Logger.get().warn(ColorParser.of("<yellow>Database handler failed to start. Database support has been disabled.").build());
-            Bukkit.getPluginManager().disablePlugin(this);
-        }
-
-        if (!Messaging.isReady() && configHandler.getDatabaseConfig().messaging.enabled) {
+        if (!Messaging.isReady() && configHandler.getConfig().messaging.enabled) {
             Logger.get().warn(ColorParser.of("<yellow>Messaging handler failed to start. Messaging support has been disabled.").build());
             Bukkit.getPluginManager().disablePlugin(this);
         }

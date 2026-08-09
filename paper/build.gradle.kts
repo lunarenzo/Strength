@@ -28,13 +28,6 @@ dependencies {
         exclude("me.clip.placeholderapi.libs", "kyori")
     }
 
-    // Database dependencies - Core
-    library(libs.bundles.flyway)
-    library(libs.jooq)
-
-    // Database dependencies - JDBC drivers
-    library(libs.bundles.jdbcdrivers)
-
     // Messaging service clients
     library(libs.bundles.messagingclients)
 
@@ -46,14 +39,6 @@ dependencies {
     testImplementation(platform(libs.testcontainers.bom))
     testImplementation(libs.bundles.testcontainers)
     testRuntimeOnly(libs.paper.api)
-
-    // Testing - Database dependencies
-    testImplementation(libs.hikaricp)
-    testImplementation(libs.bundles.flyway)
-    testImplementation(libs.jooq)
-
-    // Testing - JDBC drivers
-    testImplementation(libs.bundles.jdbcdrivers)
 
     // Testing - Messaging service clients
     testImplementation(libs.bundles.messagingclients)
@@ -81,7 +66,6 @@ tasks {
         reloc("org.json", "json")
         reloc("dev.jorel.commandapi", "commandapi")
         reloc("dev.triumphteam.gui", "triumphgui")
-        reloc("com.zaxxer.hikari", "hikaricp")
         reloc("org.bstats", "bstats")
 
         reloc("io.leangen.geantyref", "geantyref")

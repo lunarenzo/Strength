@@ -18,7 +18,6 @@ public class ConfigHandler implements Reloadable {
     private final Logger logger;
 
     private PluginConfig cfg;
-    private DatabaseConfig databaseCfg;
 
     /**
      * Instantiates a new Config handler.
@@ -45,17 +44,6 @@ public class ConfigHandler implements Reloadable {
             .withPath(configDir.resolve("config.yml"))
             .withHeader("")
             .build(PluginConfig.class);
-
-        databaseCfg = new ConfigLoader()
-            .withLogger(logger)
-            .withDirectory()
-            .withPath(configDir.resolve("database.yml"))
-            .withHeader("")
-            .withSerializer(b -> {
-                b.registerExact(StringListSerializer.TYPE_TOKEN, StringListSerializer.INSTANCE)
-                    .registerExact(StringObjectMapSerializer.TYPE_TOKEN, StringObjectMapSerializer.INSTANCE);
-            })
-            .build(DatabaseConfig.class);
     }
 
     /**
@@ -65,14 +53,5 @@ public class ConfigHandler implements Reloadable {
      */
     public PluginConfig getConfig() {
         return cfg;
-    }
-
-    /**
-     * Gets database config object.
-     *
-     * @return the config object
-     */
-    public DatabaseConfig getDatabaseConfig() {
-        return databaseCfg;
     }
 }

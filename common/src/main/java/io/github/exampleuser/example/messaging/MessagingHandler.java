@@ -9,7 +9,6 @@ import io.github.exampleuser.example.messaging.adapter.task.BukkitTaskAdapter;
 import io.github.exampleuser.example.messaging.adapter.task.TaskAdapter;
 import io.github.exampleuser.example.messaging.broker.AbstractBroker;
 import io.github.exampleuser.example.messaging.broker.BrokerType;
-import io.github.exampleuser.example.messaging.broker.database.DatabaseBroker;
 import io.github.exampleuser.example.messaging.broker.nats.NatsBroker;
 import io.github.exampleuser.example.messaging.broker.pluginmsg.PluginBroker;
 import io.github.exampleuser.example.messaging.broker.rabbitmq.RabbitMQBroker;
@@ -20,7 +19,6 @@ import io.github.exampleuser.example.messaging.exception.MessagingEnablingExcept
 import io.github.exampleuser.example.messaging.exception.MessagingInitializationException;
 import io.github.exampleuser.example.messaging.message.Message;
 import io.github.exampleuser.example.messaging.message.OutgoingMessage;
-import io.github.exampleuser.example.utility.DB;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
@@ -83,7 +81,7 @@ public final class MessagingHandler extends AbstractService implements Reloadabl
     @Override
     public void onLoad(AbstractExample plugin) {
         if (config == null)
-            this.config = MessagingConfig.fromConfig(plugin.getConfigHandler().getDatabaseConfig());
+            this.config = MessagingConfig.fromConfig(plugin.getConfigHandler().getConfig());
 
         try {
             doStartup();
@@ -124,11 +122,7 @@ public final class MessagingHandler extends AbstractService implements Reloadabl
             case REDIS -> new RedisBroker(this, implementationName, taskAdapter);
             case RABBITMQ -> new RabbitMQBroker(this, implementationName, taskAdapter);
             case NATS -> new NatsBroker(this, implementationName);
-            default -> new DatabaseBroker(this, implementationName, taskAdapter, taskAdapter);
         };
-
-        if (config.brokerType().equals(BrokerType.DATABASE) && !DB.isStarted())
-            throw new MessagingInitializationException("Database is required for this message broker but the database has failed to initialize!");
 
         if (broker == null)
             throw new MessagingInitializationException("Attempted to initialize message broker but broker is null!");
@@ -234,7 +228,7 @@ public final class MessagingHandler extends AbstractService implements Reloadabl
      */
     public BrokerType getType() {
         if (config == null)
-            return BrokerType.DATABASE;
+            return BrokerType.PLUGIN_MESSAGING;
 
         return config.brokerType();
     }
