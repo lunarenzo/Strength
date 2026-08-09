@@ -6,7 +6,6 @@ import org.jetbrains.annotations.Nullable;
  * Represents message broker implementations supported by this plugin.
  */
 public enum BrokerType {
-    DATABASE("sql"),
     PLUGIN_MESSAGING("plugin"),
     REDIS("redis"),
     RABBITMQ("rabbitmq"),

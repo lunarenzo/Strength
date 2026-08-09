@@ -9,15 +9,6 @@ import org.testcontainers.junit.jupiter.Container;
  * Runs agnostic tests for different message brokers.
  */
 public class MessagingTests {
-    @DisplayName("Database")
-    @Nested
-    class DatabaseTest extends AbstractEmbeddedMessagingTest {
-        public DatabaseTest() {
-            super(
-                MessengerTestUtils.database()
-            );
-        }
-    }
 
     @DisplayName("Redis")
     @Nested

@@ -48,17 +48,7 @@ final class MessengerTestUtils {
             ;
     }
 
-    /**
-     * {@link MessengerTestParams} factory method used for Database tests.
-     *
-     * @return a messenger test config object
-     */
-    @TestOnly
-    public static MessengerTestParams database() {
-        return MessengerTestParams.builder()
-            .withType(BrokerType.DATABASE)
-            .build();
-    }
+
 
 
     /**

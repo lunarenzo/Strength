@@ -1,6 +1,6 @@
 package io.github.exampleuser.example.messaging.config;
 
-import io.github.exampleuser.example.config.DatabaseConfig;
+import io.github.exampleuser.example.config.PluginConfig;
 import io.github.exampleuser.example.messaging.broker.BrokerType;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -58,9 +58,9 @@ public record MessagingConfig(
     }
 
     /**
-     * Builds a {@link MessagingConfig} from the plugin's {@link DatabaseConfig}.
+     * Builds a {@link MessagingConfig} from the plugin's {@link PluginConfig}.
      */
-    public static MessagingConfig fromConfig(DatabaseConfig cfg) {
+    public static MessagingConfig fromConfig(PluginConfig cfg) {
         return MessagingConfig.builder()
             .withEnabled(cfg.messaging.enabled)
             .withPollingInterval(cfg.messaging.pollingInterval)
@@ -203,8 +203,8 @@ public record MessagingConfig(
 
             BrokerType brokerType = broker;
             if (brokerType == null) {
-                LOGGER.warn("Messaging \"type\" is invalid, using default \"{}\".", BrokerType.DATABASE.getName());
-                brokerType = BrokerType.DATABASE;
+                LOGGER.warn("Messaging \"type\" is invalid, using default \"{}\".", BrokerType.PLUGIN_MESSAGING.getName());
+                brokerType = BrokerType.PLUGIN_MESSAGING;
             }
 
             if (addressList == null)
