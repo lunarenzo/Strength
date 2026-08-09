@@ -78,15 +78,8 @@ configuration and repository maintenance.
 * Command creation and handling using [CommandAPI](https://github.com/JorelAli/CommandAPI).
 * GUIs using [Triumph GUI](https://github.com/TriumphTeam/triumph-gui).
 * YAML, JSON & TOML Configuration files using [Crate](https://github.com/milkdrinkers/Crate).
-* Database Setup & Tooling:
-    - Database versioning and migrations using [Flyway](https://flywaydb.org/).
-    - [jOOQ](https://www.jooq.org/) to build and execute type safe SQL queries.
-    - Uses [HikariCP](https://github.com/brettwooldridge/HikariCP) to manage the connection pool.
-    - Supports the following database engines out of the box:
-        - [HyperSQL](https://hsqldb.org/) (_Local_)
-        - [H2](https://www.h2database.com/html/main.html) (_Local_)
-        - [MySQL](https://www.mysql.com/) (_Remote_)
-        - [MariaDB](https://mariadb.com/docs/skysql-previous-release/connect/programming-languages/java/) (_Remote_)
+* Standalone Persistent Storage:
+    - Native [PersistentDataContainer (PDC)](https://docs.papermc.io/paper/dev/api/pdc) support for high-performance player data serialization.
 
 ---
 
@@ -105,10 +98,9 @@ configuration and repository maintenance.
 * **Triumph GUI** - [Link](https://triumphteam.dev/library/triumph-gui/introduction)
 * **Crate** - [Link](https://milkdrinkers.github.io/Crate/introduction)
 
-### Database Tooling
+### Storage Tooling
 
-* **Flyway** - [Link](https://documentation.red-gate.com/fd/quickstart-how-flyway-works-184127223.html)
-* **jOOQ** - [Link](https://www.jooq.org/doc/latest/manual/getting-started/)
+* **Paper PDC Docs** - [Link](https://docs.papermc.io/paper/dev/api/pdc)
 
 ### Gradle Plugin.yml Generation
 
@@ -229,4 +221,4 @@ Simply press the `Debug` button to launch your Development Server with a Debugge
 ## Credits
 
 - **[leviem1:](https://github.com/leviem1)** _For their excellent [__Spigot plugin-template__](https://github.com/CrimsonWarpedcraft/plugin-template) which this was originally a fork of. I highly recommend their more minimalistic and much less opinionated template._
-- **[A248:](https://github.com/A248)** _For exposing me to Flyway and jOOQ, inspiring me to include it in this template. I highly recommend you check out their projects [LibertyBans](https://github.com/A248/LibertyBans) & [MorePaperLib](https://github.com/A248/MorePaperLib) which are of exceptional quality._
+- **[A248:](https://github.com/A248)** _For exposing me to [MorePaperLib](https://github.com/A248/MorePaperLib) and inspiration regarding outstanding plugin development patterns._
