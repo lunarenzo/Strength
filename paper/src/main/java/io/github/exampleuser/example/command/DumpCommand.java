@@ -47,8 +47,7 @@ final class DumpCommand extends Command {
         Map.entry("PUFFERFISH CONFIGURATION", Paths.get("pufferfish.yml"))
     );
     private static final Set<Path> INCLUDED_CONFIGS = Set.of( // Plugin-specific configurations to include in dumps
-        Paths.get("config.yml"),
-        Paths.get("database.yml")
+        Paths.get("config.yml")
     );
     private static final boolean INCLUDE_LOGS = true; // Whether to include the latest log in dumps
 
