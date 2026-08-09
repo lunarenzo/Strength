@@ -6,12 +6,10 @@ import io.github.exampleuser.example.config.ConfigHandler;
 import io.github.exampleuser.example.cooldown.CooldownHandler;
 import io.github.exampleuser.example.hook.HookManager;
 import io.github.exampleuser.example.listener.ListenerHandler;
-import io.github.exampleuser.example.messaging.MessagingHandler;
 import io.github.exampleuser.example.threadutil.SchedulerHandler;
 import io.github.exampleuser.example.translation.TranslationHandler;
 import io.github.exampleuser.example.updatechecker.UpdateHandler;
 import io.github.exampleuser.example.utility.Logger;
-import io.github.exampleuser.example.utility.Messaging;
 import io.github.milkdrinkers.colorparser.paper.ColorParser;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
@@ -27,7 +25,6 @@ public class Example extends AbstractExample {
 
     private ConfigHandler configHandler;
     private TranslationHandler translationHandler;
-    private MessagingHandler messagingHandler;
     private HookManager hookManager;
     private CommandHandler commandHandler;
     private ListenerHandler listenerHandler;
@@ -45,10 +42,6 @@ public class Example extends AbstractExample {
 
         configHandler = new ConfigHandler(this);
         translationHandler = new TranslationHandler(configHandler);
-        messagingHandler = MessagingHandler.builder()
-            .withLogger(getComponentLogger())
-            .withName(getName())
-            .build();
         hookManager = new HookManager(this);
         commandHandler = new CommandHandler(this);
         listenerHandler = new ListenerHandler(this);
@@ -60,7 +53,6 @@ public class Example extends AbstractExample {
         handlers = List.of(
             configHandler,
             translationHandler,
-            messagingHandler,
             hookManager,
             commandHandler,
             listenerHandler,
@@ -70,7 +62,6 @@ public class Example extends AbstractExample {
             apiHandler
         );
 
-        Messaging.init(messagingHandler);
         for (Reloadable handler : handlers)
             handler.onLoad(instance);
     }
@@ -79,11 +70,6 @@ public class Example extends AbstractExample {
     public void onEnable() {
         for (Reloadable handler : handlers)
             handler.onEnable(instance);
-
-        if (!Messaging.isReady() && configHandler.getConfig().messaging.enabled) {
-            Logger.get().warn(ColorParser.of("<yellow>Messaging handler failed to start. Messaging support has been disabled.").build());
-            Bukkit.getPluginManager().disablePlugin(this);
-        }
     }
 
     @Override

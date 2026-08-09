@@ -27,10 +27,6 @@ dependencies {
     compileOnly(libs.placeholderapi) {
         exclude("me.clip.placeholderapi.libs", "kyori")
     }
-
-    // Messaging service clients
-    library(libs.bundles.messagingclients)
-
     // Testing - Core
     testImplementation(libs.annotations)
     testImplementation(platform(libs.junit.bom))
@@ -39,9 +35,6 @@ dependencies {
     testImplementation(platform(libs.testcontainers.bom))
     testImplementation(libs.bundles.testcontainers)
     testRuntimeOnly(libs.paper.api)
-
-    // Testing - Messaging service clients
-    testImplementation(libs.bundles.messagingclients)
 }
 
 tasks {
