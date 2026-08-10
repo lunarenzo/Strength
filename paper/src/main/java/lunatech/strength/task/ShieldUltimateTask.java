@@ -1,6 +1,6 @@
 package lunatech.strength.task;
 
-import lunatech.strength.config.PluginConfig.ShieldSettings;
+import lunatech.strength.config.ShieldConfig;
 import lunatech.strength.listener.player.ShieldAbilityListener;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -24,12 +24,12 @@ import java.util.UUID;
  */
 public final class ShieldUltimateTask extends BukkitRunnable {
     private final Player player;
-    private final ShieldSettings settings;
+    private final ShieldConfig settings;
     private final int durationTicks;
     private int elapsedTicks = 0;
     private ItemDisplay bubbleEntity = null;
 
-    public ShieldUltimateTask(@NotNull Player player, @NotNull ShieldSettings settings) {
+    public ShieldUltimateTask(@NotNull Player player, @NotNull ShieldConfig settings) {
         this.player = player;
         this.settings = settings;
         this.durationTicks = settings.ultimateDurationTicks;
@@ -107,7 +107,7 @@ public final class ShieldUltimateTask extends BukkitRunnable {
         }
 
         if (player.isOnline()) {
-            player.sendMessage(io.github.milkdrinkers.colorparser.paper.ColorParser.of("<red>Your Shield Ultimate bubble has expired!</red>").build());
+            player.sendMessage(io.github.milkdrinkers.colorparser.paper.ColorParser.of(settings.ultimateExpiredMessage).build());
             player.playSound(player.getLocation(), Sound.BLOCK_BEACON_DEACTIVATE, 1.0f, 1.0f);
         }
     }

@@ -1,7 +1,7 @@
 package lunatech.strength.listener.player;
 
 import lunatech.strength.Strength;
-import lunatech.strength.config.PluginConfig.TridentSettings;
+import lunatech.strength.config.TridentConfig;
 import lunatech.strength.service.StrengthService;
 import io.github.milkdrinkers.colorparser.paper.ColorParser;
 import org.bukkit.Material;
@@ -51,7 +51,7 @@ public final class TridentAbilityListener implements Listener {
             return;
         }
 
-        final TridentSettings settings = plugin.getConfigHandler().getConfig().weapons.trident;
+        final TridentConfig settings = plugin.getConfigHandler().getTridentConfig();
 
         // 1. Passive Trigger: Every N hits, summon a lightning bolt that deals extra damage
         final UUID damagerUuid = damager.getUniqueId();
@@ -66,7 +66,7 @@ public final class TridentAbilityListener implements Listener {
             damagee.damage(settings.passiveLightningDamage, damager);
 
             damagee.playSound(damagee.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 0.8f, 1.0f);
-            damager.sendMessage(ColorParser.of("<yellow><bold>Trident Passive triggered! Lightning struck!</bold></yellow>").build());
+            damager.sendMessage(ColorParser.of(settings.passiveTriggeredMessage).build());
         }
 
         // 2. Ultimate Charge: Accumulate N hits to unlock the Ultimate ability
@@ -77,10 +77,15 @@ public final class TridentAbilityListener implements Listener {
             ultimateHits.put(damagerUuid, nextUltHits);
 
             if (nextUltHits == targetUltHits) {
-                damager.sendMessage(ColorParser.of("<green><bold>Trident Ultimate is fully charged! Type /ability to activate!</bold></green>").build());
+                damager.sendMessage(ColorParser.of(settings.ultimateChargedMessage).build());
                 damager.playSound(damager.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.2f);
             } else {
-                damager.sendMessage(ColorParser.of("<gray>Ultimate Charge: <gold>" + nextUltHits + "/" + targetUltHits + "</gold></gray>").build());
+                damager.sendMessage(
+                    ColorParser.of(settings.ultimateChargeProgressMessage)
+                        .with("charge", String.valueOf(nextUltHits))
+                        .with("target", String.valueOf(targetUltHits))
+                        .build()
+                );
             }
         }
     }

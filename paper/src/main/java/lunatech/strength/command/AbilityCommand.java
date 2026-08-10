@@ -4,9 +4,9 @@ import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.executors.CommandArguments;
 import lunatech.strength.AbstractStrength;
 import lunatech.strength.Strength;
-import lunatech.strength.config.PluginConfig.TridentSettings;
-import lunatech.strength.config.PluginConfig.BowSettings;
-import lunatech.strength.config.PluginConfig.ShieldSettings;
+import lunatech.strength.config.TridentConfig;
+import lunatech.strength.config.BowConfig;
+import lunatech.strength.config.ShieldConfig;
 import lunatech.strength.listener.player.TridentAbilityListener;
 import lunatech.strength.listener.player.BowAbilityListener;
 import lunatech.strength.listener.player.ShieldAbilityListener;
@@ -62,7 +62,7 @@ public final class AbilityCommand extends Command {
     }
 
     private void triggerTridentUltimate(Player player, StrengthService strengthService) {
-        final TridentSettings settings = plugin.getConfigHandler().getConfig().weapons.trident;
+        final TridentConfig settings = plugin.getConfigHandler().getTridentConfig();
         final int currentStrength = strengthService.getStrength(player);
 
         // 1. Validate Strength Requirement
@@ -128,11 +128,11 @@ public final class AbilityCommand extends Command {
 
         // Play feedback
         player.playSound(player.getLocation(), Sound.ITEM_TRIDENT_RIPTIDE_1, 1.0f, 1.0f);
-        player.sendMessage(ColorParser.of("<blue><bold>RIPTIDE WAVE ACTIVATED!</bold> Riding the waves...</blue>").build());
+        player.sendMessage(ColorParser.of(settings.ultimateActivatedMessage).build());
     }
 
     private void triggerBowUltimate(Player player, StrengthService strengthService) {
-        final BowSettings settings = plugin.getConfigHandler().getConfig().weapons.bow;
+        final BowConfig settings = plugin.getConfigHandler().getBowConfig();
         final int currentStrength = strengthService.getStrength(player);
 
         // 1. Validate Strength Requirement
@@ -166,11 +166,11 @@ public final class AbilityCommand extends Command {
         new BowBeamTask(player, settings)
             .runTaskTimer(plugin, 0L, 1L);
 
-        player.sendMessage(ColorParser.of("<gold><bold>BOW ULTIMATE ACTIVATED!</bold> Preparing Sonic Blast Beams...</gold>").build());
+        player.sendMessage(ColorParser.of(settings.ultimateActivatedMessage).build());
     }
 
     private void triggerShieldUltimate(Player player, StrengthService strengthService) {
-        final ShieldSettings settings = plugin.getConfigHandler().getConfig().weapons.shield;
+        final ShieldConfig settings = plugin.getConfigHandler().getShieldConfig();
         final int currentStrength = strengthService.getStrength(player);
 
         // 1. Validate Strength Requirement
@@ -204,6 +204,6 @@ public final class AbilityCommand extends Command {
         new ShieldUltimateTask(player, settings)
             .runTaskTimer(plugin, 0L, 1L);
 
-        player.sendMessage(ColorParser.of("<green><bold>SHIELD ULTIMATE ACTIVATED!</bold> Gained God Mode bubble barrier!</green>").build());
+        player.sendMessage(ColorParser.of(settings.ultimateActivatedMessage).build());
     }
 }

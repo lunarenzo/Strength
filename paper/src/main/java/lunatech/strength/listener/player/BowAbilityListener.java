@@ -1,7 +1,7 @@
 package lunatech.strength.listener.player;
 
 import lunatech.strength.Strength;
-import lunatech.strength.config.PluginConfig.BowSettings;
+import lunatech.strength.config.BowConfig;
 import lunatech.strength.service.StrengthService;
 import io.github.milkdrinkers.colorparser.paper.ColorParser;
 import org.bukkit.Bukkit;
@@ -75,7 +75,7 @@ public final class BowAbilityListener implements Listener {
                 }
             }.runTaskTimer(plugin, 0L, 1L);
 
-            shooter.sendMessage(ColorParser.of("<gold>Fired a Llama Spit Web Arrow!</gold>").build());
+            shooter.sendMessage(ColorParser.of(plugin.getConfigHandler().getBowConfig().passiveTriggeredShooterMessage).build());
             shooter.playSound(shooter.getLocation(), Sound.ENTITY_LLAMA_SPIT, 1.0f, 1.0f);
         }
     }
@@ -98,7 +98,7 @@ public final class BowAbilityListener implements Listener {
         }
 
         final UUID shooterUuid = shooter.getUniqueId();
-        final BowSettings settings = plugin.getConfigHandler().getConfig().weapons.bow;
+        final BowConfig settings = plugin.getConfigHandler().getBowConfig();
 
         // 1. Passive hit tracking: Increment hits
         final int currentPassiveHits = passiveHits.merge(shooterUuid, 1, Integer::sum);
@@ -106,7 +106,7 @@ public final class BowAbilityListener implements Listener {
             passiveHits.put(shooterUuid, 0); // Reset
             bowPassiveReady.put(shooterUuid, true); // Next arrow is passive
 
-            shooter.sendMessage(ColorParser.of("<gold><bold>Bow Passive is ready! Your next shot will trap the target in a cobweb!</bold></gold>").build());
+            shooter.sendMessage(ColorParser.of(settings.passiveReadyShooterMessage).build());
             shooter.playSound(shooter.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
         }
 
@@ -118,10 +118,15 @@ public final class BowAbilityListener implements Listener {
             ultimateHits.put(shooterUuid, nextUltHits);
 
             if (nextUltHits == targetUltHits) {
-                shooter.sendMessage(ColorParser.of("<green><bold>Bow Ultimate is fully charged! Use /ability to activate!</bold></green>").build());
+                shooter.sendMessage(ColorParser.of(settings.ultimateChargedMessage).build());
                 shooter.playSound(shooter.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.2f);
             } else {
-                shooter.sendMessage(ColorParser.of("<gray>Ultimate Charge: <gold>" + nextUltHits + "/" + targetUltHits + "</gold></gray>").build());
+                shooter.sendMessage(
+                    ColorParser.of(settings.ultimateChargeProgressMessage)
+                        .with("charge", String.valueOf(nextUltHits))
+                        .with("target", String.valueOf(targetUltHits))
+                        .build()
+                );
             }
         }
 
@@ -134,7 +139,7 @@ public final class BowAbilityListener implements Listener {
                 final BlockData originalData = block.getBlockData();
                 block.setType(Material.COBWEB);
 
-                victim.sendMessage(ColorParser.of("<red><bold>TRAPPED! You are caught in a cobweb!</bold></red>").build());
+                victim.sendMessage(ColorParser.of(settings.passiveTrappedVictimMessage).build());
                 victim.playSound(victim.getLocation(), Sound.ENTITY_SPIDER_DEATH, 1.0f, 0.8f);
 
                 // Schedule automatic cobweb removal/restoration

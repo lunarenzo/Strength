@@ -1,6 +1,6 @@
 package lunatech.strength.task;
 
-import lunatech.strength.config.PluginConfig.BowSettings;
+import lunatech.strength.config.BowConfig;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -27,14 +27,14 @@ import java.util.Set;
  */
 public final class BowBeamTask extends BukkitRunnable {
     private final Player player;
-    private final BowSettings settings;
+    private final BowConfig settings;
     
     private int currentBeamIndex = 0;
     private int beamTick = 0;
     private ItemDisplay currentBeamEntity = null;
     private ItemDisplay currentSpiralEntity = null;
 
-    public BowBeamTask(@NotNull Player player, @NotNull BowSettings settings) {
+    public BowBeamTask(@NotNull Player player, @NotNull BowConfig settings) {
         this.player = player;
         this.settings = settings;
     }

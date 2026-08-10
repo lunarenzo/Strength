@@ -1,6 +1,6 @@
 package lunatech.strength.task;
 
-import lunatech.strength.config.PluginConfig.TridentSettings;
+import lunatech.strength.config.TridentConfig;
 import io.github.milkdrinkers.colorparser.paper.ColorParser;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -24,7 +24,7 @@ import java.util.List;
 public final class TridentUltimateTask extends BukkitRunnable {
     private final Player player;
     private final ArmorStand vehicle;
-    private final TridentSettings settings;
+    private final TridentConfig settings;
     private final int durationTicks;
     private int elapsedTicks = 0;
 
@@ -38,7 +38,7 @@ public final class TridentUltimateTask extends BukkitRunnable {
         BlockData originalUpper
     ) {}
 
-    public TridentUltimateTask(@NotNull Player player, @NotNull ArmorStand vehicle, @NotNull TridentSettings settings) {
+    public TridentUltimateTask(@NotNull Player player, @NotNull ArmorStand vehicle, @NotNull TridentConfig settings) {
         this.player = player;
         this.vehicle = vehicle;
         this.settings = settings;
@@ -47,15 +47,13 @@ public final class TridentUltimateTask extends BukkitRunnable {
 
     @Override
     public void run() {
-        if (!player.isOnline() || player.getVehicle() != vehicle || elapsedTicks >= durationTicks) {
+        if (!player.isOnline() || player.isDead() || elapsedTicks >= durationTicks) {
             cancelAndCleanup();
             return;
         }
 
-        // Calculate strictly horizontal direction vector
-        final Location playerLoc = player.getLocation();
-        Vector dir = playerLoc.getDirection();
-        dir.setY(0); // Ensure velocity is strictly horizontal
+        // Calculate horizontal direction player is facing
+        final Vector dir = player.getEyeLocation().getDirection().setY(0);
         if (dir.lengthSquared() > 0) {
             dir.normalize();
         }
@@ -71,7 +69,7 @@ public final class TridentUltimateTask extends BukkitRunnable {
 
         // Height change verification (wall / steep cliff check)
         if (nextTerrainY - currentTerrainY > 1.0) {
-            player.sendMessage(ColorParser.of("<red>Collided with a wall! Ability ended.</red>").build());
+            player.sendMessage(ColorParser.of(settings.ultimateCollisionWallMessage).build());
             cancelAndCleanup();
             return;
         }
@@ -80,7 +78,7 @@ public final class TridentUltimateTask extends BukkitRunnable {
         final Location headCheckLoc = targetLoc.clone();
         headCheckLoc.setY(nextTerrainY + 4.0);
         if (isSolidBlock(headCheckLoc)) {
-            player.sendMessage(ColorParser.of("<red>Collided with a ceiling! Ability ended.</red>").build());
+            player.sendMessage(ColorParser.of(settings.ultimateCollisionCeilingMessage).build());
             cancelAndCleanup();
             return;
         }
@@ -90,32 +88,9 @@ public final class TridentUltimateTask extends BukkitRunnable {
         nextLoc.setY(nextTerrainY + 3.0);
         vehicle.teleport(nextLoc);
 
-        // Track block crossing to update the 7-block water trail
-        final Location currentBlockLoc = targetLoc.getBlock().getLocation();
-        if (lastBlockLoc == null || lastBlockLoc.getBlockX() != currentBlockLoc.getBlockX() || lastBlockLoc.getBlockZ() != currentBlockLoc.getBlockZ()) {
-            lastBlockLoc = currentBlockLoc;
-
-            // Generate faked water column directly under the vehicle (Y-1 and Y-2)
-            final Location trailLower = currentBlockLoc.clone();
-            trailLower.setY(nextTerrainY + 1.0);
-            final Location trailUpper = currentBlockLoc.clone();
-            trailUpper.setY(nextTerrainY + 2.0);
-
-            // Save original block states
-            final BlockData origLower = trailLower.getBlock().getBlockData();
-            final BlockData origUpper = trailUpper.getBlock().getBlockData();
-
-            // Insert new column at the front of the queue
-            waveColumns.add(0, new WaveColumn(trailLower, trailUpper, origLower, origUpper));
-
-            // Clean up oldest column to keep trail length strictly 7 blocks
-            if (waveColumns.size() > 7) {
-                final WaveColumn oldest = waveColumns.remove(7);
-                restoreColumn(oldest);
-            }
-
-            // Update water levels of active columns to simulate flowing wave tail
-            updateWaveLevels();
+        // Water Wave rendering (Tick 0, 5, 10, etc.)
+        if (elapsedTicks % 5 == 0) {
+            spawnWave(nextLoc.clone().subtract(0, 3, 0));
         }
 
         elapsedTicks++;
@@ -123,73 +98,95 @@ public final class TridentUltimateTask extends BukkitRunnable {
 
     private double getTerrainY(Location loc) {
         final Location scan = loc.clone();
+        scan.setY(loc.getY() + 3.0); // scan from upper height
+
         final int minHeight = scan.getWorld().getMinHeight();
-        final int maxHeight = scan.getWorld().getMaxHeight();
-
-        // Start scanning from current height down
-        int startY = Math.min(maxHeight, Math.max(minHeight, scan.getBlockY()));
-        scan.setY(startY);
-
         while (scan.getY() > minHeight) {
-            if (isGround(scan.getBlock())) {
+            if (scan.getBlock().getType().isSolid() || scan.getBlock().getType() == Material.WATER) {
                 return scan.getY();
             }
             scan.subtract(0, 1, 0);
         }
-        return loc.getY() - 3.0; // Fallback
-    }
-
-    private boolean isGround(Block block) {
-        return block.getType().isSolid() || block.getType() == Material.WATER;
+        return loc.getY() - 3.0; // fallback
     }
 
     private boolean isSolidBlock(Location loc) {
-        return loc.getBlock().getType().isSolid();
+        final Block b = loc.getBlock();
+        return b.getType().isSolid() && b.getType() != Material.WATER;
     }
 
-    private void updateWaveLevels() {
-        for (int i = 0; i < waveColumns.size(); i++) {
-            final WaveColumn col = waveColumns.get(i);
+    private void spawnWave(Location center) {
+        if (lastBlockLoc != null && lastBlockLoc.getBlockX() == center.getBlockX() && lastBlockLoc.getBlockZ() == center.getBlockZ()) {
+            return; // Only spawn if moved to new horizontal block
+        }
+        lastBlockLoc = center.clone();
 
-            // Lower block: Full source water (Level 0)
-            final BlockData lowerWater = Bukkit.createBlockData(Material.WATER);
-            if (lowerWater instanceof Levelled l) {
-                l.setLevel(0);
-            }
+        // Calculate perpendicular vectors to render 3-block wide wave
+        final Vector dir = player.getEyeLocation().getDirection().setY(0).normalize();
+        final Vector ortho = new Vector(-dir.getZ(), 0, dir.getX()).normalize();
 
-            // Upper block: Flowing water (Levelled from 0 to 6 based on trail distance)
-            final BlockData upperWater = Bukkit.createBlockData(Material.WATER);
-            if (upperWater instanceof Levelled l) {
-                l.setLevel(i); // i is from 0 to 6
-            }
+        final Location left = center.clone().add(ortho);
+        final Location right = center.clone().subtract(ortho);
 
-            // Send packet updates to all online players
+        renderWaveAt(left);
+        renderWaveAt(center);
+        renderWaveAt(right);
+    }
+
+    private void renderWaveAt(Location loc) {
+        final Location lower = loc.clone();
+        final Location upper = loc.clone().add(0, 1, 0);
+
+        final BlockData origLower = lower.getBlock().getBlockData();
+        final BlockData origUpper = upper.getBlock().getBlockData();
+
+        // Safe check: Only place if air or water (don't overwrite solid blocks)
+        if (canOverwrite(lower.getBlock()) && canOverwrite(upper.getBlock())) {
+            // Store block states for cleanup
+            waveColumns.add(new WaveColumn(lower.clone(), upper.clone(), origLower, origUpper));
+
+            // Set water block states
+            final BlockData waterData = Bukkit.createBlockData(Material.WATER, data -> {
+                if (data instanceof Levelled levelled) {
+                    levelled.setLevel(0); // full block
+                }
+            });
+            lower.getBlock().setBlockData(waterData, false);
+            upper.getBlock().setBlockData(waterData, false);
+
+            // Re-apply block changes for nearby players
             for (Player p : Bukkit.getOnlinePlayers()) {
-                p.sendBlockChange(col.lower, lowerWater);
-                p.sendBlockChange(col.upper, upperWater);
+                if (p.getWorld().equals(loc.getWorld()) && p.getLocation().distanceSquared(loc) < 2500) {
+                    p.sendBlockChange(lower, waterData);
+                    p.sendBlockChange(upper, waterData);
+                }
             }
         }
     }
 
-    private void restoreColumn(WaveColumn col) {
-        for (Player p : Bukkit.getOnlinePlayers()) {
-            p.sendBlockChange(col.lower, col.originalLower);
-            p.sendBlockChange(col.upper, col.originalUpper);
-        }
+    private boolean canOverwrite(Block block) {
+        final Material type = block.getType();
+        return type == Material.AIR || type == Material.CAVE_AIR || type == Material.VOID_AIR || type == Material.WATER;
     }
 
     private void cancelAndCleanup() {
         cancel();
 
-        // Remove passenger
-        if (player.isOnline() && player.getVehicle() == vehicle) {
-            vehicle.removePassenger(player);
-        }
+        // Remove passenger vehicle
         vehicle.remove();
 
-        // Restore all remaining active trail blocks
+        // Restore blocks in chronological order
         for (WaveColumn col : waveColumns) {
-            restoreColumn(col);
+            col.lower.getBlock().setBlockData(col.originalLower, false);
+            col.upper.getBlock().setBlockData(col.originalUpper, false);
+
+            // Re-sync block updates for clients
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                if (p.getWorld().equals(col.lower.getWorld()) && p.getLocation().distanceSquared(col.lower) < 2500) {
+                    p.sendBlockChange(col.lower, col.originalLower);
+                    p.sendBlockChange(col.upper, col.originalUpper);
+                }
+            }
         }
         waveColumns.clear();
     }
