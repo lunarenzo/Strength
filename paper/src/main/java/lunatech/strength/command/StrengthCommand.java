@@ -36,7 +36,11 @@ final class StrengthCommand extends Command {
                 new CommandAPICommand("withdraw")
                     .withHelp("Withdraw strength into a physical item.", "Withdraw strength into a physical item.")
                     .withArguments(new IntegerArgument("amount", 1))
-                    .executesPlayer(this::executorWithdraw)
+                    .executesPlayer(this::executorWithdraw),
+                new CommandAPICommand("reload")
+                    .withHelp("Reload the plugin configuration and translations.", "Reload the plugin configuration and translations.")
+                    .withPermission(BASE_PERM + ".reload")
+                    .executes(this::executorReload)
             )
             .executes(this::executorStrength);
     }
@@ -94,6 +98,15 @@ final class StrengthCommand extends Command {
         player.sendMessage(
             ColorParser.of("<green>Successfully withdrew <amount> Strength into a physical item!</green>")
                 .with("amount", String.valueOf(amount))
+                .build()
+        );
+    }
+
+    private void executorReload(CommandSender sender, CommandArguments args) {
+        plugin.getConfigHandler().onLoad(plugin);
+        io.github.milkdrinkers.wordweaver.Translation.reload();
+        sender.sendMessage(
+            ColorParser.of("<green>Successfully reloaded plugin configuration and translations!</green>")
                 .build()
         );
     }
