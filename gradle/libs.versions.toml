@@ -1,6 +1,6 @@
 [versions]
-paper-api = "1.21.11-R0.1-SNAPSHOT"
-paper-run = "1.21.11"
+paper-api = "1.21.1-R0.1-SNAPSHOT"
+paper-run = "1.21.1"
 commandapi = "11.2.0"
 configurate = "4.2.0-GeyserMC-SNAPSHOT"
 colorparser = "4.2.0"
