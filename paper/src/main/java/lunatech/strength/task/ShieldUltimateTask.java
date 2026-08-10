@@ -69,7 +69,7 @@ public final class ShieldUltimateTask extends BukkitRunnable {
                     
                     // Center the bubble horizontally/vertically relative to the player mounting point (usually head level)
                     display.setTransformation(new Transformation(
-                        new Vector3f(0.0f, -0.5f, 0.0f),
+                        new Vector3f(settings.bubbleOffsetX, settings.bubbleOffsetY, settings.bubbleOffsetZ),
                         new Quaternionf(),
                         new Vector3f(1.0f, 1.0f, 1.0f),
                         new Quaternionf()

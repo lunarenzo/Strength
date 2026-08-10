@@ -189,5 +189,14 @@ public class PluginConfig implements VersionedConfig {
 
         @Comment("Ultimate duration in ticks (20 ticks = 1 second, default 15s = 300 ticks)")
         public int ultimateDurationTicks = 300;
+
+        @Comment("Ultimate bubble visual translation offset X")
+        public float bubbleOffsetX = 0.0f;
+
+        @Comment("Ultimate bubble visual translation offset Y")
+        public float bubbleOffsetY = -0.5f;
+
+        @Comment("Ultimate bubble visual translation offset Z")
+        public float bubbleOffsetZ = 0.0f;
     }
 }
