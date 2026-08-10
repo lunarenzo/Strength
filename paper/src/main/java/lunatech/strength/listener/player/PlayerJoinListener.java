@@ -27,6 +27,10 @@ public final class PlayerJoinListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerJoin(@NotNull PlayerJoinEvent event) {
         final Player player = event.getPlayer();
+        
+        // Safety check: reset invulnerability status on join
+        player.setInvulnerable(false);
+
         final int strength = strengthService.getStrength(player);
         
         // Re-apply modifier on join to synchronize entity state
