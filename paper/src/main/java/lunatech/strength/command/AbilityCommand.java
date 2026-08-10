@@ -6,11 +6,14 @@ import lunatech.strength.AbstractStrength;
 import lunatech.strength.Strength;
 import lunatech.strength.config.PluginConfig.TridentSettings;
 import lunatech.strength.config.PluginConfig.BowSettings;
+import lunatech.strength.config.PluginConfig.ShieldSettings;
 import lunatech.strength.listener.player.TridentAbilityListener;
 import lunatech.strength.listener.player.BowAbilityListener;
+import lunatech.strength.listener.player.ShieldAbilityListener;
 import lunatech.strength.service.StrengthService;
 import lunatech.strength.task.TridentUltimateTask;
 import lunatech.strength.task.BowBeamTask;
+import lunatech.strength.task.ShieldUltimateTask;
 import io.github.milkdrinkers.colorparser.paper.ColorParser;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -51,6 +54,8 @@ public final class AbilityCommand extends Command {
             triggerTridentUltimate(player, strengthService);
         } else if ("bow".equalsIgnoreCase(assignedWeapon)) {
             triggerBowUltimate(player, strengthService);
+        } else if ("shield".equalsIgnoreCase(assignedWeapon)) {
+            triggerShieldUltimate(player, strengthService);
         } else {
             player.sendMessage(ColorParser.of("<red>Your assigned weapon (" + assignedWeapon.toUpperCase() + ") does not have an ultimate ability implemented in this phase.</red>").build());
         }
@@ -162,5 +167,43 @@ public final class AbilityCommand extends Command {
             .runTaskTimer(plugin, 0L, 1L);
 
         player.sendMessage(ColorParser.of("<gold><bold>BOW ULTIMATE ACTIVATED!</bold> Preparing Sonic Blast Beams...</gold>").build());
+    }
+
+    private void triggerShieldUltimate(Player player, StrengthService strengthService) {
+        final ShieldSettings settings = plugin.getConfigHandler().getConfig().weapons.shield;
+        final int currentStrength = strengthService.getStrength(player);
+
+        // 1. Validate Strength Requirement
+        if (currentStrength < settings.ultimateStrengthRequired) {
+            player.sendMessage(
+                ColorParser.of("<red>You do not have enough strength to activate your ultimate! (Required: <req>, Current: <current>)</red>")
+                    .with("req", String.valueOf(settings.ultimateStrengthRequired))
+                    .with("current", String.valueOf(currentStrength))
+                    .build()
+            );
+            return;
+        }
+
+        // 2. Validate Hit Charge Requirement
+        final UUID uuid = player.getUniqueId();
+        final int currentCharge = ShieldAbilityListener.ultimateHits.getOrDefault(uuid, 0);
+        if (currentCharge < settings.ultimateHitsRequired) {
+            player.sendMessage(
+                ColorParser.of("<red>Your ultimate is not charged yet! (Required: <req>, Current: <current> blocks)</red>")
+                    .with("req", String.valueOf(settings.ultimateHitsRequired))
+                    .with("current", String.valueOf(currentCharge))
+                    .build()
+            );
+            return;
+        }
+
+        // 3. Clear Ultimate Charge
+        ShieldAbilityListener.ultimateHits.put(uuid, 0);
+
+        // 4. Trigger Ability Task (Bubble Shield & God Mode task)
+        new ShieldUltimateTask(player, settings)
+            .runTaskTimer(plugin, 0L, 1L);
+
+        player.sendMessage(ColorParser.of("<green><bold>SHIELD ULTIMATE ACTIVATED!</bold> Gained God Mode bubble barrier!</green>").build());
     }
 }
