@@ -299,9 +299,8 @@ public class ConfigLoader {
         final CommentedConfigurationNode newRoot = CommentedConfigurationNode.root(loader.defaultOptions());
         newRoot.set(config);
 
-        if (originallyEmpty || currentVersion != newVersion) {
-            loader.save(newRoot);
-        }
+        // Always save the node tree back to disk to populate new fields and enforce formatting
+        loader.save(newRoot);
 
         // Transformer runs after saving so its changes are intentionally not persisted.
         if (transformer != null) {
