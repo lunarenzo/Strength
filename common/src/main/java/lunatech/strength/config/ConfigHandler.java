@@ -3,14 +3,12 @@ package lunatech.strength.config;
 import lunatech.strength.AbstractStrength;
 import lunatech.strength.Reloadable;
 import lunatech.strength.config.loading.ConfigLoader;
-import lunatech.strength.config.typeserializer.StringListSerializer;
-import lunatech.strength.config.typeserializer.StringObjectMapSerializer;
 import org.slf4j.Logger;
 
 import java.nio.file.Path;
 
 /**
- * A class that generates/loads {@literal &} provides access to a configuration file.
+ * A class that generates/loads & provides access to main and decoupled weapon configuration files.
  */
 public class ConfigHandler implements Reloadable {
     private final AbstractStrength plugin;
@@ -18,6 +16,9 @@ public class ConfigHandler implements Reloadable {
     private final Logger logger;
 
     private PluginConfig cfg;
+    private TridentConfig tridentCfg;
+    private BowConfig bowCfg;
+    private ShieldConfig shieldCfg;
 
     /**
      * Instantiates a new Config handler.
@@ -38,12 +39,39 @@ public class ConfigHandler implements Reloadable {
 
     @Override
     public void onLoad(AbstractStrength plugin) {
+        // 1. Load general plugin configuration
         cfg = new ConfigLoader()
             .withLogger(logger)
             .withDirectory()
             .withPath(configDir.resolve("config.yml"))
-            .withHeader("")
+            .withHeader("StrengthSMP Core Configuration")
             .build(PluginConfig.class);
+
+        final Path weaponsDir = configDir.resolve("weapons");
+
+        // 2. Load decoupled Trident configuration
+        tridentCfg = new ConfigLoader()
+            .withLogger(logger)
+            .withDirectory()
+            .withPath(weaponsDir.resolve("trident.yml"))
+            .withHeader("Trident Weapon Configuration")
+            .build(TridentConfig.class);
+
+        // 3. Load decoupled Bow configuration
+        bowCfg = new ConfigLoader()
+            .withLogger(logger)
+            .withDirectory()
+            .withPath(weaponsDir.resolve("bow.yml"))
+            .withHeader("Bow Weapon Configuration")
+            .build(BowConfig.class);
+
+        // 4. Load decoupled Shield configuration
+        shieldCfg = new ConfigLoader()
+            .withLogger(logger)
+            .withDirectory()
+            .withPath(weaponsDir.resolve("shield.yml"))
+            .withHeader("Shield Weapon Configuration")
+            .build(ShieldConfig.class);
     }
 
     /**
@@ -53,5 +81,32 @@ public class ConfigHandler implements Reloadable {
      */
     public PluginConfig getConfig() {
         return cfg;
+    }
+
+    /**
+     * Gets trident weapon configuration.
+     *
+     * @return the trident config
+     */
+    public TridentConfig getTridentConfig() {
+        return tridentCfg;
+    }
+
+    /**
+     * Gets bow weapon configuration.
+     *
+     * @return the bow config
+     */
+    public BowConfig getBowConfig() {
+        return bowCfg;
+    }
+
+    /**
+     * Gets shield weapon configuration.
+     *
+     * @return the shield config
+     */
+    public ShieldConfig getShieldConfig() {
+        return shieldCfg;
     }
 }

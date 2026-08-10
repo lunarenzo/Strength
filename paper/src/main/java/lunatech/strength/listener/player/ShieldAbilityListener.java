@@ -1,7 +1,7 @@
 package lunatech.strength.listener.player;
 
 import lunatech.strength.Strength;
-import lunatech.strength.config.PluginConfig.ShieldSettings;
+import lunatech.strength.config.ShieldConfig;
 import lunatech.strength.service.StrengthService;
 import io.github.milkdrinkers.colorparser.paper.ColorParser;
 import org.bukkit.Material;
@@ -112,7 +112,7 @@ public final class ShieldAbilityListener implements Listener {
 
         // If the player successfully blocks the incoming damage
         if (victim.isBlocking() && event.getFinalDamage() < event.getDamage()) {
-            final ShieldSettings settings = plugin.getConfigHandler().getConfig().weapons.shield;
+            final ShieldConfig settings = plugin.getConfigHandler().getShieldConfig();
             final int currentCharge = ultimateHits.getOrDefault(uuid, 0);
             final int targetCharge = settings.ultimateHitsRequired;
 
@@ -121,10 +121,15 @@ public final class ShieldAbilityListener implements Listener {
                 ultimateHits.put(uuid, nextCharge);
 
                 if (nextCharge == targetCharge) {
-                    victim.sendMessage(ColorParser.of("<green><bold>Shield Ultimate is fully charged! Use /ability to activate!</bold></green>").build());
+                    victim.sendMessage(ColorParser.of(settings.ultimateChargedMessage).build());
                     victim.playSound(victim.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.2f);
                 } else {
-                    victim.sendMessage(ColorParser.of("<gray>Ultimate Charge: <gold>" + nextCharge + "/" + targetCharge + "</gold> blocks</gray>").build());
+                    victim.sendMessage(
+                        ColorParser.of(settings.ultimateChargeProgressMessage)
+                            .with("charge", String.valueOf(nextCharge))
+                            .with("target", String.valueOf(targetCharge))
+                            .build()
+                    );
                 }
             }
         }
