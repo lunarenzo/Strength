@@ -16,7 +16,7 @@ import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
-import io.github.milkdrinkers.colorparser.paper.ColorParser;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
@@ -83,12 +83,12 @@ public final class DefaultStrengthService implements StrengthService {
         final ItemStack item = new ItemStack(material);
         item.editMeta(meta -> {
             // Set Display Name
-            meta.displayName(ColorParser.of(itemSettings.displayName).build());
+            meta.displayName(MiniMessage.miniMessage().deserialize(itemSettings.displayName));
 
             // Set Lore
             final List<Component> loreComponents = new ArrayList<>();
             for (String line : itemSettings.lore) {
-                loreComponents.add(ColorParser.of(line.replace("<amount>", String.valueOf(amount))).build());
+                loreComponents.add(MiniMessage.miniMessage().deserialize(line.replace("<amount>", String.valueOf(amount))));
             }
             meta.lore(loreComponents);
 
