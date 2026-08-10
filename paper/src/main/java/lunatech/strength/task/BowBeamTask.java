@@ -102,7 +102,7 @@ public final class BowBeamTask extends BukkitRunnable {
                     if (entity instanceof LivingEntity living && living != player && !(living instanceof ItemDisplay)) {
                         if (damaged.add(living)) {
                             living.damage(settings.ultimateDamage, player);
-                            living.playSound(living.getLocation(), Sound.ENTITY_GENERIC_HURT, 1.0f, 1.0f);
+                            living.getWorld().playSound(living.getLocation(), Sound.ENTITY_GENERIC_HURT, 1.0f, 1.0f);
                         }
                     }
                 }
