@@ -46,12 +46,10 @@ public final class TridentUltimateTask extends BukkitRunnable {
             return;
         }
 
-        // Calculate direction vector, ignoring upward vertical look to prevent flying
+        // Calculate strictly horizontal direction vector
         final Location playerLoc = player.getLocation();
         Vector dir = playerLoc.getDirection();
-        if (dir.getY() > 0) {
-            dir.setY(0);
-        }
+        dir.setY(0); // Ensure the velocity is strictly horizontal
         if (dir.lengthSquared() > 0) {
             dir.normalize();
         }
@@ -59,11 +57,33 @@ public final class TridentUltimateTask extends BukkitRunnable {
 
         // Calculate next location
         final Location currentLoc = vehicle.getLocation();
-        final Location nextLoc = currentLoc.clone().add(dir);
+        Location nextLoc = currentLoc.clone().add(dir);
 
-        // Check for solid block collisions at vehicle location (feet and head height)
-        if (isSolidBlock(nextLoc) || isSolidBlock(nextLoc.clone().add(0, 1, 0))) {
-            player.sendMessage(ColorParser.of("<red>Collided with a wall! Ability ended.</red>").build());
+        // Ground-following/Slope adjustment
+        if (isSolidBlock(nextLoc)) {
+            // Step-up check (e.g. going up stairs or low blocks)
+            final Location stepUpLoc = nextLoc.clone().add(0, 1, 0);
+            if (!isSolidBlock(stepUpLoc) && !isSolidBlock(stepUpLoc.clone().add(0, 1, 0))) {
+                nextLoc.add(0, 1, 0); // Step up smoothly
+            } else {
+                player.sendMessage(ColorParser.of("<red>Collided with a wall! Ability ended.</red>").build());
+                cancelAndCleanup();
+                return;
+            }
+        } else {
+            // Step-down check (follow terrain drop up to 2 blocks)
+            final Location stepDownLoc = nextLoc.clone().subtract(0, 1, 0);
+            if (!isSolidBlock(stepDownLoc)) {
+                final Location stepDownLoc2 = stepDownLoc.clone().subtract(0, 1, 0);
+                if (isSolidBlock(stepDownLoc2)) {
+                    nextLoc.subtract(0, 1, 0); // Step down smoothly
+                }
+            }
+        }
+
+        // Ceiling collision check (head height)
+        if (isSolidBlock(nextLoc.clone().add(0, 1, 0))) {
+            player.sendMessage(ColorParser.of("<red>Collided with a ceiling! Ability ended.</red>").build());
             cancelAndCleanup();
             return;
         }
