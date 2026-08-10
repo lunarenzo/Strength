@@ -23,7 +23,7 @@ import java.util.Set;
 
 /**
  * Task that manages the active Bow Ultimate: executing a sequence of sonic charge-ups
- * and firing 3 powerful, spinning item-display beams that damage all entities in their path.
+ * and firing 3 powerful, spinning item-display beams and spiral displays that damage all entities in their path.
  */
 public final class BowBeamTask extends BukkitRunnable {
     private final Player player;
@@ -32,6 +32,7 @@ public final class BowBeamTask extends BukkitRunnable {
     private int currentBeamIndex = 0;
     private int beamTick = 0;
     private ItemDisplay currentBeamEntity = null;
+    private ItemDisplay currentSpiralEntity = null;
 
     public BowBeamTask(@NotNull Player player, @NotNull BowSettings settings) {
         this.player = player;
@@ -64,13 +65,20 @@ public final class BowBeamTask extends BukkitRunnable {
         else if (beamTick == 20) {
             player.getWorld().playSound(player.getLocation(), Sound.ENTITY_WARDEN_SONIC_BOOM, 1.0f, 1.0f);
 
-            // Calculate center spawn location (Z scale mid-point)
+            // Calculate center spawn location for the main beam (Z scale mid-point)
             final Location center = player.getEyeLocation().add(player.getEyeLocation().getDirection().multiply(settings.ultimateRange / 2.0 + 1.5));
             center.setYaw(player.getEyeLocation().getYaw());
             center.setPitch(player.getEyeLocation().getPitch());
 
+            // Calculate spawn location for the face spiral ring (1.0 meter in front of face)
+            final Location spiralLoc = player.getEyeLocation().add(player.getEyeLocation().getDirection().multiply(1.0));
+            spiralLoc.setYaw(player.getEyeLocation().getYaw());
+            spiralLoc.setPitch(player.getEyeLocation().getPitch());
+
             try {
                 final Material mat = Material.valueOf(settings.beamMaterial);
+                
+                // Spawn main beam Display
                 currentBeamEntity = player.getWorld().spawn(center, ItemDisplay.class, display -> {
                     display.setItemStack(new ItemStack(mat, 1));
                     final ItemMeta meta = display.getItemStack().getItemMeta();
@@ -82,6 +90,22 @@ public final class BowBeamTask extends BukkitRunnable {
                         new Vector3f(0),
                         new Quaternionf(),
                         new Vector3f((float) settings.ultimateWidth, (float) settings.ultimateWidth, (float) settings.ultimateRange / 3.0f),
+                        new Quaternionf()
+                    ));
+                });
+
+                // Spawn face spiral Display
+                currentSpiralEntity = player.getWorld().spawn(spiralLoc, ItemDisplay.class, display -> {
+                    display.setItemStack(new ItemStack(mat, 1));
+                    final ItemMeta meta = display.getItemStack().getItemMeta();
+                    if (meta != null) {
+                        meta.setCustomModelData(settings.beamSpiralCustomModelData);
+                        display.getItemStack().setItemMeta(meta);
+                    }
+                    display.setTransformation(new Transformation(
+                        new Vector3f(0),
+                        new Quaternionf(),
+                        new Vector3f((float) settings.ultimateWidth * 2.0f, (float) settings.ultimateWidth * 2.0f, 0.01f),
                         new Quaternionf()
                     ));
                 });
@@ -111,17 +135,17 @@ public final class BowBeamTask extends BukkitRunnable {
 
         // 3. Animation Phase (Ticks 21 - 39)
         else if (beamTick > 20 && beamTick < 40) {
+            final int animTick = beamTick - 20;
+            final float angle = animTick * 12.0f;
+            final Quaternionf rot = new Quaternionf().rotateZ((float) Math.toRadians(angle));
+
+            // Pulsing/Tapering scale (shrink to 0 in the last 10 ticks)
+            float scale = (float) settings.ultimateWidth;
+            if (animTick > 10) {
+                scale = (float) settings.ultimateWidth * (1.0f - (animTick - 10) / 10.0f);
+            }
+
             if (currentBeamEntity != null && currentBeamEntity.isValid()) {
-                final int animTick = beamTick - 20;
-                final float angle = animTick * 12.0f;
-                final Quaternionf rot = new Quaternionf().rotateZ((float) Math.toRadians(angle));
-
-                // Pulsing/Tapering scale (shrink to 0 in the last 10 ticks)
-                float scale = (float) settings.ultimateWidth;
-                if (animTick > 10) {
-                    scale = (float) settings.ultimateWidth * (1.0f - (animTick - 10) / 10.0f);
-                }
-
                 currentBeamEntity.setTransformation(new Transformation(
                     new Vector3f(0),
                     rot,
@@ -131,14 +155,22 @@ public final class BowBeamTask extends BukkitRunnable {
                 currentBeamEntity.setInterpolationDuration(1);
                 currentBeamEntity.setInterpolationDelay(0);
             }
+
+            if (currentSpiralEntity != null && currentSpiralEntity.isValid()) {
+                currentSpiralEntity.setTransformation(new Transformation(
+                    new Vector3f(0),
+                    rot,
+                    new Vector3f(scale * 2.0f, scale * 2.0f, 0.01f),
+                    new Quaternionf()
+                ));
+                currentSpiralEntity.setInterpolationDuration(1);
+                currentSpiralEntity.setInterpolationDelay(0);
+            }
         }
 
         // 4. Beam Termination & Loop Advance (Tick 39)
         if (beamTick == 39) {
-            if (currentBeamEntity != null) {
-                currentBeamEntity.remove();
-                currentBeamEntity = null;
-            }
+            cleanup();
 
             beamTick = -1; // Reset to 0 next tick
             currentBeamIndex++;
@@ -154,6 +186,10 @@ public final class BowBeamTask extends BukkitRunnable {
         if (currentBeamEntity != null) {
             currentBeamEntity.remove();
             currentBeamEntity = null;
+        }
+        if (currentSpiralEntity != null) {
+            currentSpiralEntity.remove();
+            currentSpiralEntity = null;
         }
     }
 }

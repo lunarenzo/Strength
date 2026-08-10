@@ -154,6 +154,9 @@ public class PluginConfig implements VersionedConfig {
         @Comment("The custom model data of the ultimate beam item display")
         public int beamCustomModelData = 12348;
 
+        @Comment("The custom model data of the ultimate spiral item display")
+        public int beamSpiralCustomModelData = 12349;
+
         @Comment("The range of the ultimate beam")
         public double ultimateRange = 20.0;
 
