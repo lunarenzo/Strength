@@ -102,7 +102,7 @@ maven-metadata-local.xml
 *.versionsBackup
 maven-eclipse.xml
 
-repository/
+/repository/
 .mvn/
 maven/
 
@@ -385,3 +385,6 @@ fleet.local.yaml
 ##############################
 
 .DS_Store
+
+# Local dev docs
+dev-docs/

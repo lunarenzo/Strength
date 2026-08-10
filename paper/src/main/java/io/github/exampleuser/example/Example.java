@@ -32,6 +32,7 @@ public class Example extends AbstractExample {
     private SchedulerHandler schedulerHandler;
     private CooldownHandler cooldownHandler;
     private ExampleAPIProvider apiHandler;
+    private io.github.exampleuser.example.service.StrengthService strengthService;
 
     // Handlers list (defines order of load/enable/disable)
     private List<? extends Reloadable> handlers;
@@ -42,6 +43,13 @@ public class Example extends AbstractExample {
 
         configHandler = new ConfigHandler(this);
         translationHandler = new TranslationHandler(configHandler);
+
+        // Initialize Strength Service
+        strengthService = new io.github.exampleuser.example.service.impl.DefaultStrengthService(
+            new io.github.exampleuser.example.data.repository.impl.PDCPlayerRepository(),
+            configHandler
+        );
+
         hookManager = new HookManager(this);
         commandHandler = new CommandHandler(this);
         listenerHandler = new ListenerHandler(this);
@@ -102,5 +110,9 @@ public class Example extends AbstractExample {
 
     public @NotNull ExampleAPI getApiHandler() {
         return apiHandler;
+    }
+
+    public @NotNull io.github.exampleuser.example.service.StrengthService getStrengthService() {
+        return strengthService;
     }
 }

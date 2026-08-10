@@ -48,4 +48,25 @@ public class PluginConfig implements VersionedConfig {
 
     @Comment("Language, specify the language file to use, for example `en_US` which will load `/lang/en_US.json`")
     public String language = "en_US";
+
+    @Comment("Strength SMP Settings")
+    public StrengthSettings strength = new StrengthSettings();
+
+    @ConfigSerializable
+    public static class StrengthSettings {
+        @Comment("Amount of strength awarded to the killer on player kill")
+        public int killReward = 1;
+
+        @Comment("Amount of strength lost on death (use 0 to disable loss)")
+        public int deathLoss = 1;
+
+        @Comment("Minimum strength value a player can have")
+        public int minStrength = 0;
+
+        @Comment("Maximum strength value a player can have")
+        public int maxStrength = 100;
+
+        @Comment("Default strength value for new players")
+        public int defaultStrength = 0;
+    }
 }
