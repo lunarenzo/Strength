@@ -19,6 +19,7 @@ import org.bukkit.persistence.PersistentDataType;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,14 +56,14 @@ public final class DefaultStrengthService implements StrengthService {
     }
 
     @Override
-    public org.jetbrains.annotations.Nullable String getAssignedWeapon(@NotNull Player player) {
+    public @Nullable String getAssignedWeapon(@NotNull Player player) {
         return playerRepository.get(player)
             .map(PlayerData::assignedWeapon)
             .orElse(null);
     }
 
     @Override
-    public void setAssignedWeapon(@NotNull Player player, org.jetbrains.annotations.Nullable String weapon) {
+    public void setAssignedWeapon(@NotNull Player player, @Nullable String weapon) {
         final int currentStrength = getStrength(player);
         playerRepository.save(player, new PlayerData(currentStrength, weapon));
     }
