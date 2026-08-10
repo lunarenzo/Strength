@@ -2,6 +2,7 @@ package lunatech.strength.service;
 
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Service interface for managing Player Strength and applying the native Attribute Modifier.
@@ -45,7 +46,7 @@ public interface StrengthService {
      * @param player the target player
      * @return the assigned weapon name, or null if none
      */
-    org.jetbrains.annotations.Nullable String getAssignedWeapon(@NotNull Player player);
+    @Nullable String getAssignedWeapon(@NotNull Player player);
 
     /**
      * Sets the assigned weapon of a player.
@@ -53,5 +54,5 @@ public interface StrengthService {
      * @param player the target player
      * @param weapon the assigned weapon name
      */
-    void setAssignedWeapon(@NotNull Player player, org.jetbrains.annotations.Nullable String weapon);
+    void setAssignedWeapon(@NotNull Player player, @Nullable String weapon);
 }
