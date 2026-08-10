@@ -80,12 +80,13 @@ public final class BowBeamTask extends BukkitRunnable {
                 
                 // Spawn main beam Display
                 currentBeamEntity = player.getWorld().spawn(center, ItemDisplay.class, display -> {
-                    display.setItemStack(new ItemStack(mat, 1));
-                    final ItemMeta meta = display.getItemStack().getItemMeta();
+                    final ItemStack item = new ItemStack(mat, 1);
+                    final ItemMeta meta = item.getItemMeta();
                     if (meta != null) {
                         meta.setCustomModelData(settings.beamCustomModelData);
-                        display.getItemStack().setItemMeta(meta);
+                        item.setItemMeta(meta);
                     }
+                    display.setItemStack(item);
                     display.setTransformation(new Transformation(
                         new Vector3f(0),
                         new Quaternionf(),
@@ -96,12 +97,13 @@ public final class BowBeamTask extends BukkitRunnable {
 
                 // Spawn face spiral Display
                 currentSpiralEntity = player.getWorld().spawn(spiralLoc, ItemDisplay.class, display -> {
-                    display.setItemStack(new ItemStack(mat, 1));
-                    final ItemMeta meta = display.getItemStack().getItemMeta();
+                    final ItemStack item = new ItemStack(mat, 1);
+                    final ItemMeta meta = item.getItemMeta();
                     if (meta != null) {
                         meta.setCustomModelData(settings.beamSpiralCustomModelData);
-                        display.getItemStack().setItemMeta(meta);
+                        item.setItemMeta(meta);
                     }
+                    display.setItemStack(item);
                     display.setTransformation(new Transformation(
                         new Vector3f(0),
                         new Quaternionf(),
