@@ -27,7 +27,9 @@ public class ListenerHandler implements Reloadable {
     @Override
     public void onEnable(AbstractExample plugin) {
         listeners.clear(); // Clear the list to avoid duplicate listeners when reloading the plugin
-//        listeners.add(new ExampleListener());
+        
+        listeners.add(new io.github.exampleuser.example.listener.player.PlayerKillListener(this.plugin.getStrengthService(), this.plugin.getConfigHandler()));
+        listeners.add(new io.github.exampleuser.example.listener.player.PlayerJoinListener(this.plugin.getStrengthService()));
 
         // Register listeners here
         for (Listener listener : listeners) {
