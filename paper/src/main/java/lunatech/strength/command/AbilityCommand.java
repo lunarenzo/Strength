@@ -84,7 +84,21 @@ public final class AbilityCommand extends Command {
 
         // 4. Trigger Ability Tasks
         final Location loc = player.getLocation();
-        final ArmorStand vehicle = player.getWorld().spawn(loc, ArmorStand.class, armorStand -> {
+        double terrainY = loc.getY();
+        final Location scan = loc.clone();
+        final int minHeight = scan.getWorld().getMinHeight();
+        while (scan.getY() > minHeight) {
+            if (scan.getBlock().getType().isSolid() || scan.getBlock().getType() == org.bukkit.Material.WATER) {
+                terrainY = scan.getY();
+                break;
+            }
+            scan.subtract(0, 1, 0);
+        }
+
+        final Location spawnLoc = loc.clone();
+        spawnLoc.setY(terrainY + 3.0);
+
+        final ArmorStand vehicle = player.getWorld().spawn(spawnLoc, ArmorStand.class, armorStand -> {
             armorStand.setInvisible(true);
             armorStand.setGravity(false);
             armorStand.setMarker(true);
