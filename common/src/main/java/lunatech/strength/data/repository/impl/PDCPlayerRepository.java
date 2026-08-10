@@ -23,12 +23,18 @@ public final class PDCPlayerRepository implements PlayerRepository {
             return Optional.empty();
         }
         final int strength = pdc.getOrDefault(PDCKeys.STRENGTH, PersistentDataType.INTEGER, 0);
-        return Optional.of(new PlayerData(strength));
+        final String assignedWeapon = pdc.get(PDCKeys.ASSIGNED_WEAPON, PersistentDataType.STRING);
+        return Optional.of(new PlayerData(strength, assignedWeapon));
     }
 
     @Override
     public void save(@NotNull Player player, @NotNull PlayerData data) {
         final PersistentDataContainer pdc = player.getPersistentDataContainer();
         pdc.set(PDCKeys.STRENGTH, PersistentDataType.INTEGER, data.strength());
+        if (data.assignedWeapon() != null) {
+            pdc.set(PDCKeys.ASSIGNED_WEAPON, PersistentDataType.STRING, data.assignedWeapon());
+        } else {
+            pdc.remove(PDCKeys.ASSIGNED_WEAPON);
+        }
     }
 }

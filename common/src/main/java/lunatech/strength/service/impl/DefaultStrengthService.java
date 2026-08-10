@@ -48,9 +48,23 @@ public final class DefaultStrengthService implements StrengthService {
         final StrengthSettings settings = configHandler.getConfig().strength;
         // Clamp the strength value within the config boundaries
         final int clampedStrength = Math.max(settings.minStrength, Math.min(settings.maxStrength, strength));
+        final String assignedWeapon = getAssignedWeapon(player);
         
-        playerRepository.save(player, new PlayerData(clampedStrength));
+        playerRepository.save(player, new PlayerData(clampedStrength, assignedWeapon));
         applyAttributeModifier(player, clampedStrength);
+    }
+
+    @Override
+    public org.jetbrains.annotations.Nullable String getAssignedWeapon(@NotNull Player player) {
+        return playerRepository.get(player)
+            .map(PlayerData::assignedWeapon)
+            .orElse(null);
+    }
+
+    @Override
+    public void setAssignedWeapon(@NotNull Player player, org.jetbrains.annotations.Nullable String weapon) {
+        final int currentStrength = getStrength(player);
+        playerRepository.save(player, new PlayerData(currentStrength, weapon));
     }
 
     @Override

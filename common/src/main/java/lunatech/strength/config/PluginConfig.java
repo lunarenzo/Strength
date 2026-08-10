@@ -91,4 +91,43 @@ public class PluginConfig implements VersionedConfig {
             "<gray>Right-click to consume.</gray>"
         );
     }
+
+    @Comment("Weapon Rolling and Passive/Ultimate Ability settings")
+    public WeaponSettings weapons = new WeaponSettings();
+
+    @ConfigSerializable
+    public static class WeaponSettings {
+        @Comment("Delay in seconds before triggering the weapon roll for a first-time player")
+        public int rollDelaySeconds = 5;
+
+        @Comment("The list of weapons available for rolling")
+        public List<String> availableWeapons = List.of("Trident", "Sword", "Axe", "Bow");
+
+        @Comment("Title message shown when rolling starts")
+        public String rollStartTitle = "<yellow>Assigning Weapon...</yellow>";
+
+        @Comment("Trident Settings")
+        public TridentSettings trident = new TridentSettings();
+    }
+
+    @ConfigSerializable
+    public static class TridentSettings {
+        @Comment("Hits required to summon lightning (Passive)")
+        public int passiveHitsRequired = 4;
+
+        @Comment("Lightning damage dealt on hit (Passive)")
+        public double passiveLightningDamage = 2.5;
+
+        @Comment("Strength required to activate Ultimate")
+        public int ultimateStrengthRequired = 5;
+
+        @Comment("Hits required using trident to charge Ultimate")
+        public int ultimateHitsRequired = 8;
+
+        @Comment("Ultimate speed multiplier")
+        public double ultimateSpeed = 0.5;
+
+        @Comment("Ultimate duration in ticks (20 ticks = 1 second)")
+        public int ultimateDurationTicks = 100;
+    }
 }
