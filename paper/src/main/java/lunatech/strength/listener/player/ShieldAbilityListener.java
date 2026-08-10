@@ -38,19 +38,33 @@ public final class ShieldAbilityListener implements Listener {
         this.strengthService = strengthService;
     }
 
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
+    public void onEntityDamageLowest(@NotNull EntityDamageEvent event) {
+        if (!(event.getEntity() instanceof Player victim)) {
+            return;
+        }
+        if (shieldUltimateActive.getOrDefault(victim.getUniqueId(), false)) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
+    public void onEntityDamageHighest(@NotNull EntityDamageEvent event) {
+        if (!(event.getEntity() instanceof Player victim)) {
+            return;
+        }
+        if (shieldUltimateActive.getOrDefault(victim.getUniqueId(), false)) {
+            event.setCancelled(true);
+        }
+    }
+
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onEntityDamage(@NotNull EntityDamageEvent event) {
+    public void onEntityDamagePassive(@NotNull EntityDamageEvent event) {
         if (!(event.getEntity() instanceof Player victim)) {
             return;
         }
 
         final UUID uuid = victim.getUniqueId();
-
-        // 1. Ultimate Active: God Mode (Blocks all incoming attacks)
-        if (shieldUltimateActive.getOrDefault(uuid, false)) {
-            event.setCancelled(true);
-            return;
-        }
 
         // 2. Passive Ability: 20% Damage Reduction when Shield is Stunned (On Cooldown)
         final String assigned = strengthService.getAssignedWeapon(victim);
@@ -62,15 +76,15 @@ public final class ShieldAbilityListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onEntityDamageByEntity(@NotNull EntityDamageByEntityEvent event) {
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
+    public void onEntityDamageByEntityLowest(@NotNull EntityDamageByEntityEvent event) {
         if (!(event.getEntity() instanceof Player victim)) {
             return;
         }
 
         final UUID uuid = victim.getUniqueId();
 
-        // 1. Ultimate Active: God Mode Knockback
+        // 1. Ultimate Active: God Mode Knockback (runs even if event is already cancelled)
         if (shieldUltimateActive.getOrDefault(uuid, false)) {
             event.setCancelled(true);
 

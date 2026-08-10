@@ -2,6 +2,7 @@ package lunatech.strength.task;
 
 import lunatech.strength.config.PluginConfig.ShieldSettings;
 import lunatech.strength.listener.player.ShieldAbilityListener;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.ItemDisplay;
@@ -18,7 +19,8 @@ import java.util.UUID;
 
 /**
  * Task that manages the active Shield Ultimate: spawning the visual bubble ItemDisplay,
- * mounting it onto the player as a passenger, negating incoming damage, and removing it upon expiration.
+ * tracking and teleporting it to the player's eye level (with locked pitch to prevent tilting),
+ * and removing it upon expiration.
  */
 public final class ShieldUltimateTask extends BukkitRunnable {
     private final Player player;
@@ -31,6 +33,9 @@ public final class ShieldUltimateTask extends BukkitRunnable {
         this.player = player;
         this.settings = settings;
         this.durationTicks = settings.ultimateDurationTicks;
+        
+        // Secure active status immediately on instantiation
+        ShieldAbilityListener.shieldUltimateActive.put(player.getUniqueId(), true);
     }
 
     @Override
@@ -41,16 +46,16 @@ public final class ShieldUltimateTask extends BukkitRunnable {
             return;
         }
 
-        // 1. Initialization (Tick 0)
+        // 1. Spawning the visual display bubble (Tick 0)
         if (elapsedTicks == 0) {
-            final UUID uuid = player.getUniqueId();
-            ShieldAbilityListener.shieldUltimateActive.put(uuid, true);
-
             player.getWorld().playSound(player.getLocation(), Sound.ITEM_SHIELD_BLOCK, 1.0f, 0.8f);
 
             try {
                 final Material mat = Material.valueOf(settings.bubbleMaterial);
-                bubbleEntity = player.getWorld().spawn(player.getLocation(), ItemDisplay.class, display -> {
+                final Location spawnLoc = player.getEyeLocation().clone();
+                spawnLoc.setPitch(0.0f); // Face straight forward (no vertical tilt)
+
+                bubbleEntity = player.getWorld().spawn(spawnLoc, ItemDisplay.class, display -> {
                     final ItemStack item = new ItemStack(mat, 1);
                     final ItemMeta meta = item.getItemMeta();
                     if (meta != null) {
@@ -58,25 +63,31 @@ public final class ShieldUltimateTask extends BukkitRunnable {
                         item.setItemMeta(meta);
                     }
                     display.setItemStack(item);
+                    display.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.HEAD);
+                    display.setTeleportDuration(1); // Enable smooth 1-tick client side interpolation
                     
-                    // Translate down on Y axis by 0.5 blocks to center bubble on player body when mounted
                     display.setTransformation(new Transformation(
-                        new Vector3f(0.0f, -0.5f, 0.0f),
+                        new Vector3f(0.0f, 0.0f, 0.0f),
                         new Quaternionf(),
                         new Vector3f(1.0f, 1.0f, 1.0f),
                         new Quaternionf()
                     ));
                 });
-
-                // Set passenger so the display smoothly follows player client-side
-                player.addPassenger(bubbleEntity);
             } catch (Exception e) {
-                // Fallback to bubble-shaped block or simple display if item spawning fails
-                bubbleEntity = player.getWorld().spawn(player.getLocation(), ItemDisplay.class, display -> {
+                final Location spawnLoc = player.getEyeLocation().clone();
+                spawnLoc.setPitch(0.0f);
+                bubbleEntity = player.getWorld().spawn(spawnLoc, ItemDisplay.class, display -> {
                     display.setItemStack(new ItemStack(Material.GLASS, 1));
+                    display.setTeleportDuration(1);
                 });
-                player.addPassenger(bubbleEntity);
             }
+        }
+
+        // 2. Continuous updates (Tick 1+)
+        if (bubbleEntity != null && bubbleEntity.isValid()) {
+            final Location loc = player.getEyeLocation().clone();
+            loc.setPitch(0.0f); // Lock pitch to 0 to prevent tilting up or down!
+            bubbleEntity.teleport(loc);
         }
 
         elapsedTicks++;
@@ -87,9 +98,6 @@ public final class ShieldUltimateTask extends BukkitRunnable {
         ShieldAbilityListener.shieldUltimateActive.remove(uuid);
 
         if (bubbleEntity != null) {
-            if (player.isOnline()) {
-                player.removePassenger(bubbleEntity);
-            }
             bubbleEntity.remove();
             bubbleEntity = null;
         }
