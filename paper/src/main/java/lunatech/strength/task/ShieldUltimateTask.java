@@ -20,7 +20,7 @@ import java.util.UUID;
 /**
  * Task that manages the active Shield Ultimate: spawning the visual bubble ItemDisplay,
  * locking the spawn rotation to prevent tilting, adding it as a passenger on the player for
- * zero movement latency/lag, applying native Minecraft invulnerability, and removing it upon expiration.
+ * zero movement latency/lag, and removing it upon expiration.
  */
 public final class ShieldUltimateTask extends BukkitRunnable {
     private final Player player;
@@ -36,9 +36,6 @@ public final class ShieldUltimateTask extends BukkitRunnable {
         
         // Secure active status immediately on instantiation
         ShieldAbilityListener.shieldUltimateActive.put(player.getUniqueId(), true);
-        
-        // Grant native server-side invulnerability to eliminate all damage sources robustly
-        player.setInvulnerable(true);
     }
 
     @Override
@@ -99,7 +96,6 @@ public final class ShieldUltimateTask extends BukkitRunnable {
         ShieldAbilityListener.shieldUltimateActive.remove(uuid);
 
         if (player.isOnline()) {
-            player.setInvulnerable(false);
             if (bubbleEntity != null) {
                 player.removePassenger(bubbleEntity);
             }

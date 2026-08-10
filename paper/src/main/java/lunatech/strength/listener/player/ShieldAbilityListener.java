@@ -45,6 +45,7 @@ public final class ShieldAbilityListener implements Listener {
         }
         if (shieldUltimateActive.getOrDefault(victim.getUniqueId(), false)) {
             event.setCancelled(true);
+            event.setDamage(0.0);
         }
     }
 
@@ -55,6 +56,7 @@ public final class ShieldAbilityListener implements Listener {
         }
         if (shieldUltimateActive.getOrDefault(victim.getUniqueId(), false)) {
             event.setCancelled(true);
+            event.setDamage(0.0);
         }
     }
 
@@ -87,6 +89,7 @@ public final class ShieldAbilityListener implements Listener {
         // 1. Ultimate Active: God Mode Knockback (runs even if event is already cancelled)
         if (shieldUltimateActive.getOrDefault(uuid, false)) {
             event.setCancelled(true);
+            event.setDamage(0.0);
 
             // Push the attacker back and up
             if (event.getDamager() instanceof org.bukkit.entity.LivingEntity attacker) {
