@@ -101,7 +101,7 @@ public class PluginConfig implements VersionedConfig {
         public int rollDelaySeconds = 5;
 
         @Comment("The list of weapons available for rolling")
-        public List<String> availableWeapons = List.of("Trident", "Sword", "Axe", "Bow");
+        public List<String> availableWeapons = List.of("Trident", "Sword", "Axe", "Bow", "Shield");
 
         @Comment("Title message shown when rolling starts")
         public String rollStartTitle = "<yellow>Assigning Weapon...</yellow>";
@@ -111,6 +111,9 @@ public class PluginConfig implements VersionedConfig {
 
         @Comment("Bow Settings")
         public BowSettings bow = new BowSettings();
+
+        @Comment("Shield Settings")
+        public ShieldSettings shield = new ShieldSettings();
     }
 
     @ConfigSerializable
@@ -168,5 +171,23 @@ public class PluginConfig implements VersionedConfig {
 
         @Comment("Number of beams shot per ultimate activation")
         public int ultimateBeams = 3;
+    }
+
+    @ConfigSerializable
+    public static class ShieldSettings {
+        @Comment("Strength required to activate Ultimate")
+        public int ultimateStrengthRequired = 5;
+
+        @Comment("Shield blocks required to charge Ultimate")
+        public int ultimateHitsRequired = 10;
+
+        @Comment("The material of the ultimate bubble item display")
+        public String bubbleMaterial = "NAUTILUS_SHELL";
+
+        @Comment("The custom model data of the ultimate bubble item display")
+        public int bubbleCustomModelData = 12346;
+
+        @Comment("Ultimate duration in ticks (20 ticks = 1 second, default 15s = 300 ticks)")
+        public int ultimateDurationTicks = 300;
     }
 }
