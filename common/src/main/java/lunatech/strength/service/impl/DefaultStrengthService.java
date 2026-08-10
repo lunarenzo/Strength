@@ -55,7 +55,7 @@ public final class DefaultStrengthService implements StrengthService {
 
     @Override
     public void applyAttributeModifier(@NotNull Player player, int strength) {
-        final AttributeInstance ai = player.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE);
+        final AttributeInstance ai = player.getAttribute(Attribute.ATTACK_DAMAGE);
         if (ai != null) {
             ai.removeModifier(PDCKeys.STRENGTH);
             if (strength > 0) {
