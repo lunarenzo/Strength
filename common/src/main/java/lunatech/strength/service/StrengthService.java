@@ -38,4 +38,20 @@ public interface StrengthService {
      * @return the created ItemStack
      */
     @NotNull org.bukkit.inventory.ItemStack createStrengthItem(int amount);
+
+    /**
+     * Gets the assigned weapon of a player.
+     *
+     * @param player the target player
+     * @return the assigned weapon name, or null if none
+     */
+    org.jetbrains.annotations.Nullable String getAssignedWeapon(@NotNull Player player);
+
+    /**
+     * Sets the assigned weapon of a player.
+     *
+     * @param player the target player
+     * @param weapon the assigned weapon name
+     */
+    void setAssignedWeapon(@NotNull Player player, org.jetbrains.annotations.Nullable String weapon);
 }

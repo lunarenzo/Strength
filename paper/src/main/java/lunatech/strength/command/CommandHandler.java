@@ -42,6 +42,10 @@ public class CommandHandler implements Reloadable {
             .command()
             .withAliases()
             .register();
+
+        new AbilityCommand(plugin)
+            .command()
+            .register();
     }
 
     @Override

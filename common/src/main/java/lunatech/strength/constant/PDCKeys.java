@@ -8,6 +8,7 @@ import org.bukkit.NamespacedKey;
 public final class PDCKeys {
     public static final NamespacedKey STRENGTH = new NamespacedKey("strengthsmp", "strength");
     public static final NamespacedKey ITEM_STRENGTH = new NamespacedKey("strengthsmp", "item_strength");
+    public static final NamespacedKey ASSIGNED_WEAPON = new NamespacedKey("strengthsmp", "assigned_weapon");
 
     private PDCKeys() {
         throw new UnsupportedOperationException("Constant class");
