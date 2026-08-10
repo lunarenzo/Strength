@@ -26,4 +26,11 @@ public abstract class AbstractStrength extends JavaPlugin {
      * @return the config handler
      */
     public abstract @NotNull ConfigHandler getConfigHandler();
+
+    /**
+     * Gets strength service.
+     *
+     * @return the strength service
+     */
+    public abstract @NotNull lunatech.strength.service.StrengthService getStrengthService();
 }

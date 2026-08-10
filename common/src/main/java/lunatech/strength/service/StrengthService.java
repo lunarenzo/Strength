@@ -30,4 +30,12 @@ public interface StrengthService {
      * @param strength the strength level to apply as modifier value
      */
     void applyAttributeModifier(@NotNull Player player, int strength);
+
+    /**
+     * Creates a physical strength item with the given strength value.
+     *
+     * @param amount the strength value stored in the item
+     * @return the created ItemStack
+     */
+    @NotNull org.bukkit.inventory.ItemStack createStrengthItem(int amount);
 }
