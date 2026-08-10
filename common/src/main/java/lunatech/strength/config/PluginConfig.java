@@ -7,6 +7,7 @@ import org.spongepowered.configurate.interfaces.meta.Exclude;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 
+import java.util.List;
 import java.util.Map;
 
 @ConfigSerializable
@@ -68,5 +69,26 @@ public class PluginConfig implements VersionedConfig {
 
         @Comment("Default strength value for new players")
         public int defaultStrength = 0;
+
+        @Comment("Physical item settings for withdrawn strength")
+        public WithdrawItemSettings withdrawItem = new WithdrawItemSettings();
+    }
+
+    @ConfigSerializable
+    public static class WithdrawItemSettings {
+        @Comment("The material of the physical strength item")
+        public String material = "NAUTILUS_SHELL";
+
+        @Comment("The custom model data of the physical strength item")
+        public int customModelData = 12345;
+
+        @Comment("The display name of the strength item (MiniMessage format)")
+        public String displayName = "<gold><bold>Strength Shard</bold></gold>";
+
+        @Comment("The lore of the strength item (MiniMessage format, <amount> will be replaced)")
+        public List<String> lore = List.of(
+            "<gray>Value: <gold><amount> Strength</gold></gray>",
+            "<gray>Right-click to consume.</gray>"
+        );
     }
 }
