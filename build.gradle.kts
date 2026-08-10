@@ -9,7 +9,7 @@ plugins {
 }
 
 java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(17)) // Configure the java toolchain. This allows gradle to auto-provision JDK 17 on systems that only have JDK 8 installed for strength.
+    toolchain.languageVersion.set(JavaLanguageVersion.of(21)) // Configure the java toolchain. This allows gradle to auto-provision JDK 21 on systems that only have JDK 8 installed for strength.
 }
 
 tasks {
@@ -29,7 +29,7 @@ subprojects {
     base.archivesName.set("${rootProject.name}-${project.name}")
 
     java {
-        toolchain.languageVersion.set(JavaLanguageVersion.of(17)) // Configure the java toolchain. This allows gradle to auto-provision JDK 17 on systems that only have JDK 8 installed for strength.
+        toolchain.languageVersion.set(JavaLanguageVersion.of(21)) // Configure the java toolchain. This allows gradle to auto-provision JDK 21 on systems that only have JDK 8 installed for strength.
         withJavadocJar() // Enable javadoc jar generation
         withSourcesJar() // Enable sources jar generation
     }
@@ -63,7 +63,7 @@ subprojects {
 
     tasks {
         compileJava {
-            options.release.set(17)
+            options.release.set(21)
             options.encoding = Charsets.UTF_8.name()
             options.compilerArgs.addAll(arrayListOf("-Xlint:all", "-Xlint:-processing", "-Xdiags:verbose"))
         }
