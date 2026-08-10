@@ -108,6 +108,9 @@ public class PluginConfig implements VersionedConfig {
 
         @Comment("Trident Settings")
         public TridentSettings trident = new TridentSettings();
+
+        @Comment("Bow Settings")
+        public BowSettings bow = new BowSettings();
     }
 
     @ConfigSerializable
@@ -129,5 +132,38 @@ public class PluginConfig implements VersionedConfig {
 
         @Comment("Ultimate duration in ticks (20 ticks = 1 second)")
         public int ultimateDurationTicks = 100;
+    }
+
+    @ConfigSerializable
+    public static class BowSettings {
+        @Comment("Hits required using bow to activate Passive (llama spit trail + cobweb)")
+        public int passiveHitsRequired = 2;
+
+        @Comment("Duration in seconds that the faked cobweb traps the player")
+        public int passiveCobwebDurationSeconds = 5;
+
+        @Comment("Strength required to activate Ultimate")
+        public int ultimateStrengthRequired = 5;
+
+        @Comment("Hits required using bow to charge Ultimate")
+        public int ultimateHitsRequired = 10;
+
+        @Comment("The material of the ultimate beam item display")
+        public String beamMaterial = "NAUTILUS_SHELL";
+
+        @Comment("The custom model data of the ultimate beam item display")
+        public int beamCustomModelData = 12348;
+
+        @Comment("The range of the ultimate beam")
+        public double ultimateRange = 20.0;
+
+        @Comment("The width/radius of the ultimate beam")
+        public double ultimateWidth = 1.5;
+
+        @Comment("Damage dealt by the ultimate beam (in hearts / half-hearts)")
+        public double ultimateDamage = 8.0;
+
+        @Comment("Number of beams shot per ultimate activation")
+        public int ultimateBeams = 3;
     }
 }
