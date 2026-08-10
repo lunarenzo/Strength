@@ -19,8 +19,8 @@ import java.util.UUID;
 
 /**
  * Task that manages the active Shield Ultimate: spawning the visual bubble ItemDisplay,
- * tracking and teleporting it to the player's eye level (with locked pitch to prevent tilting),
- * and removing it upon expiration.
+ * locking the spawn rotation to prevent tilting, adding it as a passenger on the player for
+ * zero movement latency/lag, applying native Minecraft invulnerability, and removing it upon expiration.
  */
 public final class ShieldUltimateTask extends BukkitRunnable {
     private final Player player;
@@ -36,6 +36,9 @@ public final class ShieldUltimateTask extends BukkitRunnable {
         
         // Secure active status immediately on instantiation
         ShieldAbilityListener.shieldUltimateActive.put(player.getUniqueId(), true);
+        
+        // Grant native server-side invulnerability to eliminate all damage sources robustly
+        player.setInvulnerable(true);
     }
 
     @Override
@@ -52,8 +55,10 @@ public final class ShieldUltimateTask extends BukkitRunnable {
 
             try {
                 final Material mat = Material.valueOf(settings.bubbleMaterial);
-                final Location spawnLoc = player.getEyeLocation().clone();
-                spawnLoc.setPitch(0.0f); // Face straight forward (no vertical tilt)
+                
+                // Spawn at player's location with pitch locked to 0.0 to prevent vertical tilting
+                final Location spawnLoc = player.getLocation().clone();
+                spawnLoc.setPitch(0.0f);
 
                 bubbleEntity = player.getWorld().spawn(spawnLoc, ItemDisplay.class, display -> {
                     final ItemStack item = new ItemStack(mat, 1);
@@ -64,30 +69,26 @@ public final class ShieldUltimateTask extends BukkitRunnable {
                     }
                     display.setItemStack(item);
                     display.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.HEAD);
-                    display.setTeleportDuration(1); // Enable smooth 1-tick client side interpolation
                     
+                    // Center the bubble horizontally/vertically relative to the player mounting point (usually head level)
                     display.setTransformation(new Transformation(
-                        new Vector3f(0.0f, 0.0f, 0.0f),
+                        new Vector3f(0.0f, -0.5f, 0.0f),
                         new Quaternionf(),
                         new Vector3f(1.0f, 1.0f, 1.0f),
                         new Quaternionf()
                     ));
                 });
+
+                // Set passenger so the display smoothly follows player client-side with absolute zero latency
+                player.addPassenger(bubbleEntity);
             } catch (Exception e) {
-                final Location spawnLoc = player.getEyeLocation().clone();
+                final Location spawnLoc = player.getLocation().clone();
                 spawnLoc.setPitch(0.0f);
                 bubbleEntity = player.getWorld().spawn(spawnLoc, ItemDisplay.class, display -> {
                     display.setItemStack(new ItemStack(Material.GLASS, 1));
-                    display.setTeleportDuration(1);
                 });
+                player.addPassenger(bubbleEntity);
             }
-        }
-
-        // 2. Continuous updates (Tick 1+)
-        if (bubbleEntity != null && bubbleEntity.isValid()) {
-            final Location loc = player.getEyeLocation().clone();
-            loc.setPitch(0.0f); // Lock pitch to 0 to prevent tilting up or down!
-            bubbleEntity.teleport(loc);
         }
 
         elapsedTicks++;
@@ -96,6 +97,13 @@ public final class ShieldUltimateTask extends BukkitRunnable {
     private void cleanup() {
         final UUID uuid = player.getUniqueId();
         ShieldAbilityListener.shieldUltimateActive.remove(uuid);
+
+        if (player.isOnline()) {
+            player.setInvulnerable(false);
+            if (bubbleEntity != null) {
+                player.removePassenger(bubbleEntity);
+            }
+        }
 
         if (bubbleEntity != null) {
             bubbleEntity.remove();
