@@ -82,17 +82,20 @@ public final class CrossbowTrapTask extends BukkitRunnable {
                 pullCooldown--;
             }
 
-            // Check if victim is trying to escape past the max distance boundary
-            // Only apply velocity if cooldown has expired to prevent oscillation/sky-launch
+            // Check if victim is trying to escape past the max distance boundary.
+            // We use horizontal (XZ) distance ONLY — vertical falling is gravity, not escape.
+            // Only apply velocity if cooldown has expired to prevent oscillation/sky-launch.
             if (pullCooldown == 0 && victim.getWorld().equals(anchorLoc.getWorld())) {
-                final double currentDist = victim.getLocation().distance(anchorLoc);
-                if (currentDist > settings.trapMaxDistance) {
+                final double dx = victim.getLocation().getX() - anchorLoc.getX();
+                final double dz = victim.getLocation().getZ() - anchorLoc.getZ();
+                final double horizontalDist = Math.sqrt(dx * dx + dz * dz);
+
+                if (horizontalDist > settings.trapMaxDistance) {
                     // Zero out existing velocity first to cancel momentum before pulling
                     victim.setVelocity(new Vector(0, 0, 0));
 
-                    // Calculate horizontal-only pull vector (no Y boost to prevent sky-launch)
-                    final Vector pull = anchorLoc.toVector().subtract(victim.getLocation().toVector());
-                    pull.setY(0); // keep movement horizontal — gravity handles descent
+                    // Calculate horizontal-only pull vector (Y stays 0 — gravity handles descent)
+                    final Vector pull = new Vector(-dx, 0, -dz);
                     if (pull.lengthSquared() > 0) {
                         pull.normalize();
                     }
