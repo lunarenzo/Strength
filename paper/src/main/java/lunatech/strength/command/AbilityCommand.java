@@ -7,9 +7,11 @@ import lunatech.strength.Strength;
 import lunatech.strength.config.TridentConfig;
 import lunatech.strength.config.BowConfig;
 import lunatech.strength.config.ShieldConfig;
+import lunatech.strength.config.CrossbowConfig;
 import lunatech.strength.listener.player.TridentAbilityListener;
 import lunatech.strength.listener.player.BowAbilityListener;
 import lunatech.strength.listener.player.ShieldAbilityListener;
+import lunatech.strength.listener.player.CrossbowAbilityListener;
 import lunatech.strength.service.StrengthService;
 import lunatech.strength.task.TridentUltimateTask;
 import lunatech.strength.task.BowBeamTask;
@@ -56,6 +58,8 @@ public final class AbilityCommand extends Command {
             triggerBowUltimate(player, strengthService);
         } else if ("shield".equalsIgnoreCase(assignedWeapon)) {
             triggerShieldUltimate(player, strengthService);
+        } else if ("crossbow".equalsIgnoreCase(assignedWeapon)) {
+            triggerCrossbowUltimate(player, strengthService);
         } else {
             player.sendMessage(ColorParser.of("<red>Your assigned weapon (" + assignedWeapon.toUpperCase() + ") does not have an ultimate ability implemented in this phase.</red>").build());
         }
@@ -204,6 +208,43 @@ public final class AbilityCommand extends Command {
         new ShieldUltimateTask(player, settings)
             .runTaskTimer(plugin, 0L, 1L);
 
+        player.sendMessage(ColorParser.of(settings.ultimateActivatedMessage).build());
+    }
+
+    private void triggerCrossbowUltimate(Player player, StrengthService strengthService) {
+        final CrossbowConfig settings = plugin.getConfigHandler().getCrossbowConfig();
+        final int currentStrength = strengthService.getStrength(player);
+
+        // 1. Validate Strength Requirement
+        if (currentStrength < settings.ultimateStrengthRequired) {
+            player.sendMessage(
+                ColorParser.of("<red>You do not have enough strength to activate your ultimate! (Required: <req>, Current: <current>)</red>")
+                    .with("req", String.valueOf(settings.ultimateStrengthRequired))
+                    .with("current", String.valueOf(currentStrength))
+                    .build()
+            );
+            return;
+        }
+
+        // 2. Validate Hit Charge Requirement
+        final UUID uuid = player.getUniqueId();
+        final int currentCharge = CrossbowAbilityListener.ultimateHits.getOrDefault(uuid, 0);
+        if (currentCharge < settings.ultimateHitsRequired) {
+            player.sendMessage(
+                ColorParser.of("<red>Your ultimate is not charged yet! (Required: <req>, Current: <current> passive hits)</red>")
+                    .with("req", String.valueOf(settings.ultimateHitsRequired))
+                    .with("current", String.valueOf(currentCharge))
+                    .build()
+            );
+            return;
+        }
+
+        // 3. Clear Ultimate Charge and prime crossbow
+        CrossbowAbilityListener.ultimateHits.put(uuid, 0);
+        CrossbowAbilityListener.crossbowUltimatePrimed.put(uuid, true);
+
+        // Feedbacks
+        player.playSound(player.getLocation(), Sound.ITEM_CROSSBOW_LOADING_END, 1.0f, 1.0f);
         player.sendMessage(ColorParser.of(settings.ultimateActivatedMessage).build());
     }
 }
