@@ -26,6 +26,8 @@ public final class CrossbowTrapTask extends BukkitRunnable {
     private boolean sprung = false;
     private UUID victimUuid = null;
     private int trapTicksLeft = 0;
+    // Cooldown to prevent rapid velocity re-application causing oscillation/sky-launch
+    private int pullCooldown = 0;
 
     public CrossbowTrapTask(@NotNull Player shooter, @NotNull Location anchorLoc, @NotNull CrossbowConfig settings) {
         this.shooter = shooter;
@@ -75,20 +77,33 @@ public final class CrossbowTrapTask extends BukkitRunnable {
                 drawOutline();
             }
 
+            // Decrement pull cooldown each tick
+            if (pullCooldown > 0) {
+                pullCooldown--;
+            }
+
             // Check if victim is trying to escape past the max distance boundary
-            if (victim.getWorld().equals(anchorLoc.getWorld())) {
+            // Only apply velocity if cooldown has expired to prevent oscillation/sky-launch
+            if (pullCooldown == 0 && victim.getWorld().equals(anchorLoc.getWorld())) {
                 final double currentDist = victim.getLocation().distance(anchorLoc);
                 if (currentDist > settings.trapMaxDistance) {
-                    // Snap / Pull the victim back towards the anchor coordinate
+                    // Zero out existing velocity first to cancel momentum before pulling
+                    victim.setVelocity(new Vector(0, 0, 0));
+
+                    // Calculate horizontal-only pull vector (no Y boost to prevent sky-launch)
                     final Vector pull = anchorLoc.toVector().subtract(victim.getLocation().toVector());
+                    pull.setY(0); // keep movement horizontal — gravity handles descent
                     if (pull.lengthSquared() > 0) {
                         pull.normalize();
                     }
-                    
-                    // Propel the victim back and upwards
-                    pull.multiply(1.8).setY(0.4);
+
+                    // Apply moderate horizontal pull strength
+                    pull.multiply(1.4);
                     victim.setVelocity(pull);
-                    
+
+                    // Start cooldown: 15 ticks = 0.75s, enough for victim to travel & decelerate
+                    pullCooldown = 15;
+
                     // Visual/Sound feedback
                     victim.getWorld().playSound(victim.getLocation(), Sound.BLOCK_CHAIN_FALL, 1.0f, 1.0f);
                     victim.getWorld().spawnParticle(Particle.CRIT, victim.getLocation(), 15, 0.2, 0.2, 0.2, 0.1);
