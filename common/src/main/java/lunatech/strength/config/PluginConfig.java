@@ -101,7 +101,7 @@ public class PluginConfig implements VersionedConfig {
         public int rollDelaySeconds = 5;
 
         @Comment("The list of weapons available for rolling")
-        public List<String> availableWeapons = List.of("Trident", "Sword", "Axe", "Bow", "Shield");
+        public List<String> availableWeapons = List.of("Trident", "Sword", "Axe", "Bow", "Shield", "Crossbow");
 
         @Comment("Title message shown when rolling starts")
         public String rollStartTitle = "<yellow>Assigning Weapon...</yellow>";

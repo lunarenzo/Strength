@@ -19,6 +19,7 @@ public class ConfigHandler implements Reloadable {
     private TridentConfig tridentCfg;
     private BowConfig bowCfg;
     private ShieldConfig shieldCfg;
+    private CrossbowConfig crossbowCfg;
 
     /**
      * Instantiates a new Config handler.
@@ -72,6 +73,14 @@ public class ConfigHandler implements Reloadable {
             .withPath(weaponsDir.resolve("shield.yml"))
             .withHeader("Shield Weapon Configuration")
             .build(ShieldConfig.class);
+
+        // 5. Load decoupled Crossbow configuration
+        crossbowCfg = new ConfigLoader()
+            .withLogger(logger)
+            .withDirectory()
+            .withPath(weaponsDir.resolve("crossbow.yml"))
+            .withHeader("Crossbow Weapon Configuration")
+            .build(CrossbowConfig.class);
     }
 
     /**
@@ -108,5 +117,14 @@ public class ConfigHandler implements Reloadable {
      */
     public ShieldConfig getShieldConfig() {
         return shieldCfg;
+    }
+
+    /**
+     * Gets crossbow weapon configuration.
+     *
+     * @return the crossbow config
+     */
+    public CrossbowConfig getCrossbowConfig() {
+        return crossbowCfg;
     }
 }
