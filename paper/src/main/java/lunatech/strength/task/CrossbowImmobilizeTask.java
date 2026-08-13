@@ -34,6 +34,9 @@ public final class CrossbowImmobilizeTask extends BukkitRunnable {
             return;
         }
 
+        // Zero out velocity every tick to eliminate knockback from hits/explosions
+        victim.setVelocity(new org.bukkit.util.Vector(0, 0, 0));
+
         // Render 2 particle rings (head at +1.8m, legs at +0.2m)
         if (elapsedTicks % 2 == 0) {
             spawnRing(loc.clone().add(0, 1.8, 0));

@@ -139,7 +139,17 @@ public final class CrossbowAbilityListener implements Listener {
             final UUID victimUuid = victim.getUniqueId();
             final Location freezeLoc = victim.getLocation().clone();
 
+            victim.setVelocity(new Vector(0, 0, 0));
             immobilizedPlayers.put(victimUuid, freezeLoc);
+
+            // Nullify next-tick knockback velocity applied by Minecraft server engine
+            org.bukkit.Bukkit.getScheduler().runTask(plugin, () -> {
+                if (victim.isOnline()) {
+                    victim.setVelocity(new Vector(0, 0, 0));
+                    immobilizedPlayers.put(victimUuid, victim.getLocation().clone());
+                }
+            });
+
             new CrossbowImmobilizeTask(victim, settings.immobilizeDurationSeconds)
                 .runTaskTimer(plugin, 0L, 1L);
 
