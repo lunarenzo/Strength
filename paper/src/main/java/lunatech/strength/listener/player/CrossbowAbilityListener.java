@@ -3,7 +3,7 @@ package lunatech.strength.listener.player;
 import lunatech.strength.Strength;
 import lunatech.strength.config.CrossbowConfig;
 import lunatech.strength.service.StrengthService;
-import lunatech.strength.task.CrossbowTrapTask;
+import lunatech.strength.task.CrossbowImmobilizeTask;
 import io.github.milkdrinkers.colorparser.paper.ColorParser;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -16,7 +16,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
-import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -30,9 +30,9 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Listener that manages Crossbow abilities: tracking 3rd shot passive damage multipliers,
- * back-facing slowness potion triggers, ultimate arrow priming, anchoring block traps,
- * and teleport caging handlers.
+ * Listener managing Crossbow abilities: 3rd shot passive damage multipliers,
+ * back-facing slowness potion triggers, tranquilizer ultimate shot immobilization,
+ * location locking, and teleport cancellations.
  */
 public final class CrossbowAbilityListener implements Listener {
     private final Strength plugin;
@@ -42,7 +42,7 @@ public final class CrossbowAbilityListener implements Listener {
     public static final Map<UUID, Integer> passiveHits = new ConcurrentHashMap<>();
     public static final Map<UUID, Integer> ultimateHits = new ConcurrentHashMap<>();
     public static final Map<UUID, Boolean> crossbowUltimatePrimed = new ConcurrentHashMap<>();
-    public static final Map<UUID, Location> trappedPlayers = new ConcurrentHashMap<>();
+    public static final Map<UUID, Location> immobilizedPlayers = new ConcurrentHashMap<>();
 
     public CrossbowAbilityListener(@NotNull Strength plugin, @NotNull StrengthService strengthService) {
         this.plugin = plugin;
@@ -55,12 +55,10 @@ public final class CrossbowAbilityListener implements Listener {
             return;
         }
 
-        // Verify player is holding a crossbow
         if (event.getBow() == null || event.getBow().getType() != Material.CROSSBOW) {
             return;
         }
 
-        // Verify player has Crossbow weapon assigned
         final String assigned = strengthService.getAssignedWeapon(player);
         if (!"crossbow".equalsIgnoreCase(assigned)) {
             return;
@@ -69,10 +67,8 @@ public final class CrossbowAbilityListener implements Listener {
         final UUID uuid = player.getUniqueId();
         final Projectile projectile = (Projectile) event.getProjectile();
 
-        // Tag projectile as crossbow arrow
         projectile.setMetadata("CrossbowArrow", new FixedMetadataValue(plugin, true));
 
-        // If ultimate is primed, consume and tag the projectile as ultimate arrow
         if (crossbowUltimatePrimed.getOrDefault(uuid, false)) {
             crossbowUltimatePrimed.put(uuid, false);
             projectile.setMetadata("CrossbowUltimateArrow", new FixedMetadataValue(plugin, true));
@@ -85,17 +81,14 @@ public final class CrossbowAbilityListener implements Listener {
             return;
         }
 
-        // Verify damage was caused by an arrow shot by a player
         if (!(event.getDamager() instanceof Arrow arrow) || !(arrow.getShooter() instanceof Player shooter)) {
             return;
         }
 
-        // Verify arrow was shot from a Crossbow
         if (!arrow.hasMetadata("CrossbowArrow")) {
             return;
         }
 
-        // Verify shooter has Crossbow assigned
         final String assigned = strengthService.getAssignedWeapon(shooter);
         if (!"crossbow".equalsIgnoreCase(assigned)) {
             return;
@@ -108,7 +101,6 @@ public final class CrossbowAbilityListener implements Listener {
         final Vector sLook = shooter.getLocation().getDirection().setY(0).normalize();
         final Vector vLook = victim.getLocation().getDirection().setY(0).normalize();
         if (sLook.dot(vLook) > 0.0) {
-            // Inflict slowness 1 natively (60 ticks = 3 seconds)
             victim.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 60, 0, true, true));
             shooter.sendMessage(ColorParser.of(settings.slownessAppliedMessage).build());
         }
@@ -117,8 +109,7 @@ public final class CrossbowAbilityListener implements Listener {
         final int currentPassiveHits = passiveHits.merge(shooterUuid, 1, Integer::sum);
         if (currentPassiveHits >= 3) {
             passiveHits.put(shooterUuid, 0); // reset count
-            
-            // Set 2x damage
+
             event.setDamage(event.getDamage() * 2.0);
             shooter.sendMessage(ColorParser.of(settings.passiveTriggeredShooterMessage).build());
 
@@ -142,63 +133,49 @@ public final class CrossbowAbilityListener implements Listener {
                 }
             }
         }
+
+        // 4. Tranquilizer Ultimate Shot Trigger
+        if (arrow.hasMetadata("CrossbowUltimateArrow")) {
+            final UUID victimUuid = victim.getUniqueId();
+            final Location freezeLoc = victim.getLocation().clone();
+
+            immobilizedPlayers.put(victimUuid, freezeLoc);
+            new CrossbowImmobilizeTask(victim, settings.immobilizeDurationSeconds)
+                .runTaskTimer(plugin, 0L, 1L);
+
+            victim.getWorld().playSound(victim.getLocation(), Sound.ITEM_CROSSBOW_HIT, 1.0f, 0.5f);
+            victim.sendMessage(ColorParser.of(settings.immobilizedVictimMessage).build());
+            shooter.sendMessage(ColorParser.of(settings.immobilizedShooterMessage).build());
+        }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void onProjectileHit(@NotNull ProjectileHitEvent event) {
-        if (!(event.getEntity() instanceof Arrow arrow) || !(arrow.getShooter() instanceof Player shooter)) {
-            return;
-        }
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onPlayerMove(@NotNull PlayerMoveEvent event) {
+        final UUID uuid = event.getPlayer().getUniqueId();
+        final Location freezeLoc = immobilizedPlayers.get(uuid);
 
-        // Verify arrow is an ultimate arrow
-        if (!arrow.hasMetadata("CrossbowUltimateArrow")) {
-            return;
-        }
+        if (freezeLoc != null) {
+            final Location from = event.getFrom();
+            final Location to = event.getTo();
 
-        final CrossbowConfig settings = plugin.getConfigHandler().getCrossbowConfig();
-
-        // If arrow hit a player/entity directly, it fizzles
-        if (event.getHitEntity() != null) {
-            shooter.sendMessage(ColorParser.of(settings.ultimateFlippedMessage).build());
-            return;
-        }
-
-        // If arrow hit a block, spawn the anchor
-        if (event.getHitBlock() != null) {
-            // Anchor location centered on the hit block surface
-            final Location anchorLoc = event.getHitBlock().getLocation().add(0.5, 1.0, 0.5);
-            
-            // Remove the arrow entity
-            arrow.remove();
-
-            // Sound feedback
-            anchorLoc.getWorld().playSound(anchorLoc, Sound.BLOCK_CHAIN_PLACE, 1.0f, 1.0f);
-
-            // Start repeating caging check task
-            new CrossbowTrapTask(shooter, anchorLoc, settings)
-                .runTaskTimer(plugin, 0L, 1L);
+            // Block X, Y, Z translation while preserving camera pitch & yaw rotation
+            if (from.getX() != to.getX() || from.getY() != to.getY() || from.getZ() != to.getZ()) {
+                final Location target = freezeLoc.clone();
+                target.setPitch(to.getPitch());
+                target.setYaw(to.getYaw());
+                event.setTo(target);
+            }
         }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onPlayerTeleport(@NotNull PlayerTeleportEvent event) {
         final UUID uuid = event.getPlayer().getUniqueId();
-        
-        // If victim is trapped, block teleport attempts from pearl/chorus/command/plugin
-        if (trappedPlayers.containsKey(uuid)) {
-            final PlayerTeleportEvent.TeleportCause cause = event.getCause();
-            if (cause == PlayerTeleportEvent.TeleportCause.ENDER_PEARL ||
-                cause == PlayerTeleportEvent.TeleportCause.CHORUS_FRUIT ||
-                cause == PlayerTeleportEvent.TeleportCause.COMMAND ||
-                cause == PlayerTeleportEvent.TeleportCause.PLUGIN) {
-                
-                event.setCancelled(true);
-                
-                final Player player = event.getPlayer();
-                final CrossbowConfig settings = plugin.getConfigHandler().getCrossbowConfig();
-                player.sendMessage(ColorParser.of(settings.trapEscapeBlockedMessage).build());
-                player.playSound(player.getLocation(), Sound.BLOCK_CHAIN_HIT, 1.0f, 1.0f);
-            }
+
+        if (immobilizedPlayers.containsKey(uuid)) {
+            event.setCancelled(true);
+            final CrossbowConfig settings = plugin.getConfigHandler().getCrossbowConfig();
+            event.getPlayer().sendMessage(ColorParser.of(settings.trapEscapeBlockedMessage).build());
         }
     }
 
@@ -208,6 +185,6 @@ public final class CrossbowAbilityListener implements Listener {
         passiveHits.remove(uuid);
         ultimateHits.remove(uuid);
         crossbowUltimatePrimed.remove(uuid);
-        trappedPlayers.remove(uuid);
+        immobilizedPlayers.remove(uuid);
     }
 }
