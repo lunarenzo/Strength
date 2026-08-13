@@ -19,14 +19,8 @@ public class CrossbowConfig implements VersionedConfig {
     @Comment("Crossbow passive 3rd-shot triggers required to charge Ultimate")
     public int ultimateHitsRequired = 3;
 
-    @Comment("Duration of the trap lockdown in seconds")
-    public int trapDurationSeconds = 10;
-
-    @Comment("Trigger radius to spring the trap (in blocks)")
-    public double trapTriggerRadius = 3.0;
-
-    @Comment("Maximum distance a trapped player can get from the anchor block before being pulled back (in blocks)")
-    public double trapMaxDistance = 5.0;
+    @Comment("Duration of the tranquilizer immobilization in seconds")
+    public int immobilizeDurationSeconds = 5;
 
     // Messages
     @Comment("Message sent when crossbow passive 3rd shot deals 2x damage")
@@ -42,14 +36,14 @@ public class CrossbowConfig implements VersionedConfig {
     public String ultimateChargeProgressMessage = "<gray>Ultimate Charge: <gold>{charge}/{target}</gold> passive hits</gray>";
 
     @Comment("Message sent when crossbow ultimate is activated")
-    public String ultimateActivatedMessage = "<gold><bold>CROSSBOW ULTIMATE PRIMED!</bold> Your next arrow shot on a ground block will plant a trap anchor.</gold>";
+    public String ultimateActivatedMessage = "<gold><bold>TRANQUILIZER SHOT PRIMED!</bold> Your next arrow shot on an enemy will immobilize them!</gold>";
 
-    @Comment("Message sent when crossbow ultimate fails because the arrow hit an entity/player directly")
-    public String ultimateFlippedMessage = "<red>Your ultimate shot hit a player directly and fizzled!</red>";
+    @Comment("Message sent to the shooter when ultimate hits an enemy")
+    public String immobilizedShooterMessage = "<green><bold>TRANQUILIZER HIT!</bold> Target immobilized!</green>";
 
-    @Comment("Message sent to the trapped player when they trigger the anchor")
-    public String trapTriggeredVictimMessage = "<red><bold>TRAPPED! You have sprung a chain anchor trap!</bold></red>";
+    @Comment("Message sent to the victim when hit by tranquilizer shot")
+    public String immobilizedVictimMessage = "<red><bold>IMMOBILIZED! You are struck by a tranquilizer shot!</bold></red>";
 
-    @Comment("Message sent to the trapped player when they try to escape or teleport")
-    public String trapEscapeBlockedMessage = "<red>You are tethered to the trap anchor and cannot escape!</red>";
+    @Comment("Message sent to the immobilized player when attempting to move or teleport")
+    public String trapEscapeBlockedMessage = "<red>You are immobilized and cannot move or teleport!</red>";
 }
