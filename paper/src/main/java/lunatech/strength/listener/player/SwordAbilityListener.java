@@ -86,7 +86,7 @@ public final class SwordAbilityListener implements Listener {
         }
 
         // 1. Remove 100% Attack Speed Attribute Modifier (+50% cooldown reduction)
-        final AttributeInstance attr = player.getAttribute(Attribute.GENERIC_ATTACK_SPEED);
+        final AttributeInstance attr = player.getAttribute(Attribute.ATTACK_SPEED);
         if (attr != null) {
             attr.removeModifier(new NamespacedKey(plugin, "sword_ult_speed"));
         }
@@ -190,7 +190,9 @@ public final class SwordAbilityListener implements Listener {
         if (event.getHand() == EquipmentSlot.OFF_HAND && activeDualWield.getOrDefault(uuid, false)) {
             event.setCancelled(true);
             if (event.getRightClicked() instanceof LivingEntity target) {
-                target.damage(player.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE).getValue(), player);
+                final AttributeInstance damageAttr = player.getAttribute(Attribute.ATTACK_DAMAGE);
+                final double dmg = damageAttr != null ? damageAttr.getValue() : 6.0;
+                target.damage(dmg, player);
                 player.swingOffHand();
             }
         }
@@ -216,7 +218,9 @@ public final class SwordAbilityListener implements Listener {
                 );
 
                 if (result != null && result.getHitEntity() instanceof LivingEntity target) {
-                    target.damage(player.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE).getValue(), player);
+                    final AttributeInstance damageAttr = player.getAttribute(Attribute.ATTACK_DAMAGE);
+                    final double dmg = damageAttr != null ? damageAttr.getValue() : 6.0;
+                    target.damage(dmg, player);
                 }
             }
         }

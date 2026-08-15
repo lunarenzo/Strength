@@ -306,7 +306,7 @@ public final class AbilityCommand extends Command {
         player.getInventory().setItemInOffHand(clone);
 
         // Apply +100% attack speed attribute modifier (+50% cooldown reduction)
-        final AttributeInstance attr = player.getAttribute(Attribute.GENERIC_ATTACK_SPEED);
+        final AttributeInstance attr = player.getAttribute(Attribute.ATTACK_SPEED);
         if (attr != null) {
             attr.addModifier(new AttributeModifier(new NamespacedKey(plugin, "sword_ult_speed"), 4.0, AttributeModifier.Operation.ADD_NUMBER));
         }
