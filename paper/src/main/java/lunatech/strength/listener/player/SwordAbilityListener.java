@@ -151,23 +151,25 @@ public final class SwordAbilityListener implements Listener {
             damager.playSound(damager.getLocation(), Sound.ENTITY_PLAYER_ATTACK_CRIT, 1.0f, 1.0f);
             damager.sendMessage(ColorParser.of(settings.passiveAutoCritMessage).build());
 
-            // Increment Ultimate Charge on Passive Trigger
-            final int currentUltHits = ultimateHits.getOrDefault(uuid, 0);
-            final int targetUltHits = settings.ultimateHitsRequired;
-            if (currentUltHits < targetUltHits) {
-                final int nextUltHits = currentUltHits + 1;
-                ultimateHits.put(uuid, nextUltHits);
+            // Increment Ultimate Charge on Passive Trigger (only when NOT in active dual wield)
+            if (!activeDualWield.getOrDefault(uuid, false)) {
+                final int currentUltHits = ultimateHits.getOrDefault(uuid, 0);
+                final int targetUltHits = settings.ultimateHitsRequired;
+                if (currentUltHits < targetUltHits) {
+                    final int nextUltHits = currentUltHits + 1;
+                    ultimateHits.put(uuid, nextUltHits);
 
-                if (nextUltHits == targetUltHits) {
-                    damager.sendMessage(ColorParser.of(settings.ultimateChargedMessage).build());
-                    damager.playSound(damager.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.2f);
-                } else {
-                    damager.sendMessage(
-                        ColorParser.of(settings.ultimateChargeProgressMessage)
-                            .with("charge", String.valueOf(nextUltHits))
-                            .with("target", String.valueOf(targetUltHits))
-                            .build()
-                    );
+                    if (nextUltHits == targetUltHits) {
+                        damager.sendMessage(ColorParser.of(settings.ultimateChargedMessage).build());
+                        damager.playSound(damager.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.2f);
+                    } else {
+                        damager.sendMessage(
+                            ColorParser.of(settings.ultimateChargeProgressMessage)
+                                .with("charge", String.valueOf(nextUltHits))
+                                .with("target", String.valueOf(targetUltHits))
+                                .build()
+                        );
+                    }
                 }
             }
         } else {
