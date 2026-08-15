@@ -53,6 +53,7 @@ public final class SwordAbilityListener implements Listener {
     public static final Map<UUID, Integer> ultimateHits = new ConcurrentHashMap<>();
     public static final Map<UUID, Boolean> activeDualWield = new ConcurrentHashMap<>();
     public static final Map<UUID, ItemStack> originalOffhandItems = new ConcurrentHashMap<>();
+    public static final Map<UUID, Long> lastOffhandAttackTimes = new ConcurrentHashMap<>();
 
     private static NamespacedKey cloneKey;
 
@@ -103,6 +104,8 @@ public final class SwordAbilityListener implements Listener {
         if (saved != null) {
             player.getInventory().setItemInOffHand(saved);
         }
+
+        lastOffhandAttackTimes.remove(uuid);
 
         final SwordConfig settings = plugin.getConfigHandler().getSwordConfig();
         player.sendMessage(ColorParser.of(settings.ultimateExpiredMessage).build());
@@ -225,6 +228,7 @@ public final class SwordAbilityListener implements Listener {
     }
 
     private void executeOffhandDamage(Player player, LivingEntity target) {
+        lastOffhandAttackTimes.put(player.getUniqueId(), System.currentTimeMillis());
         final PlayerInventory inv = player.getInventory();
         final ItemStack main = inv.getItemInMainHand();
         final ItemStack off = inv.getItemInOffHand();

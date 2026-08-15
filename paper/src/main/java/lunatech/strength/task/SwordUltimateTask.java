@@ -34,6 +34,23 @@ public final class SwordUltimateTask extends BukkitRunnable {
             return;
         }
 
+        // Offhand Attack Cooldown Actionbar Indicator during Dual Wield state
+        final Long lastOffhandAttack = SwordAbilityListener.lastOffhandAttackTimes.get(uuid);
+        if (lastOffhandAttack != null) {
+            final long now = System.currentTimeMillis();
+            final long diff = now - lastOffhandAttack;
+            final long cooldownMs = 500; // 500ms attack cooldown (+100% attack speed)
+
+            if (diff < cooldownMs) {
+                final double pct = (double) diff / (double) cooldownMs;
+                final int filled = (int) (pct * 8.0);
+                final String bar = "■".repeat(filled) + "□".repeat(8 - filled);
+                player.sendActionBar(io.github.milkdrinkers.colorparser.paper.ColorParser.of("<gray>Offhand: <gold>" + bar + "</gold></gray>").build());
+            } else if (diff < cooldownMs + 300) {
+                player.sendActionBar(io.github.milkdrinkers.colorparser.paper.ColorParser.of("<green><bold>⚔ OFFHAND READY</bold></green>").build());
+            }
+        }
+
         elapsedTicks++;
     }
 }
