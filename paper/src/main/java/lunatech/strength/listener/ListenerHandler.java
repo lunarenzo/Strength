@@ -35,6 +35,7 @@ public class ListenerHandler implements Reloadable {
         listeners.add(new lunatech.strength.listener.player.BowAbilityListener(this.plugin, this.plugin.getStrengthService()));
         listeners.add(new lunatech.strength.listener.player.ShieldAbilityListener(this.plugin, this.plugin.getStrengthService()));
         listeners.add(new lunatech.strength.listener.player.CrossbowAbilityListener(this.plugin, this.plugin.getStrengthService()));
+        listeners.add(new lunatech.strength.listener.player.SwordAbilityListener(this.plugin, this.plugin.getStrengthService()));
 
         // Register listeners here
         for (Listener listener : listeners) {
