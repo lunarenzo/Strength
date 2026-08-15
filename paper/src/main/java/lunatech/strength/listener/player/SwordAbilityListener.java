@@ -240,6 +240,12 @@ public final class SwordAbilityListener implements Listener {
             player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_ATTACK_CRIT, 1.0f, 1.0f);
         }
 
+        // Enchanted hit particle effect
+        final ItemStack offhand = player.getInventory().getItemInOffHand();
+        if (offhand != null && offhand.hasItemMeta() && offhand.getItemMeta().hasEnchants()) {
+            target.getWorld().spawnParticle(Particle.ENCHANTED_HIT, target.getLocation().add(0, 1.0, 0), 15, 0.3, 0.5, 0.3, 0.1);
+        }
+
         target.damage(dmg, player);
         player.swingOffHand();
     }
@@ -269,6 +275,14 @@ public final class SwordAbilityListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerDeath(PlayerDeathEvent event) {
         final Player player = event.getEntity();
+        final UUID uuid = player.getUniqueId();
+
+        // Restore & drop original offhand item on death
+        final ItemStack saved = originalOffhandItems.remove(uuid);
+        if (saved != null && saved.getType() != org.bukkit.Material.AIR) {
+            event.getDrops().add(saved);
+        }
+
         event.getDrops().removeIf(SwordAbilityListener::isClone);
         endDualWield(player, plugin);
     }
