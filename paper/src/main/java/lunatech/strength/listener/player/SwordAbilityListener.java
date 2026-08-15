@@ -192,10 +192,7 @@ public final class SwordAbilityListener implements Listener {
         if (event.getHand() == EquipmentSlot.OFF_HAND && activeDualWield.getOrDefault(uuid, false)) {
             event.setCancelled(true);
             if (event.getRightClicked() instanceof LivingEntity target) {
-                final AttributeInstance damageAttr = player.getAttribute(Attribute.ATTACK_DAMAGE);
-                final double dmg = damageAttr != null ? damageAttr.getValue() : 6.0;
-                target.damage(dmg, player);
-                player.swingOffHand();
+                executeOffhandDamage(player, target);
             }
         }
     }
@@ -220,12 +217,31 @@ public final class SwordAbilityListener implements Listener {
                 );
 
                 if (result != null && result.getHitEntity() instanceof LivingEntity target) {
-                    final AttributeInstance damageAttr = player.getAttribute(Attribute.ATTACK_DAMAGE);
-                    final double dmg = damageAttr != null ? damageAttr.getValue() : 6.0;
-                    target.damage(dmg, player);
+                    executeOffhandDamage(player, target);
                 }
             }
         }
+    }
+
+    private void executeOffhandDamage(Player player, LivingEntity target) {
+        final AttributeInstance damageAttr = player.getAttribute(Attribute.ATTACK_DAMAGE);
+        double dmg = damageAttr != null ? damageAttr.getValue() : 6.0;
+
+        // Native jump-crit condition: falling, not climbing, not in water, no blindness, not riding
+        final boolean isCrit = player.getFallDistance() > 0.0F 
+            && !player.isClimbing() 
+            && !player.isInWater() 
+            && !player.hasPotionEffect(org.bukkit.potion.PotionEffectType.BLINDNESS) 
+            && player.getVehicle() == null;
+
+        if (isCrit) {
+            dmg *= 1.5;
+            target.getWorld().spawnParticle(Particle.CRIT, target.getLocation().add(0, 1.0, 0), 15, 0.3, 0.5, 0.3, 0.1);
+            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_ATTACK_CRIT, 1.0f, 1.0f);
+        }
+
+        target.damage(dmg, player);
+        player.swingOffHand();
     }
 
     // Anti-Duplication Guardrails
