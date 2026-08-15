@@ -27,11 +27,9 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
-import org.bukkit.craftbukkit.entity.CraftEntity;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.RayTraceResult;
@@ -227,7 +225,7 @@ public final class SwordAbilityListener implements Listener {
     }
 
     private void executeOffhandDamage(Player player, LivingEntity target) {
-        final EntityEquipment inv = player.getInventory();
+        final PlayerInventory inv = player.getInventory();
         final ItemStack main = inv.getItemInMainHand();
         final ItemStack off = inv.getItemInOffHand();
 
@@ -236,8 +234,7 @@ public final class SwordAbilityListener implements Listener {
         inv.setItemInOffHand(main);
 
         try {
-            // NMS attack triggers 100% native attack logic (sweep arc in front, crits, enchantments, and attack cooldown indicator reset)
-            ((CraftPlayer) player).getHandle().attack(((CraftEntity) target).getHandle());
+            nmsAttack(player, target);
         } finally {
             // Restore hands immediately
             inv.setItemInMainHand(main);
@@ -245,6 +242,26 @@ public final class SwordAbilityListener implements Listener {
         }
 
         player.swingOffHand();
+    }
+
+    private void nmsAttack(Player player, LivingEntity target) {
+        try {
+            final Object serverPlayer = player.getClass().getMethod("getHandle").invoke(player);
+            final Object serverTarget = target.getClass().getMethod("getHandle").invoke(target);
+
+            for (java.lang.reflect.Method m : serverPlayer.getClass().getMethods()) {
+                if (m.getName().equals("attack") && m.getParameterCount() == 1) {
+                    m.invoke(serverPlayer, serverTarget);
+                    return;
+                }
+            }
+        } catch (Exception ignored) {
+        }
+
+        // Fallback if reflection fails
+        final AttributeInstance damageAttr = player.getAttribute(Attribute.ATTACK_DAMAGE);
+        final double dmg = damageAttr != null ? damageAttr.getValue() : 6.0;
+        target.damage(dmg, player);
     }
 
     // Anti-Duplication Guardrails
