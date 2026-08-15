@@ -27,6 +27,9 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
+import org.bukkit.craftbukkit.entity.CraftEntity;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -224,33 +227,23 @@ public final class SwordAbilityListener implements Listener {
     }
 
     private void executeOffhandDamage(Player player, LivingEntity target) {
-        final AttributeInstance damageAttr = player.getAttribute(Attribute.ATTACK_DAMAGE);
-        double dmg = damageAttr != null ? damageAttr.getValue() : 6.0;
+        final EntityEquipment inv = player.getInventory();
+        final ItemStack main = inv.getItemInMainHand();
+        final ItemStack off = inv.getItemInOffHand();
 
-        // Native jump-crit condition: falling, not climbing, not in water, no blindness, not riding
-        final boolean isCrit = player.getFallDistance() > 0.0F 
-            && !player.isClimbing() 
-            && !player.isInWater() 
-            && !player.hasPotionEffect(org.bukkit.potion.PotionEffectType.BLINDNESS) 
-            && player.getVehicle() == null;
+        // Swap hands so NMS attack uses offhand weapon stats & enchantments
+        inv.setItemInMainHand(off);
+        inv.setItemInOffHand(main);
 
-        if (isCrit) {
-            dmg *= 1.5;
-            target.getWorld().spawnParticle(Particle.CRIT, target.getLocation().add(0, 1.0, 0), 15, 0.3, 0.5, 0.3, 0.1);
-            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_ATTACK_CRIT, 1.0f, 1.0f);
-        } else if (!player.isSprinting()) {
-            // Native sweep attack particle & sound effect
-            target.getWorld().spawnParticle(Particle.SWEEP_ATTACK, target.getLocation().add(0, 1.0, 0), 1, 0.0, 0.0, 0.0, 0.0);
-            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1.0f, 1.0f);
+        try {
+            // NMS attack triggers 100% native attack logic (sweep arc in front, crits, enchantments, and attack cooldown indicator reset)
+            ((CraftPlayer) player).getHandle().attack(((CraftEntity) target).getHandle());
+        } finally {
+            // Restore hands immediately
+            inv.setItemInMainHand(main);
+            inv.setItemInOffHand(off);
         }
 
-        // Enchanted hit particle effect
-        final ItemStack offhand = player.getInventory().getItemInOffHand();
-        if (offhand != null && offhand.hasItemMeta() && offhand.getItemMeta().hasEnchants()) {
-            target.getWorld().spawnParticle(Particle.ENCHANTED_HIT, target.getLocation().add(0, 1.0, 0), 15, 0.3, 0.5, 0.3, 0.1);
-        }
-
-        target.damage(dmg, player);
         player.swingOffHand();
     }
 
