@@ -238,6 +238,10 @@ public final class SwordAbilityListener implements Listener {
             dmg *= 1.5;
             target.getWorld().spawnParticle(Particle.CRIT, target.getLocation().add(0, 1.0, 0), 15, 0.3, 0.5, 0.3, 0.1);
             player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_ATTACK_CRIT, 1.0f, 1.0f);
+        } else if (!player.isSprinting()) {
+            // Native sweep attack particle & sound effect
+            target.getWorld().spawnParticle(Particle.SWEEP_ATTACK, target.getLocation().add(0, 1.0, 0), 1, 0.0, 0.0, 0.0, 0.0);
+            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1.0f, 1.0f);
         }
 
         // Enchanted hit particle effect
