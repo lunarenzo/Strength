@@ -244,16 +244,25 @@ public final class SwordAbilityListener implements Listener {
         player.swingOffHand();
     }
 
-    private void nmsAttack(Player player, LivingEntity target) {
+    private static java.lang.reflect.Method cachedAttackMethod = null;
+
+    private static void nmsAttack(Player player, LivingEntity target) {
         try {
             final Object serverPlayer = player.getClass().getMethod("getHandle").invoke(player);
             final Object serverTarget = target.getClass().getMethod("getHandle").invoke(target);
 
-            for (java.lang.reflect.Method m : serverPlayer.getClass().getMethods()) {
-                if (m.getName().equals("attack") && m.getParameterCount() == 1) {
-                    m.invoke(serverPlayer, serverTarget);
-                    return;
+            if (cachedAttackMethod == null) {
+                for (java.lang.reflect.Method m : serverPlayer.getClass().getMethods()) {
+                    if (m.getName().equals("attack") && m.getParameterCount() == 1) {
+                        cachedAttackMethod = m;
+                        break;
+                    }
                 }
+            }
+
+            if (cachedAttackMethod != null) {
+                cachedAttackMethod.invoke(serverPlayer, serverTarget);
+                return;
             }
         } catch (Exception ignored) {
         }
