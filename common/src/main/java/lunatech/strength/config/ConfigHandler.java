@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import java.nio.file.Path;
 
 /**
- * A class that generates/loads & provides access to main and decoupled weapon configuration files.
+ * A class that generates/loads &amp; provides access to main and decoupled weapon configuration files.
  */
 public class ConfigHandler implements Reloadable {
     private final AbstractStrength plugin;
@@ -20,6 +20,7 @@ public class ConfigHandler implements Reloadable {
     private BowConfig bowCfg;
     private ShieldConfig shieldCfg;
     private CrossbowConfig crossbowCfg;
+    private SwordConfig swordCfg;
 
     /**
      * Instantiates a new Config handler.
@@ -81,6 +82,14 @@ public class ConfigHandler implements Reloadable {
             .withPath(weaponsDir.resolve("crossbow.yml"))
             .withHeader("Crossbow Weapon Configuration")
             .build(CrossbowConfig.class);
+
+        // 6. Load decoupled Sword configuration
+        swordCfg = new ConfigLoader()
+            .withLogger(logger)
+            .withDirectory()
+            .withPath(weaponsDir.resolve("sword.yml"))
+            .withHeader("Sword Weapon Configuration")
+            .build(SwordConfig.class);
     }
 
     /**
@@ -126,5 +135,14 @@ public class ConfigHandler implements Reloadable {
      */
     public CrossbowConfig getCrossbowConfig() {
         return crossbowCfg;
+    }
+
+    /**
+     * Gets sword weapon configuration.
+     *
+     * @return the sword config
+     */
+    public SwordConfig getSwordConfig() {
+        return swordCfg;
     }
 }
