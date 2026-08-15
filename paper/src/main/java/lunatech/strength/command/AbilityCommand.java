@@ -8,19 +8,28 @@ import lunatech.strength.config.TridentConfig;
 import lunatech.strength.config.BowConfig;
 import lunatech.strength.config.ShieldConfig;
 import lunatech.strength.config.CrossbowConfig;
+import lunatech.strength.config.SwordConfig;
 import lunatech.strength.listener.player.TridentAbilityListener;
 import lunatech.strength.listener.player.BowAbilityListener;
 import lunatech.strength.listener.player.ShieldAbilityListener;
 import lunatech.strength.listener.player.CrossbowAbilityListener;
+import lunatech.strength.listener.player.SwordAbilityListener;
 import lunatech.strength.service.StrengthService;
 import lunatech.strength.task.TridentUltimateTask;
 import lunatech.strength.task.BowBeamTask;
 import lunatech.strength.task.ShieldUltimateTask;
+import lunatech.strength.task.SwordUltimateTask;
 import io.github.milkdrinkers.colorparser.paper.ColorParser;
 import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
+import org.bukkit.Tag;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
@@ -60,6 +69,8 @@ public final class AbilityCommand extends Command {
             triggerShieldUltimate(player, strengthService);
         } else if ("crossbow".equalsIgnoreCase(assignedWeapon)) {
             triggerCrossbowUltimate(player, strengthService);
+        } else if ("sword".equalsIgnoreCase(assignedWeapon)) {
+            triggerSwordUltimate(player, strengthService);
         } else {
             player.sendMessage(ColorParser.of("<red>Your assigned weapon (" + assignedWeapon.toUpperCase() + ") does not have an ultimate ability implemented in this phase.</red>").build());
         }
@@ -245,6 +256,68 @@ public final class AbilityCommand extends Command {
 
         // Feedbacks
         player.playSound(player.getLocation(), Sound.ITEM_CROSSBOW_LOADING_END, 1.0f, 1.0f);
+        player.sendMessage(ColorParser.of(settings.ultimateActivatedMessage).build());
+    }
+
+    private void triggerSwordUltimate(Player player, StrengthService strengthService) {
+        final SwordConfig settings = plugin.getConfigHandler().getSwordConfig();
+        final int currentStrength = strengthService.getStrength(player);
+
+        if (currentStrength < settings.ultimateStrengthRequired) {
+            player.sendMessage(
+                ColorParser.of("<red>You do not have enough strength to activate your ultimate! (Required: <req>, Current: <current>)</red>")
+                    .with("req", String.valueOf(settings.ultimateStrengthRequired))
+                    .with("current", String.valueOf(currentStrength))
+                    .build()
+            );
+            return;
+        }
+
+        final UUID uuid = player.getUniqueId();
+        final int currentCharge = SwordAbilityListener.ultimateHits.getOrDefault(uuid, 0);
+        if (currentCharge < settings.ultimateHitsRequired) {
+            player.sendMessage(
+                ColorParser.of("<red>Your ultimate is not charged yet! (Required: <req>, Current: <current> passive crits)</red>")
+                    .with("req", String.valueOf(settings.ultimateHitsRequired))
+                    .with("current", String.valueOf(currentCharge))
+                    .build()
+            );
+            return;
+        }
+
+        final ItemStack mainHand = player.getInventory().getItemInMainHand();
+        if (mainHand == null || !Tag.ITEMS_SWORDS.isTagged(mainHand.getType())) {
+            player.sendMessage(ColorParser.of("<red>You must be holding a sword to activate Dual Wielding!</red>").build());
+            return;
+        }
+
+        // Clear charge
+        SwordAbilityListener.ultimateHits.put(uuid, 0);
+
+        // Save original offhand item if present
+        final ItemStack originalOffhand = player.getInventory().getItemInOffHand();
+        if (originalOffhand != null && originalOffhand.getType() != org.bukkit.Material.AIR) {
+            SwordAbilityListener.originalOffhandItems.put(uuid, originalOffhand.clone());
+        }
+
+        // Clone main hand sword to offhand and mark as clone
+        final ItemStack clone = mainHand.clone();
+        SwordAbilityListener.markAsClone(clone);
+        player.getInventory().setItemInOffHand(clone);
+
+        // Apply +100% attack speed attribute modifier (+50% cooldown reduction)
+        final AttributeInstance attr = player.getAttribute(Attribute.GENERIC_ATTACK_SPEED);
+        if (attr != null) {
+            attr.addModifier(new AttributeModifier(new NamespacedKey(plugin, "sword_ult_speed"), 4.0, AttributeModifier.Operation.ADD_NUMBER));
+        }
+
+        // Enable active dual wield
+        SwordAbilityListener.activeDualWield.put(uuid, true);
+
+        // Start duration task
+        new SwordUltimateTask(player, plugin, settings.ultimateDurationSeconds).runTaskTimer(plugin, 0L, 1L);
+
+        player.playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_IRON, 1.0f, 1.2f);
         player.sendMessage(ColorParser.of(settings.ultimateActivatedMessage).build());
     }
 }
