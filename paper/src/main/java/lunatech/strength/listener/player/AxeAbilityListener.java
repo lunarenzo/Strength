@@ -3,7 +3,6 @@ package lunatech.strength.listener.player;
 import lunatech.strength.Strength;
 import lunatech.strength.config.AxeConfig;
 import lunatech.strength.service.StrengthService;
-import lunatech.strength.task.AxeUltimateTask;
 import io.github.milkdrinkers.colorparser.paper.ColorParser;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -13,10 +12,15 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Map;
 import java.util.UUID;
@@ -38,6 +42,67 @@ public final class AxeAbilityListener implements Listener {
     public AxeAbilityListener(Strength plugin, StrengthService strengthService) {
         this.plugin = plugin;
         this.strengthService = strengthService;
+
+        // Continuous Actionbar updater for stunned players (5-tick interval for GeyserMC Bedrock compatibility)
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (stunnedPlayers.isEmpty()) return;
+                final long now = System.currentTimeMillis();
+                final AxeConfig settings = plugin.getConfigHandler().getAxeConfig();
+
+                stunnedPlayers.entrySet().removeIf(entry -> {
+                    final long until = entry.getValue();
+                    if (now >= until) return true;
+
+                    final Player p = plugin.getServer().getPlayer(entry.getKey());
+                    if (p != null && p.isOnline()) {
+                        final long remainingSec = Math.max(1, (until - now + 999) / 1000);
+                        final String msg = settings.stunActionbarMessage.replace("{seconds}", String.valueOf(remainingSec));
+                        p.sendActionBar(ColorParser.of(msg).build());
+                    }
+                    return false;
+                });
+            }
+        }.runTaskTimer(plugin, 5L, 5L);
+    }
+
+    public static boolean isStunned(Player player) {
+        final Long until = stunnedPlayers.get(player.getUniqueId());
+        if (until == null) return false;
+        if (System.currentTimeMillis() >= until) {
+            stunnedPlayers.remove(player.getUniqueId());
+            return false;
+        }
+        return true;
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onStunnedInteract(PlayerInteractEvent event) {
+        if (isStunned(event.getPlayer())) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onStunnedInteractEntity(PlayerInteractEntityEvent event) {
+        if (isStunned(event.getPlayer())) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onStunnedBlockPlace(BlockPlaceEvent event) {
+        if (isStunned(event.getPlayer())) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onStunnedBlockBreak(BlockBreakEvent event) {
+        if (isStunned(event.getPlayer())) {
+            event.setCancelled(true);
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -51,9 +116,7 @@ public final class AxeAbilityListener implements Listener {
         final AxeConfig settings = plugin.getConfigHandler().getAxeConfig();
 
         // 1. Attack Cancellation when Stunned
-        final Long stunnedUntil = stunnedPlayers.get(victimUuid);
-        if (stunnedUntil != null && System.currentTimeMillis() < stunnedUntil && settings.cancelAttacksWhenStunned) {
-            // Damager is currently stunned
+        if (isStunned(damager) && settings.cancelAttacksWhenStunned) {
             event.setCancelled(true);
             return;
         }
