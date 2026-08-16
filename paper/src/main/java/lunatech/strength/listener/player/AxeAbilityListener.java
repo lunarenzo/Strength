@@ -43,26 +43,44 @@ public final class AxeAbilityListener implements Listener {
         this.plugin = plugin;
         this.strengthService = strengthService;
 
-        // Continuous Actionbar updater for stunned players (5-tick interval for GeyserMC Bedrock compatibility)
+        // Continuous Actionbar updater for stunned players & ultimate-marked targets
         new BukkitRunnable() {
             @Override
             public void run() {
-                if (stunnedPlayers.isEmpty()) return;
-                final long now = System.currentTimeMillis();
                 final AxeConfig settings = plugin.getConfigHandler().getAxeConfig();
 
-                stunnedPlayers.entrySet().removeIf(entry -> {
-                    final long until = entry.getValue();
-                    if (now >= until) return true;
+                // 1. Stun Actionbar Refresh
+                if (!stunnedPlayers.isEmpty()) {
+                    final long now = System.currentTimeMillis();
+                    stunnedPlayers.entrySet().removeIf(entry -> {
+                        final long until = entry.getValue();
+                        if (now >= until) return true;
 
-                    final Player p = plugin.getServer().getPlayer(entry.getKey());
-                    if (p != null && p.isOnline()) {
-                        final long remainingSec = Math.max(1, (until - now + 999) / 1000);
-                        final String msg = settings.stunActionbarMessage.replace("{seconds}", String.valueOf(remainingSec));
-                        p.sendActionBar(ColorParser.of(msg).build());
+                        final Player p = plugin.getServer().getPlayer(entry.getKey());
+                        if (p != null && p.isOnline()) {
+                            final long remainingSec = Math.max(1, (until - now + 999) / 1000);
+                            final String msg = settings.stunActionbarMessage.replace("{seconds}", String.valueOf(remainingSec));
+                            p.sendActionBar(ColorParser.of(msg).build());
+                        }
+                        return false;
+                    });
+                }
+
+                // 2. Ultimate Pending Damage Actionbar Refresh
+                if (!storedDamagePools.isEmpty()) {
+                    for (Map<UUID, Double> pool : storedDamagePools.values()) {
+                        for (Map.Entry<UUID, Double> entry : pool.entrySet()) {
+                            if (entry.getValue() > 0.0) {
+                                final Player target = plugin.getServer().getPlayer(entry.getKey());
+                                if (target != null && target.isOnline()) {
+                                    final double totalPending = entry.getValue() * settings.damageMultiplier;
+                                    final String msg = settings.pendingDamageActionbarMessage.replace("{amount}", String.format("%.1f", totalPending));
+                                    target.sendActionBar(ColorParser.of(msg).build());
+                                }
+                            }
+                        }
                     }
-                    return false;
-                });
+                }
             }
         }.runTaskTimer(plugin, 5L, 5L);
     }
@@ -151,35 +169,44 @@ public final class AxeAbilityListener implements Listener {
                 damager.sendMessage(ColorParser.of(settings.ultimateChargedMessage).build());
             }
 
-            // Track passive charge
-            final int crits = criticalHitsMap.merge(damagerUuid, 1, Integer::sum);
+            // Do not build passive stun charge if victim is ALREADY stunned
+            if (!isStunned(victim)) {
+                final int crits = criticalHitsMap.merge(damagerUuid, 1, Integer::sum);
 
-            if (crits >= settings.critsRequired) {
-                // Reset passive charge
-                criticalHitsMap.put(damagerUuid, 0);
+                if (crits >= settings.critsRequired) {
+                    // Reset passive charge
+                    criticalHitsMap.put(damagerUuid, 0);
 
-                // Apply Seismic Stun to victim
-                final long stunEndTime = System.currentTimeMillis() + (settings.stunDurationSeconds * 1000L);
-                stunnedPlayers.put(victimUuid, stunEndTime);
+                    // Apply Seismic Stun to victim
+                    final long stunEndTime = System.currentTimeMillis() + (settings.stunDurationSeconds * 1000L);
+                    stunnedPlayers.put(victimUuid, stunEndTime);
 
-                // Immobilize target (slowness max + jump inhibition)
-                victim.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, settings.stunDurationSeconds * 20, 255, false, false, true));
-                victim.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, settings.stunDurationSeconds * 20, 128, false, false, true));
+                    // Immobilize target (slowness max + jump inhibition)
+                    victim.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, settings.stunDurationSeconds * 20, 255, false, false, true));
+                    victim.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, settings.stunDurationSeconds * 20, 128, false, false, true));
 
-                // Particles & Sound
-                victim.getWorld().spawnParticle(Particle.CRIT, victim.getLocation().add(0, 1.0, 0), 20, 0.3, 0.5, 0.3, 0.1);
-                victim.playSound(victim.getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 1.0f, 1.0f);
+                    // Particles & Sound
+                    victim.getWorld().spawnParticle(Particle.CRIT, victim.getLocation().add(0, 1.0, 0), 20, 0.3, 0.5, 0.3, 0.1);
+                    victim.playSound(victim.getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 1.0f, 1.0f);
 
-                // Messages
-                damager.sendMessage(ColorParser.of(settings.passiveTriggeredAttackerMessage.replace("{seconds}", String.valueOf(settings.stunDurationSeconds))).build());
-                victim.sendActionBar(ColorParser.of(settings.stunActionbarMessage.replace("{seconds}", String.valueOf(settings.stunDurationSeconds))).build());
+                    // Messages
+                    damager.sendMessage(ColorParser.of(settings.passiveTriggeredAttackerMessage.replace("{seconds}", String.valueOf(settings.stunDurationSeconds))).build());
+                    victim.sendActionBar(ColorParser.of(settings.stunActionbarMessage.replace("{seconds}", String.valueOf(settings.stunDurationSeconds))).build());
+                }
             }
         }
 
         // 2. Active Ultimate Damage Interception & Storage
         if (activeUltimateAttackers.getOrDefault(damagerUuid, false)) {
             final double finalDamage = event.getFinalDamage();
-            storedDamagePools.computeIfAbsent(damagerUuid, k -> new ConcurrentHashMap<>()).merge(victimUuid, finalDamage, Double::sum);
+            final Map<UUID, Double> pool = storedDamagePools.computeIfAbsent(damagerUuid, k -> new ConcurrentHashMap<>());
+            final double newTotal = pool.merge(victimUuid, finalDamage, Double::sum);
+
+            // Immediate Actionbar notification to victim
+            final double pendingBurst = newTotal * settings.damageMultiplier;
+            final String msg = settings.pendingDamageActionbarMessage.replace("{amount}", String.format("%.1f", pendingBurst));
+            victim.sendActionBar(ColorParser.of(msg).build());
+
             // Cancel direct damage so damage accumulates for final burst
             event.setDamage(0.0);
         }
