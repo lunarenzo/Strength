@@ -21,6 +21,7 @@ public class ConfigHandler implements Reloadable {
     private ShieldConfig shieldCfg;
     private CrossbowConfig crossbowCfg;
     private SwordConfig swordCfg;
+    private AxeConfig axeCfg;
 
     /**
      * Instantiates a new Config handler.
@@ -90,6 +91,14 @@ public class ConfigHandler implements Reloadable {
             .withPath(weaponsDir.resolve("sword.yml"))
             .withHeader("Sword Weapon Configuration")
             .build(SwordConfig.class);
+
+        // 7. Load decoupled Axe configuration
+        axeCfg = new ConfigLoader()
+            .withLogger(logger)
+            .withDirectory()
+            .withPath(weaponsDir.resolve("axe.yml"))
+            .withHeader("Axe Weapon Configuration")
+            .build(AxeConfig.class);
     }
 
     /**
@@ -144,5 +153,14 @@ public class ConfigHandler implements Reloadable {
      */
     public SwordConfig getSwordConfig() {
         return swordCfg;
+    }
+
+    /**
+     * Gets axe weapon configuration.
+     *
+     * @return the axe config
+     */
+    public AxeConfig getAxeConfig() {
+        return axeCfg;
     }
 }
