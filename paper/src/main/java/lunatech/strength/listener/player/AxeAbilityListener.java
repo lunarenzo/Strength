@@ -4,6 +4,7 @@ import lunatech.strength.Strength;
 import lunatech.strength.config.AxeConfig;
 import lunatech.strength.service.StrengthService;
 import io.github.milkdrinkers.colorparser.paper.ColorParser;
+import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.Tag;
@@ -17,8 +18,8 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -96,6 +97,20 @@ public final class AxeAbilityListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onPlayerMove(PlayerMoveEvent event) {
+        if (isStunned(event.getPlayer())) {
+            final Location from = event.getFrom();
+            final Location to = event.getTo();
+            if (from.getX() != to.getX() || from.getY() != to.getY() || from.getZ() != to.getZ()) {
+                final Location target = from.clone();
+                target.setPitch(to.getPitch());
+                target.setYaw(to.getYaw());
+                event.setTo(target);
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onStunnedInteract(PlayerInteractEvent event) {
         if (isStunned(event.getPlayer())) {
             event.setCancelled(true);
@@ -149,6 +164,22 @@ public final class AxeAbilityListener implements Listener {
             return;
         }
 
+        // 2. Active Ultimate Damage Interception & Storage (ALL attacks: normal & crit)
+        if (activeUltimateAttackers.getOrDefault(damagerUuid, false)) {
+            final double finalDamage = event.getFinalDamage();
+            final Map<UUID, Double> pool = storedDamagePools.computeIfAbsent(damagerUuid, k -> new ConcurrentHashMap<>());
+            final double newTotal = pool.merge(victimUuid, finalDamage, Double::sum);
+
+            // Immediate Actionbar notification to victim
+            final double pendingBurst = newTotal * settings.damageMultiplier;
+            final String msg = settings.pendingDamageActionbarMessage.replace("{amount}", String.format("%.1f", pendingBurst));
+            victim.sendActionBar(ColorParser.of(msg).build());
+
+            // Cancel direct damage so damage accumulates for final burst
+            event.setDamage(0.0);
+            return;
+        }
+
         // Edge Case 1: Check if victim is blocking with a shield
         final boolean isBlocking = victim.isBlocking();
         if (isBlocking && !settings.countShieldHitsAsCrit) {
@@ -181,10 +212,6 @@ public final class AxeAbilityListener implements Listener {
                     final long stunEndTime = System.currentTimeMillis() + (settings.stunDurationSeconds * 1000L);
                     stunnedPlayers.put(victimUuid, stunEndTime);
 
-                    // Immobilize target (slowness max + jump inhibition)
-                    victim.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, settings.stunDurationSeconds * 20, 255, false, false, true));
-                    victim.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, settings.stunDurationSeconds * 20, 128, false, false, true));
-
                     // Particles & Sound
                     victim.getWorld().spawnParticle(Particle.CRIT, victim.getLocation().add(0, 1.0, 0), 20, 0.3, 0.5, 0.3, 0.1);
                     victim.playSound(victim.getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 1.0f, 1.0f);
@@ -194,21 +221,6 @@ public final class AxeAbilityListener implements Listener {
                     victim.sendActionBar(ColorParser.of(settings.stunActionbarMessage.replace("{seconds}", String.valueOf(settings.stunDurationSeconds))).build());
                 }
             }
-        }
-
-        // 2. Active Ultimate Damage Interception & Storage
-        if (activeUltimateAttackers.getOrDefault(damagerUuid, false)) {
-            final double finalDamage = event.getFinalDamage();
-            final Map<UUID, Double> pool = storedDamagePools.computeIfAbsent(damagerUuid, k -> new ConcurrentHashMap<>());
-            final double newTotal = pool.merge(victimUuid, finalDamage, Double::sum);
-
-            // Immediate Actionbar notification to victim
-            final double pendingBurst = newTotal * settings.damageMultiplier;
-            final String msg = settings.pendingDamageActionbarMessage.replace("{amount}", String.format("%.1f", pendingBurst));
-            victim.sendActionBar(ColorParser.of(msg).build());
-
-            // Cancel direct damage so damage accumulates for final burst
-            event.setDamage(0.0);
         }
     }
 }
