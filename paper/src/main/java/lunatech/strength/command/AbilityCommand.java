@@ -71,9 +71,47 @@ public final class AbilityCommand extends Command {
             triggerCrossbowUltimate(player, strengthService);
         } else if ("sword".equalsIgnoreCase(assignedWeapon)) {
             triggerSwordUltimate(player, strengthService);
+        } else if ("axe".equalsIgnoreCase(assignedWeapon)) {
+            triggerAxeUltimate(player, strengthService);
         } else {
             player.sendMessage(ColorParser.of("<red>Your assigned weapon (" + assignedWeapon.toUpperCase() + ") does not have an ultimate ability implemented in this phase.</red>").build());
         }
+    }
+
+    private void triggerAxeUltimate(Player player, StrengthService strengthService) {
+        final lunatech.strength.config.AxeConfig settings = plugin.getConfigHandler().getAxeConfig();
+        final int currentStrength = strengthService.getStrength(player);
+
+        if (currentStrength < settings.ultimateStrengthRequired) {
+            player.sendMessage(ColorParser.of("<red>You do not have enough strength to activate your ultimate! (Required: " + settings.ultimateStrengthRequired + ", Current: " + currentStrength + ")</red>").build());
+            return;
+        }
+
+        final UUID uuid = player.getUniqueId();
+        final int currentCharge = lunatech.strength.listener.player.AxeAbilityListener.ultimateHitsMap.getOrDefault(uuid, 0);
+        if (currentCharge < settings.ultimateCritsRequired) {
+            player.sendMessage(ColorParser.of("<red>Your ultimate is not charged yet! (Required: " + settings.ultimateCritsRequired + ", Current: " + currentCharge + " critical hits)</red>").build());
+            return;
+        }
+
+        final org.bukkit.inventory.ItemStack mainhand = player.getInventory().getItemInMainHand();
+        if (mainhand == null || !org.bukkit.Tag.ITEMS_AXES.isTagged(mainhand.getType())) {
+            player.sendMessage(ColorParser.of("<red>You must be holding an Axe in your main hand to activate this ultimate!</red>").build());
+            return;
+        }
+
+        if (lunatech.strength.listener.player.AxeAbilityListener.activeUltimateAttackers.getOrDefault(uuid, false)) {
+            player.sendMessage(ColorParser.of("<red>Your Axe ultimate is already active!</red>").build());
+            return;
+        }
+
+        // Reset charge & activate ultimate
+        lunatech.strength.listener.player.AxeAbilityListener.ultimateHitsMap.put(uuid, 0);
+        lunatech.strength.listener.player.AxeAbilityListener.activeUltimateAttackers.put(uuid, true);
+
+        player.sendMessage(ColorParser.of(settings.ultimateActivatedMessage.replace("{seconds}", String.valueOf(settings.ultimateDurationSeconds)).replace("{multiplier}", String.valueOf(settings.damageMultiplier))).build());
+
+        new lunatech.strength.task.AxeUltimateTask(player, plugin, settings.ultimateDurationSeconds).runTaskTimer(plugin, 0L, 1L);
     }
 
     private void triggerTridentUltimate(Player player, StrengthService strengthService) {
