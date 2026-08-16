@@ -51,7 +51,7 @@ public final class FirstJoinRollTask extends BukkitRunnable {
         } else {
             // Final Roll Assignment
             final String finalWeapon = availableWeapons.get(random.nextInt(availableWeapons.size()));
-            strengthService.assignWeapon(player, finalWeapon);
+            strengthService.setAssignedWeapon(player, finalWeapon);
 
             final Title title = Title.title(
                 ColorParser.of("<gold><bold>WEAPON ASSIGNED!</bold></gold>").build(),
