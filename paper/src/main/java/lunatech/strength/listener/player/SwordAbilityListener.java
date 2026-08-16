@@ -228,53 +228,63 @@ public final class SwordAbilityListener implements Listener {
     }
 
     private void executeOffhandDamage(Player player, LivingEntity target) {
-        lastOffhandAttackTimes.put(player.getUniqueId(), System.currentTimeMillis());
-        final PlayerInventory inv = player.getInventory();
-        final ItemStack main = inv.getItemInMainHand();
-        final ItemStack off = inv.getItemInOffHand();
+        final UUID uuid = player.getUniqueId();
+        final long now = System.currentTimeMillis();
+        final long last = lastOffhandAttackTimes.getOrDefault(uuid, 0L);
 
-        // Swap hands so NMS attack uses offhand weapon stats & enchantments
-        inv.setItemInMainHand(off);
-        inv.setItemInOffHand(main);
-
-        try {
-            nmsAttack(player, target);
-        } finally {
-            // Restore hands immediately
-            inv.setItemInMainHand(main);
-            inv.setItemInOffHand(off);
+        // 1. Debounce 200ms to prevent double-hit when both interact events fire for the same click
+        if (now - last < 200L) {
+            return;
         }
 
-        player.swingOffHand();
-    }
+        lastOffhandAttackTimes.put(uuid, now);
 
-    private static java.lang.reflect.Method cachedAttackMethod = null;
+        final ItemStack offhand = player.getInventory().getItemInOffHand();
+        final AttributeInstance damageAttr = player.getAttribute(Attribute.ATTACK_DAMAGE);
+        double dmg = damageAttr != null ? damageAttr.getValue() : 6.0;
 
-    private static void nmsAttack(Player player, LivingEntity target) {
-        try {
-            final Object serverPlayer = player.getClass().getMethod("getHandle").invoke(player);
-            final Object serverTarget = target.getClass().getMethod("getHandle").invoke(target);
+        // Sharpness enchantment damage bonus
+        if (offhand != null && offhand.hasItemMeta() && offhand.getItemMeta().hasEnchant(org.bukkit.enchantments.Enchantment.SHARPNESS)) {
+            final int sharpLvl = offhand.getItemMeta().getEnchantLevel(org.bukkit.enchantments.Enchantment.SHARPNESS);
+            dmg += (0.5 * sharpLvl + 0.5);
+        }
 
-            if (cachedAttackMethod == null) {
-                for (java.lang.reflect.Method m : serverPlayer.getClass().getMethods()) {
-                    if (m.getName().equals("attack") && m.getParameterCount() == 1) {
-                        cachedAttackMethod = m;
-                        break;
-                    }
+        // Native jump-crit condition: falling, not climbing, not in water, no blindness, not riding
+        final boolean isCrit = player.getFallDistance() > 0.0F 
+            && !player.isClimbing() 
+            && !player.isInWater() 
+            && !player.hasPotionEffect(org.bukkit.potion.PotionEffectType.BLINDNESS) 
+            && player.getVehicle() == null;
+
+        if (isCrit) {
+            dmg *= 1.5;
+            target.getWorld().spawnParticle(Particle.CRIT, target.getLocation().add(0, 1.0, 0), 15, 0.3, 0.5, 0.3, 0.1);
+            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_ATTACK_CRIT, 1.0f, 1.0f);
+        } else if (!player.isSprinting()) {
+            // Native vanilla sweep particle location (1.2 blocks in front of player at chest level)
+            final Vector dir = player.getLocation().getDirection().setY(0).normalize();
+            final Location sweepLoc = player.getLocation().add(0, 1.0, 0).add(dir.multiply(1.2));
+            target.getWorld().spawnParticle(Particle.SWEEP_ATTACK, sweepLoc, 1, 0.0, 0.0, 0.0, 0.0);
+            player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1.0f, 1.0f);
+
+            // Collateral AoE sweep damage to nearby entities (1.0 + Sweeping Edge level)
+            final double sweepDmg = 1.0 + (offhand != null && offhand.containsEnchantment(org.bukkit.enchantments.Enchantment.SWEEPING_EDGE) 
+                ? offhand.getEnchantmentLevel(org.bukkit.enchantments.Enchantment.SWEEPING_EDGE) : 0.0);
+
+            for (org.bukkit.entity.Entity nearby : target.getWorld().getNearbyEntities(target.getBoundingBox().expand(1.0, 0.25, 1.0))) {
+                if (nearby instanceof LivingEntity living && !nearby.equals(player) && !nearby.equals(target)) {
+                    living.damage(sweepDmg, player);
                 }
             }
-
-            if (cachedAttackMethod != null) {
-                cachedAttackMethod.invoke(serverPlayer, serverTarget);
-                return;
-            }
-        } catch (Exception ignored) {
         }
 
-        // Fallback if reflection fails
-        final AttributeInstance damageAttr = player.getAttribute(Attribute.ATTACK_DAMAGE);
-        final double dmg = damageAttr != null ? damageAttr.getValue() : 6.0;
+        // Enchanted hit particle effect
+        if (offhand != null && offhand.hasItemMeta() && offhand.getItemMeta().hasEnchants()) {
+            target.getWorld().spawnParticle(Particle.ENCHANTED_HIT, target.getLocation().add(0, 1.0, 0), 15, 0.3, 0.5, 0.3, 0.1);
+        }
+
         target.damage(dmg, player);
+        player.swingOffHand();
     }
 
     // Anti-Duplication Guardrails
