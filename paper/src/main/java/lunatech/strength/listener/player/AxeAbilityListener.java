@@ -110,12 +110,24 @@ public final class AxeAbilityListener implements Listener {
         return true;
     }
 
+    public static final NamespacedKey STUN_JUMP_KEY = new NamespacedKey("strength", "seismic_stun_jump");
+
     public static void applyStunAttribute(Player player) {
-        final AttributeInstance attr = player.getAttribute(Attribute.MOVEMENT_SPEED);
-        if (attr != null) {
-            attr.removeModifier(STUN_MODIFIER_KEY);
-            attr.addModifier(new AttributeModifier(
+        final AttributeInstance speedAttr = player.getAttribute(Attribute.MOVEMENT_SPEED);
+        if (speedAttr != null) {
+            speedAttr.removeModifier(STUN_MODIFIER_KEY);
+            speedAttr.addModifier(new AttributeModifier(
                 STUN_MODIFIER_KEY,
+                -1.0,
+                AttributeModifier.Operation.ADD_SCALAR
+            ));
+        }
+
+        final AttributeInstance jumpAttr = player.getAttribute(Attribute.JUMP_STRENGTH);
+        if (jumpAttr != null) {
+            jumpAttr.removeModifier(STUN_JUMP_KEY);
+            jumpAttr.addModifier(new AttributeModifier(
+                STUN_JUMP_KEY,
                 -1.0,
                 AttributeModifier.Operation.ADD_SCALAR
             ));
@@ -123,10 +135,16 @@ public final class AxeAbilityListener implements Listener {
     }
 
     public static void removeStunAttribute(Player player) {
-        final AttributeInstance attr = player.getAttribute(Attribute.MOVEMENT_SPEED);
-        if (attr != null) {
-            attr.removeModifier(STUN_MODIFIER_KEY);
+        final AttributeInstance speedAttr = player.getAttribute(Attribute.MOVEMENT_SPEED);
+        if (speedAttr != null) {
+            speedAttr.removeModifier(STUN_MODIFIER_KEY);
         }
+
+        final AttributeInstance jumpAttr = player.getAttribute(Attribute.JUMP_STRENGTH);
+        if (jumpAttr != null) {
+            jumpAttr.removeModifier(STUN_JUMP_KEY);
+        }
+
         player.removePotionEffect(PotionEffectType.SLOWNESS);
     }
 
