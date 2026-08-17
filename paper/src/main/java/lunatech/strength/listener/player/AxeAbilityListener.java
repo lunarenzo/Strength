@@ -109,9 +109,13 @@ public final class AxeAbilityListener implements Listener {
         }
         return true;
     }
+
     public static final NamespacedKey STUN_JUMP_KEY = new NamespacedKey("strength", "seismic_stun_jump");
+    public static final Map<UUID, Location> lockedLocations = new ConcurrentHashMap<>();
 
     public static void applyStunAttributes(Player player) {
+        lockedLocations.put(player.getUniqueId(), player.getLocation());
+
         final AttributeInstance speedAttr = player.getAttribute(Attribute.MOVEMENT_SPEED);
         if (speedAttr != null) {
             speedAttr.removeModifier(STUN_MODIFIER_KEY);
@@ -134,6 +138,8 @@ public final class AxeAbilityListener implements Listener {
     }
 
     public static void removeStunAttributes(Player player) {
+        lockedLocations.remove(player.getUniqueId());
+
         final AttributeInstance speedAttr = player.getAttribute(Attribute.MOVEMENT_SPEED);
         if (speedAttr != null) {
             speedAttr.removeModifier(STUN_MODIFIER_KEY);
@@ -150,6 +156,23 @@ public final class AxeAbilityListener implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         removeStunAttributes(event.getPlayer());
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onPlayerMove(PlayerMoveEvent event) {
+        final Player player = event.getPlayer();
+        if (!isStunned(player)) return;
+
+        if (!event.hasChangedPosition()) return;
+
+        final Location anchor = lockedLocations.get(player.getUniqueId());
+        if (anchor == null) return;
+
+        final Location destination = anchor.clone();
+        destination.setYaw(event.getTo().getYaw());
+        destination.setPitch(event.getTo().getPitch());
+
+        event.setTo(destination);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
