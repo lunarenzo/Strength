@@ -44,7 +44,8 @@ public final class StunPacketListener extends PacketListenerAbstract {
                 loc.getYaw(),
                 loc.getPitch(),
                 (byte) 0,
-                0
+                0,
+                false
             );
 
             PacketEvents.getAPI().getPlayerManager().sendPacket(player, positionPacket);
