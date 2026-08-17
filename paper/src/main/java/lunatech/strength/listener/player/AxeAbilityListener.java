@@ -65,7 +65,7 @@ public final class AxeAbilityListener implements Listener {
                         final long until = entry.getValue();
                         if (now >= until) {
                             final Player p = plugin.getServer().getPlayer(entry.getKey());
-                            if (p != null) removeStunAttribute(p);
+                            if (p != null) removeStunAttributes(p);
                             return true;
                         }
 
@@ -104,19 +104,18 @@ public final class AxeAbilityListener implements Listener {
         if (until == null) return false;
         if (System.currentTimeMillis() >= until) {
             stunnedPlayers.remove(uuid);
-            removeStunAttribute(player);
+            removeStunAttributes(player);
             return false;
         }
         return true;
     }
-
     public static final NamespacedKey STUN_JUMP_KEY = new NamespacedKey("strength", "seismic_stun_jump");
 
-    public static void applyStunAttribute(Player player) {
+    public static void applyStunAttributes(Player player) {
         final AttributeInstance speedAttr = player.getAttribute(Attribute.MOVEMENT_SPEED);
         if (speedAttr != null) {
             speedAttr.removeModifier(STUN_MODIFIER_KEY);
-            speedAttr.addModifier(new AttributeModifier(
+            speedAttr.addTransientModifier(new AttributeModifier(
                 STUN_MODIFIER_KEY,
                 -1.0,
                 AttributeModifier.Operation.ADD_SCALAR
@@ -126,15 +125,15 @@ public final class AxeAbilityListener implements Listener {
         final AttributeInstance jumpAttr = player.getAttribute(Attribute.JUMP_STRENGTH);
         if (jumpAttr != null) {
             jumpAttr.removeModifier(STUN_JUMP_KEY);
-            jumpAttr.addModifier(new AttributeModifier(
+            jumpAttr.addTransientModifier(new AttributeModifier(
                 STUN_JUMP_KEY,
-                -1.0,
-                AttributeModifier.Operation.ADD_SCALAR
+                -10.0,
+                AttributeModifier.Operation.ADD_NUMBER
             ));
         }
     }
 
-    public static void removeStunAttribute(Player player) {
+    public static void removeStunAttributes(Player player) {
         final AttributeInstance speedAttr = player.getAttribute(Attribute.MOVEMENT_SPEED);
         if (speedAttr != null) {
             speedAttr.removeModifier(STUN_MODIFIER_KEY);
@@ -150,14 +149,7 @@ public final class AxeAbilityListener implements Listener {
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        removeStunAttribute(event.getPlayer());
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onPlayerJump(com.destroystokyo.paper.event.player.PlayerJumpEvent event) {
-        if (isStunned(event.getPlayer())) {
-            event.setCancelled(true);
-        }
+        removeStunAttributes(event.getPlayer());
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -261,7 +253,7 @@ public final class AxeAbilityListener implements Listener {
                     // Apply Seismic Stun to victim (Server & Client synchronized AttributeModifier & Y velocity clamp)
                     final long stunEndTime = System.currentTimeMillis() + (settings.stunDurationSeconds * 1000L);
                     stunnedPlayers.put(victimUuid, stunEndTime);
-                    applyStunAttribute(victim);
+                    applyStunAttributes(victim);
 
                     victim.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, settings.stunDurationSeconds * 20, 255, false, false, true));
 
