@@ -127,6 +127,8 @@ public final class AxeAbilityListener implements Listener {
         if (attr != null) {
             attr.removeModifier(STUN_MODIFIER_KEY);
         }
+        player.removePotionEffect(PotionEffectType.SLOWNESS);
+        player.removePotionEffect(PotionEffectType.JUMP_BOOST);
     }
 
     @EventHandler
@@ -244,12 +246,13 @@ public final class AxeAbilityListener implements Listener {
                     // Reset passive charge
                     criticalHitsMap.put(damagerUuid, 0);
 
-                    // Apply Seismic Stun to victim (Server & Client synchronized AttributeModifier zeroing)
+                    // Apply Seismic Stun to victim (Server & Client synchronized AttributeModifier & Jump Boost 250)
                     final long stunEndTime = System.currentTimeMillis() + (settings.stunDurationSeconds * 1000L);
                     stunnedPlayers.put(victimUuid, stunEndTime);
                     applyStunAttribute(victim);
 
                     victim.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, settings.stunDurationSeconds * 20, 255, false, false, true));
+                    victim.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, settings.stunDurationSeconds * 20, 250, false, false, true));
 
                     // Particles & Sound
                     victim.getWorld().spawnParticle(Particle.CRIT, victim.getLocation().add(0, 1.0, 0), 20, 0.3, 0.5, 0.3, 0.1);
