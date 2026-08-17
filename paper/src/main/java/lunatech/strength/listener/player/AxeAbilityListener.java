@@ -135,7 +135,12 @@ public final class AxeAbilityListener implements Listener {
         removeStunAttribute(event.getPlayer());
     }
 
-    // Note: Player movement packet cancellation is handled at protocol layer by StunPacketListener
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onPlayerJump(com.destroystokyo.paper.event.player.PlayerJumpEvent event) {
+        if (isStunned(event.getPlayer())) {
+            event.setCancelled(true);
+        }
+    }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onStunnedInteract(PlayerInteractEvent event) {
