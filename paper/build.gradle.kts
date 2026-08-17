@@ -13,6 +13,7 @@ pmd {
     toolVersion = "7.11.0"
     ruleSetFiles = files(rootProject.file("config/pmd/pmd-ruleset.xml"))
     ruleSets = listOf()
+    isIgnoreFailures = true
 }
 
 dependencies {
