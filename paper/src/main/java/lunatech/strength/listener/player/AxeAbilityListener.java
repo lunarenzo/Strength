@@ -8,6 +8,7 @@ import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.Tag;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -16,12 +17,11 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDismountEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Map;
@@ -38,6 +38,7 @@ public final class AxeAbilityListener implements Listener {
     public static final Map<UUID, Integer> criticalHitsMap = new ConcurrentHashMap<>();
     public static final Map<UUID, Integer> ultimateHitsMap = new ConcurrentHashMap<>();
     public static final Map<UUID, Long> stunnedPlayers = new ConcurrentHashMap<>();
+    public static final Map<UUID, ArmorStand> stunVehicles = new ConcurrentHashMap<>();
     public static final Map<UUID, Boolean> activeUltimateAttackers = new ConcurrentHashMap<>();
     public static final Map<UUID, Map<UUID, Double>> storedDamagePools = new ConcurrentHashMap<>();
 
@@ -51,12 +52,15 @@ public final class AxeAbilityListener implements Listener {
             public void run() {
                 final AxeConfig settings = plugin.getConfigHandler().getAxeConfig();
 
-                // 1. Stun Actionbar Refresh
+                // 1. Stun Actionbar Refresh & Expiration Cleanup
                 if (!stunnedPlayers.isEmpty()) {
                     final long now = System.currentTimeMillis();
                     stunnedPlayers.entrySet().removeIf(entry -> {
                         final long until = entry.getValue();
-                        if (now >= until) return true;
+                        if (now >= until) {
+                            removeStunVehicle(entry.getKey());
+                            return true;
+                        }
 
                         final Player p = plugin.getServer().getPlayer(entry.getKey());
                         if (p != null && p.isOnline()) {
@@ -88,25 +92,34 @@ public final class AxeAbilityListener implements Listener {
     }
 
     public static boolean isStunned(Player player) {
-        final Long until = stunnedPlayers.get(player.getUniqueId());
+        final UUID uuid = player.getUniqueId();
+        final Long until = stunnedPlayers.get(uuid);
         if (until == null) return false;
         if (System.currentTimeMillis() >= until) {
-            stunnedPlayers.remove(player.getUniqueId());
+            stunnedPlayers.remove(uuid);
+            removeStunVehicle(uuid);
             return false;
         }
         return true;
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onPlayerMove(PlayerMoveEvent event) {
-        if (isStunned(event.getPlayer())) {
-            final Location from = event.getFrom();
-            final Location to = event.getTo();
-            // Cancel horizontal movement and upward jumping (spacebar)
-            if (from.getX() != to.getX() || from.getZ() != to.getZ() || to.getY() > from.getY()) {
-                event.setCancelled(true);
-            }
+    public static void removeStunVehicle(UUID uuid) {
+        final ArmorStand vehicle = stunVehicles.remove(uuid);
+        if (vehicle != null && !vehicle.isDead()) {
+            vehicle.remove();
         }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onEntityDismount(EntityDismountEvent event) {
+        if (event.getEntity() instanceof Player p && isStunned(p)) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        removeStunVehicle(event.getPlayer().getUniqueId());
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -207,12 +220,21 @@ public final class AxeAbilityListener implements Listener {
                     // Reset passive charge
                     criticalHitsMap.put(damagerUuid, 0);
 
-                    // Apply Seismic Stun to victim
+                    // Apply Seismic Stun to victim (zero-rubberband invisible marker vehicle mounting)
                     final long stunEndTime = System.currentTimeMillis() + (settings.stunDurationSeconds * 1000L);
                     stunnedPlayers.put(victimUuid, stunEndTime);
 
-                    // Client-side zero movement speed via SLOWNESS 255 (no JUMP_BOOST to prevent vertical flinging)
-                    victim.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, settings.stunDurationSeconds * 20, 255, false, false, true));
+                    removeStunVehicle(victimUuid);
+                    final Location loc = victim.getLocation();
+                    final ArmorStand vehicle = victim.getWorld().spawn(loc, ArmorStand.class, stand -> {
+                        stand.setInvisible(true);
+                        stand.setMarker(true);
+                        stand.setGravity(false);
+                        stand.setInvulnerable(true);
+                        stand.setPersistent(false);
+                    });
+                    vehicle.addPassenger(victim);
+                    stunVehicles.put(victimUuid, vehicle);
 
                     // Particles & Sound
                     victim.getWorld().spawnParticle(Particle.CRIT, victim.getLocation().add(0, 1.0, 0), 20, 0.3, 0.5, 0.3, 0.1);
