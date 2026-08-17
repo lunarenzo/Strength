@@ -38,9 +38,17 @@ public final class StunPacketListener extends PacketListenerAbstract {
         }
 
         final var type = event.getPacketType();
-        if (type == PacketType.Play.Client.PLAYER_POSITION || type == PacketType.Play.Client.PLAYER_POSITION_AND_ROTATION) {
+        if (type == PacketType.Play.Client.PLAYER_POSITION
+            || type == PacketType.Play.Client.PLAYER_POSITION_AND_ROTATION
+            || type == PacketType.Play.Client.PLAYER_FLYING) {
+
             // Cancel client movement/jump attempt
             event.setCancelled(true);
+
+            // Skip running teleport math for raw FLYING packets
+            if (type == PacketType.Play.Client.PLAYER_FLYING) {
+                return;
+            }
 
             // Rate-limit position correction packets (max once per 250ms) to prevent packet spam kicks
             final long now = System.currentTimeMillis();
