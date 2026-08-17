@@ -115,6 +115,7 @@ public final class AxeAbilityListener implements Listener {
 
     public static void applyStunAttributes(Player player) {
         lockedLocations.put(player.getUniqueId(), player.getLocation());
+        player.setSprinting(false);
 
         final AttributeInstance speedAttr = player.getAttribute(Attribute.MOVEMENT_SPEED);
         if (speedAttr != null) {
@@ -156,6 +157,14 @@ public final class AxeAbilityListener implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         removeStunAttributes(event.getPlayer());
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onStunnedSprint(org.bukkit.event.player.PlayerToggleSprintEvent event) {
+        if (event.isSprinting() && isStunned(event.getPlayer())) {
+            event.setCancelled(true);
+            event.getPlayer().setSprinting(false);
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
