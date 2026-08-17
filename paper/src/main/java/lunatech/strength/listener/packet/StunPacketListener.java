@@ -19,8 +19,7 @@ public final class StunPacketListener extends PacketListenerAbstract {
 
     @Override
     public void onPacketReceive(PacketReceiveEvent event) {
-        if (event.getUser() == null) return;
-        final Object playerObj = event.getUser().getSpigotPlayer();
+        final Object playerObj = event.getPlayer();
         if (!(playerObj instanceof Player player)) return;
 
         if (!AxeAbilityListener.isStunned(player)) return;
