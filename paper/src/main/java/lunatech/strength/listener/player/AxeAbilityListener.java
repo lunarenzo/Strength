@@ -128,7 +128,6 @@ public final class AxeAbilityListener implements Listener {
             attr.removeModifier(STUN_MODIFIER_KEY);
         }
         player.removePotionEffect(PotionEffectType.SLOWNESS);
-        player.removePotionEffect(PotionEffectType.JUMP_BOOST);
     }
 
     @EventHandler
@@ -138,11 +137,13 @@ public final class AxeAbilityListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onPlayerMove(PlayerMoveEvent event) {
-        if (isStunned(event.getPlayer())) {
+        final Player player = event.getPlayer();
+        if (isStunned(player)) {
             final Location from = event.getFrom();
             final Location to = event.getTo();
-            // Cancel horizontal translation and spacebar jumping while keeping standing pose
-            if (from.getX() != to.getX() || from.getZ() != to.getZ() || to.getY() > from.getY()) {
+            if (to.getY() > from.getY()) {
+                // Ground clamp upward velocity natively to block spacebar jumping without flinging
+                player.setVelocity(player.getVelocity().setY(0.0));
                 event.setCancelled(true);
             }
         }
@@ -246,13 +247,12 @@ public final class AxeAbilityListener implements Listener {
                     // Reset passive charge
                     criticalHitsMap.put(damagerUuid, 0);
 
-                    // Apply Seismic Stun to victim (Server & Client synchronized AttributeModifier & Jump Boost 250)
+                    // Apply Seismic Stun to victim (Server & Client synchronized AttributeModifier & Y velocity clamp)
                     final long stunEndTime = System.currentTimeMillis() + (settings.stunDurationSeconds * 1000L);
                     stunnedPlayers.put(victimUuid, stunEndTime);
                     applyStunAttribute(victim);
 
                     victim.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, settings.stunDurationSeconds * 20, 255, false, false, true));
-                    victim.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, settings.stunDurationSeconds * 20, 250, false, false, true));
 
                     // Particles & Sound
                     victim.getWorld().spawnParticle(Particle.CRIT, victim.getLocation().add(0, 1.0, 0), 20, 0.3, 0.5, 0.3, 0.1);
