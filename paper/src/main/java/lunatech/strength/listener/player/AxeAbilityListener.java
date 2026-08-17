@@ -101,11 +101,9 @@ public final class AxeAbilityListener implements Listener {
         if (isStunned(event.getPlayer())) {
             final Location from = event.getFrom();
             final Location to = event.getTo();
-            if (from.getX() != to.getX() || from.getY() != to.getY() || from.getZ() != to.getZ()) {
-                final Location target = from.clone();
-                target.setPitch(to.getPitch());
-                target.setYaw(to.getYaw());
-                event.setTo(target);
+            // Cancel horizontal movement and upward jumping (spacebar)
+            if (from.getX() != to.getX() || from.getZ() != to.getZ() || to.getY() > from.getY()) {
+                event.setCancelled(true);
             }
         }
     }
@@ -211,6 +209,9 @@ public final class AxeAbilityListener implements Listener {
                     // Apply Seismic Stun to victim
                     final long stunEndTime = System.currentTimeMillis() + (settings.stunDurationSeconds * 1000L);
                     stunnedPlayers.put(victimUuid, stunEndTime);
+
+                    // Client-side zero movement speed via SLOWNESS 255 (no JUMP_BOOST to prevent vertical flinging)
+                    victim.addPotionEffect(new org.bukkit.potion.PotionEffect(PotionEffectType.SLOWNESS, settings.stunDurationSeconds * 20, 255, false, false, true));
 
                     // Particles & Sound
                     victim.getWorld().spawnParticle(Particle.CRIT, victim.getLocation().add(0, 1.0, 0), 20, 0.3, 0.5, 0.3, 0.1);
