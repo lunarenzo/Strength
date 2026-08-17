@@ -135,19 +135,7 @@ public final class AxeAbilityListener implements Listener {
         removeStunAttribute(event.getPlayer());
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onPlayerMove(PlayerMoveEvent event) {
-        final Player player = event.getPlayer();
-        if (isStunned(player)) {
-            final Location from = event.getFrom();
-            final Location to = event.getTo();
-            if (to.getY() > from.getY()) {
-                // Ground clamp upward velocity natively to block spacebar jumping without flinging
-                player.setVelocity(player.getVelocity().setY(0.0));
-                event.setCancelled(true);
-            }
-        }
-    }
+    // Note: Player movement packet cancellation is handled at protocol layer by StunPacketListener
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onStunnedInteract(PlayerInteractEvent event) {
