@@ -111,20 +111,19 @@ public final class AxeAbilityListener implements Listener {
     }
 
     public static void applyStunAttribute(Player player) {
-        final AttributeInstance attr = player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED);
+        final AttributeInstance attr = player.getAttribute(Attribute.MOVEMENT_SPEED);
         if (attr != null) {
             attr.removeModifier(STUN_MODIFIER_KEY);
-            attr.addTransientModifier(new AttributeModifier(
+            attr.addModifier(new AttributeModifier(
                 STUN_MODIFIER_KEY,
                 -1.0,
-                AttributeModifier.Operation.ADD_SCALED_MULTIPLICATIVE,
-                EquipmentSlotGroup.ANY
+                AttributeModifier.Operation.ADD_SCALAR
             ));
         }
     }
 
     public static void removeStunAttribute(Player player) {
-        final AttributeInstance attr = player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED);
+        final AttributeInstance attr = player.getAttribute(Attribute.MOVEMENT_SPEED);
         if (attr != null) {
             attr.removeModifier(STUN_MODIFIER_KEY);
         }
