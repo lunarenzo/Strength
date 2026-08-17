@@ -1,26 +1,21 @@
 package lunatech.strength.listener.packet;
 
-import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListenerAbstract;
 import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import com.github.retrooper.packetevents.event.PacketReceiveEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPlayerPositionAndLook;
+import com.github.retrooper.packetevents.util.Vector3d;
+import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPlayerPosition;
+import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPlayerPositionAndRotation;
 import lunatech.strength.listener.player.AxeAbilityListener;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-
 /**
- * Protocol-level PacketEvents listener that intercepts incoming movement packets for stunned players.
- * Instantly kills client-side jump physics by sending debounced server-side position confirmations.
+ * Protocol-level PacketEvents listener that rewrites movement packets for stunned players.
+ * Eliminates outbound teleport replies completely, eliminating any chance of packet rate kicks.
  */
 public final class StunPacketListener extends PacketListenerAbstract {
-
-    private final Map<UUID, Long> lastTeleportSentMap = new ConcurrentHashMap<>();
 
     public StunPacketListener() {
         super(PacketListenerPriority.HIGH);
@@ -31,45 +26,23 @@ public final class StunPacketListener extends PacketListenerAbstract {
         final Object playerObj = event.getPlayer();
         if (!(playerObj instanceof Player player)) return;
 
-        final UUID uuid = player.getUniqueId();
-        if (!AxeAbilityListener.isStunned(player)) {
-            lastTeleportSentMap.remove(uuid);
-            return;
-        }
+        if (!AxeAbilityListener.isStunned(player)) return;
 
         final var type = event.getPacketType();
-        if (type == PacketType.Play.Client.PLAYER_POSITION
-            || type == PacketType.Play.Client.PLAYER_POSITION_AND_ROTATION
-            || type == PacketType.Play.Client.PLAYER_FLYING) {
+        final Location serverLoc = player.getLocation();
+        final Vector3d pos = new Vector3d(serverLoc.getX(), serverLoc.getY(), serverLoc.getZ());
 
-            // Cancel client movement/jump attempt
-            event.setCancelled(true);
-
-            // Skip running teleport math for raw FLYING packets
-            if (type == PacketType.Play.Client.PLAYER_FLYING) {
-                return;
-            }
-
-            // Rate-limit position correction packets (max once per 250ms) to prevent packet spam kicks
-            final long now = System.currentTimeMillis();
-            final long lastSent = lastTeleportSentMap.getOrDefault(uuid, 0L);
-            if (now - lastSent >= 250L) {
-                lastTeleportSentMap.put(uuid, now);
-
-                final Location loc = player.getLocation();
-                final WrapperPlayServerPlayerPositionAndLook positionPacket = new WrapperPlayServerPlayerPositionAndLook(
-                    loc.getX(),
-                    loc.getY(),
-                    loc.getZ(),
-                    loc.getYaw(),
-                    loc.getPitch(),
-                    (byte) 0,
-                    0,
-                    false
-                );
-
-                PacketEvents.getAPI().getPlayerManager().sendPacket(player, positionPacket);
-            }
+        if (type == PacketType.Play.Client.PLAYER_POSITION) {
+            final WrapperPlayClientPlayerPosition packet = new WrapperPlayClientPlayerPosition(event);
+            packet.setPosition(pos);
+            packet.setOnGround(true);
+        } else if (type == PacketType.Play.Client.PLAYER_POSITION_AND_ROTATION) {
+            final WrapperPlayClientPlayerPositionAndRotation packet = new WrapperPlayClientPlayerPositionAndRotation(event);
+            packet.setPosition(pos);
+            packet.setOnGround(true);
+            // Yaw and pitch are preserved so head turning stays 100% smooth!
         }
+
+        // PacketType.Play.Client.PLAYER_FLYING is left untouched to keep network heartbeat alive!
     }
 }
