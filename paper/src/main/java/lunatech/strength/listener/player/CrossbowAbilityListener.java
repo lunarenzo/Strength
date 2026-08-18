@@ -146,12 +146,22 @@ public final class CrossbowAbilityListener implements Listener {
             }
         }
 
-        // 3. Tranquilizer Ultimate Shot Trigger
+        // 3. Crossbow Ultimate Shot Trigger
         final boolean isUltArrow = arrow.getPersistentDataContainer().has(CROSSBOW_ULT_KEY, PersistentDataType.BYTE)
             || arrow.hasMetadata("CrossbowUltimateArrow");
         if (isUltArrow) {
             final UUID victimUuid = victim.getUniqueId();
             final Location freezeLoc = victim.getLocation().clone();
+
+            // Spawn invisible ArmorStand vehicle to natively disable WASD vehicle movement
+            final org.bukkit.entity.ArmorStand vehicle = victim.getWorld().spawn(freezeLoc, org.bukkit.entity.ArmorStand.class, as -> {
+                as.setVisible(false);
+                as.setMarker(true);
+                as.setGravity(false);
+                as.setSmall(true);
+                as.setPersistent(false);
+            });
+            vehicle.addPassenger(victim);
 
             victim.setVelocity(new Vector(0, 0, 0));
             immobilizedPlayers.put(victimUuid, freezeLoc);
@@ -164,7 +174,7 @@ public final class CrossbowAbilityListener implements Listener {
                 }
             });
 
-            new CrossbowImmobilizeTask(victim, settings.immobilizeDurationSeconds)
+            new CrossbowImmobilizeTask(victim, vehicle, settings.immobilizeDurationSeconds)
                 .runTaskTimer(plugin, 0L, 1L);
 
             victim.getWorld().playSound(victim.getLocation(), Sound.ITEM_CROSSBOW_HIT, 1.0f, 0.5f);
