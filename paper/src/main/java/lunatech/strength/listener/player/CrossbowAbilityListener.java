@@ -124,12 +124,12 @@ public final class CrossbowAbilityListener implements Listener {
         if (now - lastHit >= 250L) {
             lastPassiveHitTime.put(shooterUuid, now);
 
-            // 2. Passive Hit Tracker: Every Nth shot hit deals Nx damage multiplier
+            // 2. Passive Hit Tracker: Every 3rd shot hit deals 2x damage
             final int currentPassiveHits = passiveHits.merge(shooterUuid, 1, Integer::sum);
-            if (currentPassiveHits >= settings.passiveHitsRequired) {
+            if (currentPassiveHits >= 3) {
                 passiveHits.put(shooterUuid, 0); // reset count
 
-                event.setDamage(event.getDamage() * settings.passiveDamageMultiplier);
+                event.setDamage(event.getDamage() * 2.0);
                 shooter.sendMessage(ColorParser.of(settings.passiveTriggeredShooterMessage).build());
 
                 // 3. Ultimate Charge Increment
