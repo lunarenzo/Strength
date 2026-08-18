@@ -21,6 +21,7 @@ import lunatech.strength.task.ShieldUltimateTask;
 import lunatech.strength.task.SwordUltimateTask;
 import io.github.milkdrinkers.colorparser.paper.ColorParser;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.Tag;
