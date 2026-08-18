@@ -183,14 +183,17 @@ public final class CrossbowAbilityListener implements Listener {
         }
     }
 
-    // Edge Case 3: Lock BOTH position (X, Y, Z) and screen rotation (Yaw, Pitch) in place so immobilized player cannot turn POV
+    // Lock position (X, Y, Z) while preserving smooth mouse camera look (Yaw, Pitch)
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onPlayerMove(@NotNull PlayerMoveEvent event) {
         final UUID uuid = event.getPlayer().getUniqueId();
         final Location freezeLoc = immobilizedPlayers.get(uuid);
 
         if (freezeLoc != null) {
-            event.setTo(freezeLoc.clone());
+            final Location target = freezeLoc.clone();
+            target.setYaw(event.getTo().getYaw());
+            target.setPitch(event.getTo().getPitch());
+            event.setTo(target);
         }
     }
 
