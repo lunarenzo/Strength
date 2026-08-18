@@ -264,7 +264,13 @@ public final class AbilityCommand extends Command {
         final CrossbowConfig settings = plugin.getConfigHandler().getCrossbowConfig();
         final int currentStrength = strengthService.getStrength(player);
 
-        // 1. Validate Strength Requirement
+        // 1. Validate Weapon Held Requirement
+        if (player.getInventory().getItemInMainHand().getType() != Material.CROSSBOW) {
+            player.sendMessage(ColorParser.of("<red>You must be holding a Crossbow to activate your ultimate!</red>").build());
+            return;
+        }
+
+        // 2. Validate Strength Requirement
         if (currentStrength < settings.ultimateStrengthRequired) {
             player.sendMessage(
                 ColorParser.of("<red>You do not have enough strength to activate your ultimate! (Required: <req>, Current: <current>)</red>")
@@ -275,7 +281,7 @@ public final class AbilityCommand extends Command {
             return;
         }
 
-        // 2. Validate Hit Charge Requirement
+        // 3. Validate Hit Charge Requirement
         final UUID uuid = player.getUniqueId();
         final int currentCharge = CrossbowAbilityListener.ultimateHits.getOrDefault(uuid, 0);
         if (currentCharge < settings.ultimateHitsRequired) {
@@ -288,7 +294,7 @@ public final class AbilityCommand extends Command {
             return;
         }
 
-        // 3. Clear Ultimate Charge and prime crossbow
+        // 4. Clear Ultimate Charge and prime crossbow
         CrossbowAbilityListener.ultimateHits.put(uuid, 0);
         CrossbowAbilityListener.crossbowUltimatePrimed.put(uuid, true);
 

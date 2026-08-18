@@ -110,21 +110,13 @@ public final class CrossbowAbilityListener implements Listener {
         final UUID shooterUuid = shooter.getUniqueId();
         final CrossbowConfig settings = plugin.getConfigHandler().getCrossbowConfig();
 
-        // 1. Back-Facing Slowness Check
-        final Vector sLook = shooter.getLocation().getDirection().setY(0).normalize();
-        final Vector vLook = victim.getLocation().getDirection().setY(0).normalize();
-        if (sLook.dot(vLook) > 0.0) {
-            victim.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 60, 0, true, true));
-            shooter.sendMessage(ColorParser.of(settings.slownessAppliedMessage).build());
-        }
-
         // Edge Case 2: Multishot Cooldown Check (5 ticks / 250ms) to prevent single Multishot burst from multi-incrementing passive
         final long now = System.currentTimeMillis();
         final long lastHit = lastPassiveHitTime.getOrDefault(shooterUuid, 0L);
         if (now - lastHit >= 250L) {
             lastPassiveHitTime.put(shooterUuid, now);
 
-            // 2. Passive Hit Tracker: Every Nth shot hit deals configurable damage multiplier
+            // 1. Passive Hit Tracker: Every Nth shot hit deals configurable damage multiplier
             final int currentPassiveHits = passiveHits.merge(shooterUuid, 1, Integer::sum);
             if (currentPassiveHits >= settings.passiveHitsRequired) {
                 passiveHits.put(shooterUuid, 0); // reset count
@@ -132,7 +124,7 @@ public final class CrossbowAbilityListener implements Listener {
                 event.setDamage(event.getDamage() * settings.passiveDamageMultiplier);
                 shooter.sendMessage(ColorParser.of(settings.passiveTriggeredShooterMessage).build());
 
-                // 3. Ultimate Charge Increment
+                // 2. Ultimate Charge Increment
                 final int currentUltHits = ultimateHits.getOrDefault(shooterUuid, 0);
                 final int targetUltHits = settings.ultimateHitsRequired;
                 if (currentUltHits < targetUltHits) {
@@ -154,7 +146,7 @@ public final class CrossbowAbilityListener implements Listener {
             }
         }
 
-        // 4. Tranquilizer Ultimate Shot Trigger
+        // 3. Tranquilizer Ultimate Shot Trigger
         final boolean isUltArrow = arrow.getPersistentDataContainer().has(CROSSBOW_ULT_KEY, PersistentDataType.BYTE)
             || arrow.hasMetadata("CrossbowUltimateArrow");
         if (isUltArrow) {

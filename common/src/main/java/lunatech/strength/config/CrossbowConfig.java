@@ -42,13 +42,13 @@ public class CrossbowConfig implements VersionedConfig {
     public String ultimateChargeProgressMessage = "<gray>Ultimate Charge: <gold>{charge}/{target}</gold> passive hits</gray>";
 
     @Comment("Message sent when crossbow ultimate is activated")
-    public String ultimateActivatedMessage = "<gold><bold>TRANQUILIZER SHOT PRIMED!</bold> Your next arrow shot on an enemy will immobilize them!</gold>";
+    public String ultimateActivatedMessage = "<gold><bold>CROSSBOW ULTIMATE ACTIVATED!</bold> Your next arrow shot on an enemy will immobilize them!</gold>";
 
     @Comment("Message sent to the shooter when ultimate hits an enemy")
-    public String immobilizedShooterMessage = "<green><bold>TRANQUILIZER HIT!</bold> Target immobilized!</green>";
+    public String immobilizedShooterMessage = "<green><bold>CROSSBOW ULTIMATE HIT!</bold> Target immobilized!</green>";
 
-    @Comment("Message sent to the victim when hit by tranquilizer shot")
-    public String immobilizedVictimMessage = "<red><bold>IMMOBILIZED! You are struck by a tranquilizer shot!</bold></red>";
+    @Comment("Message sent to the victim when hit by ultimate shot")
+    public String immobilizedVictimMessage = "<red><bold>IMMOBILIZED! You are struck by Crossbow Ultimate!</bold></red>";
 
     @Comment("Message sent to the immobilized player when attempting to move or teleport")
     public String trapEscapeBlockedMessage = "<red>You are immobilized and cannot move or teleport!</red>";
