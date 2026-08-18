@@ -13,6 +13,12 @@ public class CrossbowConfig implements VersionedConfig {
         return configVersion;
     }
 
+    @Comment("Number of valid crossbow arrow hits required to trigger passive damage multiplier")
+    public int passiveHitsRequired = 3;
+
+    @Comment("Damage multiplier applied when passive is triggered")
+    public double passiveDamageMultiplier = 2.0;
+
     @Comment("Strength required to activate Ultimate")
     public int ultimateStrengthRequired = 5;
 
