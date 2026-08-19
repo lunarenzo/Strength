@@ -25,6 +25,9 @@ public class BowConfig implements VersionedConfig {
     @Comment("Hits required using bow to charge Ultimate")
     public int ultimateHitsRequired = 10;
 
+    @Comment("Cooldown in seconds for the Bow Ultimate")
+    public int ultimateCooldownSeconds = 60;
+
     @Comment("The material of the ultimate beam item display")
     public String beamMaterial = "NAUTILUS_SHELL";
 
@@ -64,4 +67,7 @@ public class BowConfig implements VersionedConfig {
 
     @Comment("Message sent when bow ultimate is activated")
     public String ultimateActivatedMessage = "<gold><bold>BOW ULTIMATE ACTIVATED!</bold> Preparing Sonic Blast Beams...</gold>";
+
+    @Comment("Message sent when bow ultimate is on cooldown")
+    public String ultimateCooldownMessage = "<red>Your Ultimate is on cooldown for another <seconds>s!</red>";
 }

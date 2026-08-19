@@ -43,4 +43,9 @@ public class ListenerHandler implements Reloadable {
             plugin.getServer().getPluginManager().registerEvents(listener, plugin);
         }
     }
+
+    @Override
+    public void onDisable(AbstractStrength plugin) {
+        lunatech.strength.listener.player.BowAbilityListener.cleanupActiveCobwebs();
+    }
 }
