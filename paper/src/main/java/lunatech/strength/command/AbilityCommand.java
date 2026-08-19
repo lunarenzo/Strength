@@ -191,7 +191,7 @@ public final class AbilityCommand extends Command {
 
         // 1. Validate Weapon Held Requirement
         if (player.getInventory().getItemInMainHand().getType() != Material.BOW) {
-            player.sendMessage(ColorParser.of("<red>You must be holding a Bow to activate your ultimate!</red>").build());
+            player.sendMessage(ColorParser.of(settings.mustHoldBowMessage).build());
             return;
         }
 
@@ -203,7 +203,8 @@ public final class AbilityCommand extends Command {
         if (now - lastUse < cooldownMillis) {
             final long secondsLeft = (cooldownMillis - (now - lastUse)) / 1000L + 1;
             player.sendMessage(
-                ColorParser.of(settings.ultimateCooldownMessage)
+                ColorParser.of(settings.ultimateCooldownMessage
+                    .replace("{seconds}", String.valueOf(secondsLeft)))
                     .with("seconds", String.valueOf(secondsLeft))
                     .build()
             );
@@ -213,7 +214,9 @@ public final class AbilityCommand extends Command {
         // 3. Validate Strength Requirement
         if (currentStrength < settings.ultimateStrengthRequired) {
             player.sendMessage(
-                ColorParser.of("<red>You do not have enough strength to activate your ultimate! (Required: <req>, Current: <current>)</red>")
+                ColorParser.of(settings.notEnoughStrengthMessage
+                    .replace("{req}", String.valueOf(settings.ultimateStrengthRequired))
+                    .replace("{current}", String.valueOf(currentStrength)))
                     .with("req", String.valueOf(settings.ultimateStrengthRequired))
                     .with("current", String.valueOf(currentStrength))
                     .build()
@@ -225,7 +228,9 @@ public final class AbilityCommand extends Command {
         final int currentCharge = BowAbilityListener.ultimateHits.getOrDefault(uuid, 0);
         if (currentCharge < settings.ultimateHitsRequired) {
             player.sendMessage(
-                ColorParser.of("<red>Your ultimate is not charged yet! (Required: <req>, Current: <current> hits)</red>")
+                ColorParser.of(settings.notChargedMessage
+                    .replace("{req}", String.valueOf(settings.ultimateHitsRequired))
+                    .replace("{current}", String.valueOf(currentCharge)))
                     .with("req", String.valueOf(settings.ultimateHitsRequired))
                     .with("current", String.valueOf(currentCharge))
                     .build()

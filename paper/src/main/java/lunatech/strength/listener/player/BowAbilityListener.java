@@ -181,7 +181,9 @@ public final class BowAbilityListener implements Listener {
                     shooter.playSound(shooter.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.2f);
                 } else {
                     shooter.sendMessage(
-                        ColorParser.of(settings.ultimateChargeProgressMessage)
+                        ColorParser.of(settings.ultimateChargeProgressMessage
+                            .replace("{charge}", String.valueOf(nextUltHits))
+                            .replace("{target}", String.valueOf(targetUltHits)))
                             .with("charge", String.valueOf(nextUltHits))
                             .with("target", String.valueOf(targetUltHits))
                             .build()
