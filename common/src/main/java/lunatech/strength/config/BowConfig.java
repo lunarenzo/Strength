@@ -63,11 +63,20 @@ public class BowConfig implements VersionedConfig {
     public String ultimateChargedMessage = "<green><bold>Bow Ultimate is fully charged! Use /ability to activate!</bold></green>";
 
     @Comment("Message sent indicating ultimate charge progress")
-    public String ultimateChargeProgressMessage = "<gray>Ultimate Charge: <gold>{charge}/{target}</gold></gray>";
+    public String ultimateChargeProgressMessage = "<gray>Ultimate Charge: <gold><charge>/<target></gold></gray>";
 
     @Comment("Message sent when bow ultimate is activated")
     public String ultimateActivatedMessage = "<gold><bold>BOW ULTIMATE ACTIVATED!</bold> Preparing Sonic Blast Beams...</gold>";
 
     @Comment("Message sent when bow ultimate is on cooldown")
     public String ultimateCooldownMessage = "<red>Your Ultimate is on cooldown for another <seconds>s!</red>";
+
+    @Comment("Message sent when player is not holding a Bow for ultimate")
+    public String mustHoldBowMessage = "<red>You must be holding a Bow to activate your ultimate!</red>";
+
+    @Comment("Message sent when player does not have enough strength for ultimate")
+    public String notEnoughStrengthMessage = "<red>You do not have enough strength to activate your ultimate! (Required: <req>, Current: <current>)</red>";
+
+    @Comment("Message sent when player ultimate is not fully charged")
+    public String notChargedMessage = "<red>Your ultimate is not charged yet! (Required: <req>, Current: <current> hits)</red>";
 }
