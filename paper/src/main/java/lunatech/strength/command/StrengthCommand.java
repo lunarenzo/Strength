@@ -47,7 +47,14 @@ final class StrengthCommand extends Command {
                     .withPermission(BASE_PERM + ".changeweapon")
                     .withArguments(
                         new EntitySelectorArgument.OnePlayer("target"),
-                        new StringArgument("weapon").replaceSuggestions(ArgumentSuggestions.stringCollection(info -> List.of("sword", "axe", "bow", "crossbow", "trident", "mace", "shield")))
+                        new StringArgument("weapon").replaceSuggestions(
+                            ArgumentSuggestions.stringCollection(info ->
+                                plugin.getConfigHandler().getConfig().weapons.availableWeapons
+                                    .stream()
+                                    .map(String::toLowerCase)
+                                    .toList()
+                            )
+                        )
                     )
                     .executes(this::executorChangeWeapon),
                 new CommandAPICommand("set")
@@ -126,7 +133,10 @@ final class StrengthCommand extends Command {
     private void executorChangeWeapon(CommandSender sender, CommandArguments args) {
         final Player target = (Player) args.get("target");
         final String weapon = ((String) args.get("weapon")).toLowerCase();
-        final List<String> availableWeapons = List.of("sword", "axe", "bow", "crossbow", "trident", "mace", "shield");
+        final List<String> availableWeapons = plugin.getConfigHandler().getConfig().weapons.availableWeapons
+            .stream()
+            .map(String::toLowerCase)
+            .toList();
 
         if (target == null) {
             sender.sendMessage(ColorParser.of("<red>Target player not found or offline!</red>").build());
