@@ -121,43 +121,18 @@ public final class BowAbilityListener implements Listener {
         final UUID shooterUuid = shooter.getUniqueId();
         final BowConfig settings = plugin.getConfigHandler().getBowConfig();
 
-        // 1. Passive hit tracking: Increment hits
-        final int currentPassiveHits = passiveHits.merge(shooterUuid, 1, Integer::sum);
-        if (currentPassiveHits >= settings.passiveHitsRequired) {
-            passiveHits.put(shooterUuid, 0); // Reset count
-            bowPassiveReady.put(shooterUuid, true); // Next valid shot will trap the target in a cobweb
-
-            shooter.sendMessage(ColorParser.of(settings.passiveReadyShooterMessage).build());
-            shooter.playSound(shooter.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
-        }
-
-        // 2. Ultimate hit tracking: Increment hits
-        final int currentUltHits = ultimateHits.getOrDefault(shooterUuid, 0);
-        final int targetUltHits = settings.ultimateHitsRequired;
-        if (currentUltHits < targetUltHits) {
-            final int nextUltHits = currentUltHits + 1;
-            ultimateHits.put(shooterUuid, nextUltHits);
-
-            if (nextUltHits == targetUltHits) {
-                shooter.sendMessage(ColorParser.of(settings.ultimateChargedMessage).build());
-                shooter.playSound(shooter.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.2f);
-            } else {
-                shooter.sendMessage(
-                    ColorParser.of(settings.ultimateChargeProgressMessage)
-                        .with("charge", String.valueOf(nextUltHits))
-                        .with("target", String.valueOf(targetUltHits))
-                        .build()
-                );
-            }
-        }
-
-        // 3. Passive Cobweb Trap Trigger
         final boolean isPassiveArrow = arrow.getPersistentDataContainer().has(BOW_PASSIVE_KEY, PersistentDataType.BYTE)
             || arrow.hasMetadata("BowPassiveArrow");
+
         if (isPassiveArrow) {
-            // Edge Case 2: 1-tick delay to allow Minecraft knockback velocity calculation to complete first
+            // Nullify knockback velocity (including Punch I/II or full-charge bow velocity) so target doesn't fly out of trap
+            victim.setVelocity(new org.bukkit.util.Vector(0, 0, 0));
+
+            // Edge Case 2: 1-tick delay to anchor target directly inside post-hit chest cobweb
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
                 if (!victim.isOnline()) return;
+
+                victim.setVelocity(new org.bukkit.util.Vector(0, 0, 0));
 
                 // Select target's updated post-knockback chest block
                 final Location victimLoc = victim.getLocation();
@@ -183,6 +158,36 @@ public final class BowAbilityListener implements Listener {
                     }, settings.passiveCobwebDurationSeconds * 20L);
                 }
             }, 1L);
+        } else {
+            // 1. Passive hit tracking: Increment hits (ONLY for normal non-passive bow hits)
+            final int currentPassiveHits = passiveHits.merge(shooterUuid, 1, Integer::sum);
+            if (currentPassiveHits >= settings.passiveHitsRequired) {
+                passiveHits.put(shooterUuid, 0); // Reset count
+                bowPassiveReady.put(shooterUuid, true); // Next valid shot will trap the target in a cobweb
+
+                shooter.sendMessage(ColorParser.of(settings.passiveReadyShooterMessage).build());
+                shooter.playSound(shooter.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
+            }
+
+            // 2. Ultimate hit tracking: Increment hits
+            final int currentUltHits = ultimateHits.getOrDefault(shooterUuid, 0);
+            final int targetUltHits = settings.ultimateHitsRequired;
+            if (currentUltHits < targetUltHits) {
+                final int nextUltHits = currentUltHits + 1;
+                ultimateHits.put(shooterUuid, nextUltHits);
+
+                if (nextUltHits == targetUltHits) {
+                    shooter.sendMessage(ColorParser.of(settings.ultimateChargedMessage).build());
+                    shooter.playSound(shooter.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.2f);
+                } else {
+                    shooter.sendMessage(
+                        ColorParser.of(settings.ultimateChargeProgressMessage)
+                            .with("charge", String.valueOf(nextUltHits))
+                            .with("target", String.valueOf(targetUltHits))
+                            .build()
+                    );
+                }
+            }
         }
     }
 
