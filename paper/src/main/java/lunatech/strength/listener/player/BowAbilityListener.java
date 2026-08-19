@@ -61,7 +61,12 @@ public final class BowAbilityListener implements Listener {
             return;
         }
 
-        // Edge Case 1: Verify shooter is holding a Bow and has Bow weapon role assigned
+        // Verify the item used is a standard Bow (not a Crossbow)
+        if (event.getBow() == null || event.getBow().getType() != Material.BOW) {
+            return;
+        }
+
+        // Edge Case 1: Verify shooter has Bow weapon role assigned
         final String assigned = strengthService.getAssignedWeapon(shooter);
         if (!"bow".equalsIgnoreCase(assigned)) {
             return;
