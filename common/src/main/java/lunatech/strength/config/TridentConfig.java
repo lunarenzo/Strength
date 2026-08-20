@@ -31,6 +31,9 @@ public class TridentConfig implements VersionedConfig {
     @Comment("Ultimate duration in ticks (20 ticks = 1 second)")
     public int ultimateDurationTicks = 100;
 
+    @Comment("Custom model data for yellow lightning bolt display entity")
+    public int yellowLightningCustomModelData = 12350;
+
     // Messages
     @Comment("Message sent when trident passive is triggered")
     public String passiveTriggeredMessage = "<yellow><bold>Trident Passive triggered! Lightning struck!</bold></yellow>";
