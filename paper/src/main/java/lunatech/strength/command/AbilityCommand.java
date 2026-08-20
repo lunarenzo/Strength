@@ -253,10 +253,35 @@ public final class AbilityCommand extends Command {
         final ShieldConfig settings = plugin.getConfigHandler().getShieldConfig();
         final int currentStrength = strengthService.getStrength(player);
 
-        // 1. Validate Strength Requirement
+        // 1. Validate Weapon Held Requirement (Main hand or Offhand)
+        if (player.getInventory().getItemInMainHand().getType() != Material.SHIELD
+            && player.getInventory().getItemInOffHand().getType() != Material.SHIELD) {
+            player.sendMessage(ColorParser.of(settings.mustHoldShieldMessage).build());
+            return;
+        }
+
+        // 2. Validate Cooldown Requirement
+        final UUID uuid = player.getUniqueId();
+        final long now = System.currentTimeMillis();
+        final long lastUse = ShieldAbilityListener.ultimateCooldowns.getOrDefault(uuid, 0L);
+        final long cooldownMillis = settings.ultimateCooldownSeconds * 1000L;
+        if (now - lastUse < cooldownMillis) {
+            final long secondsLeft = (cooldownMillis - (now - lastUse)) / 1000L + 1;
+            player.sendMessage(
+                ColorParser.of(settings.ultimateCooldownMessage
+                    .replace("{seconds}", String.valueOf(secondsLeft)))
+                    .with("seconds", String.valueOf(secondsLeft))
+                    .build()
+            );
+            return;
+        }
+
+        // 3. Validate Strength Requirement
         if (currentStrength < settings.ultimateStrengthRequired) {
             player.sendMessage(
-                ColorParser.of("<red>You do not have enough strength to activate your ultimate! (Required: <req>, Current: <current>)</red>")
+                ColorParser.of(settings.notEnoughStrengthMessage
+                    .replace("{req}", String.valueOf(settings.ultimateStrengthRequired))
+                    .replace("{current}", String.valueOf(currentStrength)))
                     .with("req", String.valueOf(settings.ultimateStrengthRequired))
                     .with("current", String.valueOf(currentStrength))
                     .build()
@@ -264,12 +289,13 @@ public final class AbilityCommand extends Command {
             return;
         }
 
-        // 2. Validate Hit Charge Requirement
-        final UUID uuid = player.getUniqueId();
+        // 4. Validate Hit Charge Requirement
         final int currentCharge = ShieldAbilityListener.ultimateHits.getOrDefault(uuid, 0);
         if (currentCharge < settings.ultimateHitsRequired) {
             player.sendMessage(
-                ColorParser.of("<red>Your ultimate is not charged yet! (Required: <req>, Current: <current> blocks)</red>")
+                ColorParser.of(settings.notChargedMessage
+                    .replace("{req}", String.valueOf(settings.ultimateHitsRequired))
+                    .replace("{current}", String.valueOf(currentCharge)))
                     .with("req", String.valueOf(settings.ultimateHitsRequired))
                     .with("current", String.valueOf(currentCharge))
                     .build()
@@ -277,10 +303,11 @@ public final class AbilityCommand extends Command {
             return;
         }
 
-        // 3. Clear Ultimate Charge
+        // 5. Clear Ultimate Charge and record cooldown timestamp
         ShieldAbilityListener.ultimateHits.put(uuid, 0);
+        ShieldAbilityListener.ultimateCooldowns.put(uuid, now);
 
-        // 4. Trigger Ability Task (Bubble Shield & God Mode task)
+        // 6. Trigger Ability Task (Bubble Shield & God Mode task)
         new ShieldUltimateTask(player, settings)
             .runTaskTimer(plugin, 0L, 1L);
 
