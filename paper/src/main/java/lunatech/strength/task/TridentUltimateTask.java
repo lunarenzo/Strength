@@ -71,26 +71,7 @@ public final class TridentUltimateTask extends BukkitRunnable {
                 center.getWorld().spawnParticle(Particle.CRIT, targetLoc.clone().add(0, 1, 0), 15, 0.5, 1.0, 0.5, 0.2);
                 center.getWorld().spawnParticle(Particle.ENCHANTED_HIT, targetLoc.clone().add(0, 1, 0), 15, 0.5, 1.0, 0.5, 0.2);
 
-                // 3. Optional 3D yellow lightning item display entity
-                if (settings.yellowLightningCustomModelData > 0) {
-                    center.getWorld().spawn(targetLoc, ItemDisplay.class, display -> {
-                        final ItemStack item = new ItemStack(Material.NAUTILUS_SHELL);
-                        final ItemMeta meta = item.getItemMeta();
-                        if (meta != null) {
-                            meta.setCustomModelData(settings.yellowLightningCustomModelData);
-                            item.setItemMeta(meta);
-                        }
-                        display.setItemStack(item);
-                        display.setBillboard(ItemDisplay.Billboard.CENTER);
-                        org.bukkit.Bukkit.getScheduler().runTaskLater(
-                            org.bukkit.plugin.java.JavaPlugin.getProvidingPlugin(getClass()),
-                            display::remove,
-                            15L
-                        );
-                    });
-                }
-
-                // 4. Apply damage and Slowness effect
+                // 3. Apply damage and Slowness effect
                 target.damage(settings.ultimateDamage, player);
                 target.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, settings.slownessDurationTicks, settings.slownessAmplifier));
                 target.getWorld().playSound(targetLoc, Sound.ENTITY_LIGHTNING_BOLT_IMPACT, 2.0f, 1.0f);

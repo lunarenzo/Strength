@@ -69,22 +69,6 @@ public final class TridentAbilityListener implements Listener {
             // Visual lightning effect (does not damage terrain or trigger fire/griefing)
             damagee.getWorld().strikeLightningEffect(damagee.getLocation());
 
-            // Spawn visual 3D yellow thunder bolt item display entity (if CustomModelData is configured)
-            if (settings.yellowLightningCustomModelData > 0) {
-                damagee.getWorld().spawn(damagee.getLocation(), org.bukkit.entity.ItemDisplay.class, display -> {
-                    final org.bukkit.inventory.ItemStack item = new org.bukkit.inventory.ItemStack(Material.NAUTILUS_SHELL);
-                    final org.bukkit.inventory.meta.ItemMeta meta = item.getItemMeta();
-                    if (meta != null) {
-                        meta.setCustomModelData(settings.yellowLightningCustomModelData);
-                        item.setItemMeta(meta);
-                    }
-                    display.setItemStack(item);
-                    display.setBillboard(org.bukkit.entity.Display.Billboard.CENTER);
-                    display.setInterpolationDuration(5);
-                    Bukkit.getScheduler().runTaskLater(plugin, display::remove, 15L);
-                });
-            }
-
             // Yellow lightning particles
             damagee.getWorld().spawnParticle(
                 org.bukkit.Particle.DUST,
