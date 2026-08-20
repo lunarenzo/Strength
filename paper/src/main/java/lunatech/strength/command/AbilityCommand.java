@@ -119,10 +119,40 @@ public final class AbilityCommand extends Command {
         final TridentConfig settings = plugin.getConfigHandler().getTridentConfig();
         final int currentStrength = strengthService.getStrength(player);
 
-        // 1. Validate Strength Requirement
+        // 1. Validate Weapon Held Requirement
+        if (player.getInventory().getItemInMainHand().getType() != Material.TRIDENT) {
+            player.sendMessage(ColorParser.of(settings.mustHoldTridentMessage).build());
+            return;
+        }
+
+        // 2. Validate Ground / Water Requirement (matching Poseidon Mod requirement)
+        if (!player.isOnGround() && !player.isInWater()) {
+            player.sendMessage(ColorParser.of(settings.mustBeOnGroundMessage).build());
+            return;
+        }
+
+        // 3. Validate Cooldown Requirement
+        final UUID uuid = player.getUniqueId();
+        final long now = System.currentTimeMillis();
+        final long lastUse = TridentAbilityListener.ultimateCooldowns.getOrDefault(uuid, 0L);
+        final long cooldownMillis = settings.ultimateCooldownSeconds * 1000L;
+        if (now - lastUse < cooldownMillis) {
+            final long secondsLeft = (cooldownMillis - (now - lastUse)) / 1000L + 1;
+            player.sendMessage(
+                ColorParser.of(settings.ultimateCooldownMessage
+                    .replace("{seconds}", String.valueOf(secondsLeft)))
+                    .with("seconds", String.valueOf(secondsLeft))
+                    .build()
+            );
+            return;
+        }
+
+        // 4. Validate Strength Requirement
         if (currentStrength < settings.ultimateStrengthRequired) {
             player.sendMessage(
-                ColorParser.of("<red>You do not have enough strength to activate your ultimate! (Required: <req>, Current: <current>)</red>")
+                ColorParser.of(settings.notEnoughStrengthMessage
+                    .replace("{req}", String.valueOf(settings.ultimateStrengthRequired))
+                    .replace("{current}", String.valueOf(currentStrength)))
                     .with("req", String.valueOf(settings.ultimateStrengthRequired))
                     .with("current", String.valueOf(currentStrength))
                     .build()
@@ -130,12 +160,13 @@ public final class AbilityCommand extends Command {
             return;
         }
 
-        // 2. Validate Hit Charge Requirement
-        final UUID uuid = player.getUniqueId();
+        // 5. Validate Hit Charge Requirement
         final int currentCharge = TridentAbilityListener.ultimateHits.getOrDefault(uuid, 0);
         if (currentCharge < settings.ultimateHitsRequired) {
             player.sendMessage(
-                ColorParser.of("<red>Your ultimate is not charged yet! (Required: <req>, Current: <current> hits)</red>")
+                ColorParser.of(settings.notChargedMessage
+                    .replace("{req}", String.valueOf(settings.ultimateHitsRequired))
+                    .replace("{current}", String.valueOf(currentCharge)))
                     .with("req", String.valueOf(settings.ultimateHitsRequired))
                     .with("current", String.valueOf(currentCharge))
                     .build()
@@ -143,45 +174,14 @@ public final class AbilityCommand extends Command {
             return;
         }
 
-        // 3. Clear Ultimate Charge
+        // 6. Clear Ultimate Charge and record cooldown timestamp
         TridentAbilityListener.ultimateHits.put(uuid, 0);
+        TridentAbilityListener.ultimateCooldowns.put(uuid, now);
 
-        // 4. Trigger Ability Tasks
-        final Location loc = player.getLocation();
-        double terrainY = loc.getY();
-        final Location scan = loc.clone();
-        final int minHeight = scan.getWorld().getMinHeight();
-        while (scan.getY() > minHeight) {
-            if (scan.getBlock().getType().isSolid() || scan.getBlock().getType() == org.bukkit.Material.WATER) {
-                terrainY = scan.getY();
-                break;
-            }
-            scan.subtract(0, 1, 0);
-        }
-
-        final Location spawnLoc = loc.clone();
-        spawnLoc.setY(terrainY + 3.0);
-
-        final ArmorStand vehicle = player.getWorld().spawn(spawnLoc, ArmorStand.class, armorStand -> {
-            armorStand.setInvisible(true);
-            armorStand.setGravity(false);
-            armorStand.setMarker(true);
-            armorStand.setBasePlate(false);
-            armorStand.setSmall(true);
-            armorStand.setCanPickupItems(false);
-            armorStand.setCustomName("TridentWaveVehicle");
-            armorStand.setCustomNameVisible(false);
-        });
-
-        // Set rider
-        vehicle.addPassenger(player);
-
-        // Run repeating task to manage movement and water trail
-        new TridentUltimateTask(player, vehicle, settings)
+        // 7. Trigger Poseidon's Calling Ability Task
+        new TridentUltimateTask(player, settings)
             .runTaskTimer(plugin, 0L, 1L);
 
-        // Play feedback
-        player.playSound(player.getLocation(), Sound.ITEM_TRIDENT_RIPTIDE_1, 1.0f, 1.0f);
         player.sendMessage(ColorParser.of(settings.ultimateActivatedMessage).build());
     }
 
