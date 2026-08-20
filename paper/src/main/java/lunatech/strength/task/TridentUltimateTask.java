@@ -9,7 +9,6 @@ import org.bukkit.Sound;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ItemDisplay;
-import org.bukkit.entity.LightningBolt;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -63,8 +62,8 @@ public final class TridentUltimateTask extends BukkitRunnable {
 
                 final Location targetLoc = target.getLocation();
 
-                // 1. Visual-only lightning bolt strike (Paper API native)
-                center.getWorld().spawn(targetLoc, LightningBolt.class, bolt -> bolt.setVisualOnly(true));
+                // 1. Visual-only lightning bolt strike (does not damage terrain or trigger fire/griefing)
+                center.getWorld().strikeLightningEffect(targetLoc);
 
                 // 2. Yellow particle effects (RGB 255,220,0 dust + electric spark)
                 center.getWorld().spawnParticle(Particle.DUST, targetLoc.clone().add(0, 1, 0), 20, 0.4, 0.8, 0.4, yellowDust);
