@@ -14,7 +14,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerItemBreakEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerShieldDisableEvent;
+import io.papermc.paper.event.player.PlayerShieldDisableEvent;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
