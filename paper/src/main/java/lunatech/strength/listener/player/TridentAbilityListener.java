@@ -4,6 +4,7 @@ import lunatech.strength.Strength;
 import lunatech.strength.config.TridentConfig;
 import lunatech.strength.service.StrengthService;
 import io.github.milkdrinkers.colorparser.paper.ColorParser;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -61,6 +62,28 @@ public final class TridentAbilityListener implements Listener {
 
             // Visual lightning effect (does not damage terrain or trigger fire/griefing)
             damagee.getWorld().strikeLightningEffect(damagee.getLocation());
+
+            // Spawn visual 3D yellow thunder bolt item display entity (CustomModelData 12350)
+            damagee.getWorld().spawn(damagee.getLocation(), org.bukkit.entity.ItemDisplay.class, display -> {
+                final org.bukkit.inventory.ItemStack item = new org.bukkit.inventory.ItemStack(Material.NAUTILUS_SHELL);
+                final org.bukkit.inventory.meta.ItemMeta meta = item.getItemMeta();
+                if (meta != null) {
+                    meta.setCustomModelData(settings.yellowLightningCustomModelData);
+                    item.setItemMeta(meta);
+                }
+                display.setItemStack(item);
+                display.setBillboard(org.bukkit.entity.Display.Billboard.CENTER);
+                display.setInterpolationDuration(5);
+                Bukkit.getScheduler().runTaskLater(plugin, display::remove, 15L);
+            });
+
+            // Yellow lightning particles
+            damagee.getWorld().spawnParticle(
+                org.bukkit.Particle.DUST,
+                damagee.getLocation().add(0, 1, 0),
+                25, 0.4, 1.0, 0.4,
+                new org.bukkit.Particle.DustOptions(org.bukkit.Color.fromRGB(255, 220, 0), 1.8f)
+            );
 
             // Deal faked lightning damage
             damagee.damage(settings.passiveLightningDamage, damager);
