@@ -26,16 +26,17 @@ public final class TridentAbilityListener implements Listener {
     private final Strength plugin;
     private final StrengthService strengthService;
 
-    // Thread-safe maps for tracking hits. Cleaned up on PlayerQuitEvent to prevent structural memory leaks.
+    // Thread-safe maps for tracking hits and cooldowns. Cleaned up on PlayerQuitEvent to prevent structural memory leaks.
     public static final Map<UUID, Integer> passiveHits = new ConcurrentHashMap<>();
     public static final Map<UUID, Integer> ultimateHits = new ConcurrentHashMap<>();
+    public static final Map<UUID, Long> ultimateCooldowns = new ConcurrentHashMap<>();
 
     public TridentAbilityListener(@NotNull Strength plugin, @NotNull StrengthService strengthService) {
         this.plugin = plugin;
         this.strengthService = strengthService;
     }
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onEntityDamageByEntity(@NotNull EntityDamageByEntityEvent event) {
         if (!(event.getDamager() instanceof Player damager) || !(event.getEntity() instanceof Player damagee)) {
             return;
@@ -54,28 +55,35 @@ public final class TridentAbilityListener implements Listener {
 
         final TridentConfig settings = plugin.getConfigHandler().getTridentConfig();
 
-        // 1. Passive Trigger: Every N hits, summon a lightning bolt that deals extra damage
+        // 1. Passive Trigger: Every N hits, summon a lightning bolt and apply Nx damage multiplier
         final UUID damagerUuid = damager.getUniqueId();
         final int currentPassiveHits = passiveHits.merge(damagerUuid, 1, Integer::sum);
         if (currentPassiveHits >= settings.passiveHitsRequired) {
-            passiveHits.put(damagerUuid, 0); // Reset count
+            passiveHits.put(damagerUuid, 0); // Reset count back to 0 immediately
+
+            // Apply Nx damage multiplier + extra bonus damage
+            final double baseDamage = event.getDamage();
+            final double multipliedDamage = (baseDamage * settings.passiveDamageMultiplier) + settings.passiveLightningDamage;
+            event.setDamage(multipliedDamage);
 
             // Visual lightning effect (does not damage terrain or trigger fire/griefing)
             damagee.getWorld().strikeLightningEffect(damagee.getLocation());
 
-            // Spawn visual 3D yellow thunder bolt item display entity (CustomModelData 12350)
-            damagee.getWorld().spawn(damagee.getLocation(), org.bukkit.entity.ItemDisplay.class, display -> {
-                final org.bukkit.inventory.ItemStack item = new org.bukkit.inventory.ItemStack(Material.NAUTILUS_SHELL);
-                final org.bukkit.inventory.meta.ItemMeta meta = item.getItemMeta();
-                if (meta != null) {
-                    meta.setCustomModelData(settings.yellowLightningCustomModelData);
-                    item.setItemMeta(meta);
-                }
-                display.setItemStack(item);
-                display.setBillboard(org.bukkit.entity.Display.Billboard.CENTER);
-                display.setInterpolationDuration(5);
-                Bukkit.getScheduler().runTaskLater(plugin, display::remove, 15L);
-            });
+            // Spawn visual 3D yellow thunder bolt item display entity (if CustomModelData is configured)
+            if (settings.yellowLightningCustomModelData > 0) {
+                damagee.getWorld().spawn(damagee.getLocation(), org.bukkit.entity.ItemDisplay.class, display -> {
+                    final org.bukkit.inventory.ItemStack item = new org.bukkit.inventory.ItemStack(Material.NAUTILUS_SHELL);
+                    final org.bukkit.inventory.meta.ItemMeta meta = item.getItemMeta();
+                    if (meta != null) {
+                        meta.setCustomModelData(settings.yellowLightningCustomModelData);
+                        item.setItemMeta(meta);
+                    }
+                    display.setItemStack(item);
+                    display.setBillboard(org.bukkit.entity.Display.Billboard.CENTER);
+                    display.setInterpolationDuration(5);
+                    Bukkit.getScheduler().runTaskLater(plugin, display::remove, 15L);
+                });
+            }
 
             // Yellow lightning particles
             damagee.getWorld().spawnParticle(
@@ -84,9 +92,6 @@ public final class TridentAbilityListener implements Listener {
                 25, 0.4, 1.0, 0.4,
                 new org.bukkit.Particle.DustOptions(org.bukkit.Color.fromRGB(255, 220, 0), 1.8f)
             );
-
-            // Deal faked lightning damage
-            damagee.damage(settings.passiveLightningDamage, damager);
 
             damagee.playSound(damagee.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 0.8f, 1.0f);
             damager.sendMessage(ColorParser.of(settings.passiveTriggeredMessage).build());
@@ -104,7 +109,9 @@ public final class TridentAbilityListener implements Listener {
                 damager.playSound(damager.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.2f);
             } else {
                 damager.sendMessage(
-                    ColorParser.of(settings.ultimateChargeProgressMessage)
+                    ColorParser.of(settings.ultimateChargeProgressMessage
+                        .replace("{charge}", String.valueOf(nextUltHits))
+                        .replace("{target}", String.valueOf(targetUltHits)))
                         .with("charge", String.valueOf(nextUltHits))
                         .with("target", String.valueOf(targetUltHits))
                         .build()
@@ -119,5 +126,6 @@ public final class TridentAbilityListener implements Listener {
         final UUID uuid = event.getPlayer().getUniqueId();
         passiveHits.remove(uuid);
         ultimateHits.remove(uuid);
+        ultimateCooldowns.remove(uuid);
     }
 }
