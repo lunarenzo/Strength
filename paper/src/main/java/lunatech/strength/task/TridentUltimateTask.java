@@ -65,9 +65,11 @@ public final class TridentUltimateTask extends BukkitRunnable {
                 // 1. Visual-only lightning bolt strike (does not damage terrain or trigger fire/griefing)
                 center.getWorld().strikeLightningEffect(targetLoc);
 
-                // 2. Yellow particle effects (RGB 255,220,0 dust + electric spark)
+                // 2. Yellow particle effects (RGB 255,220,0 dust + electric spark + generic_0..7 yellow lightning texture sheet)
                 center.getWorld().spawnParticle(Particle.DUST, targetLoc.clone().add(0, 1, 0), 20, 0.4, 0.8, 0.4, yellowDust);
                 center.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, targetLoc, 25, 0.3, 0.5, 0.3, 0.1);
+                center.getWorld().spawnParticle(Particle.CRIT, targetLoc.clone().add(0, 1, 0), 15, 0.5, 1.0, 0.5, 0.2);
+                center.getWorld().spawnParticle(Particle.ENCHANTED_HIT, targetLoc.clone().add(0, 1, 0), 15, 0.5, 1.0, 0.5, 0.2);
 
                 // 3. Optional 3D yellow lightning item display entity
                 if (settings.yellowLightningCustomModelData > 0) {
