@@ -12,7 +12,9 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerItemBreakEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerShieldDisableEvent;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Listener that manages Shield abilities: tracking shield blocks to charge the ultimate,
- * applying 20% passive damage reduction when the shield is on cooldown (stunned),
+ * applying configurable percentage passive damage reduction when the shield is disabled or broken,
  * and managing god-mode damage negation and knockback when the ultimate is active.
  */
 public final class ShieldAbilityListener implements Listener {
@@ -32,6 +34,8 @@ public final class ShieldAbilityListener implements Listener {
     // Concurrent collections to ensure zero memory retention and thread safety
     public static final Map<UUID, Integer> ultimateHits = new ConcurrentHashMap<>();
     public static final Map<UUID, Boolean> shieldUltimateActive = new ConcurrentHashMap<>();
+    public static final Map<UUID, Long> passiveProtectionExpiry = new ConcurrentHashMap<>();
+    public static final Map<UUID, Long> ultimateCooldowns = new ConcurrentHashMap<>();
 
     public ShieldAbilityListener(@NotNull Strength plugin, @NotNull StrengthService strengthService) {
         this.plugin = plugin;
@@ -60,6 +64,20 @@ public final class ShieldAbilityListener implements Listener {
         }
     }
 
+    // Edge Case 1: Trigger passive protection when an axe disables player's shield
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onShieldDisable(@NotNull PlayerShieldDisableEvent event) {
+        triggerPassiveProtection(event.getPlayer());
+    }
+
+    // Edge Case 2: Backup trigger when shield durability reaches 0 and item breaks
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onItemBreak(@NotNull PlayerItemBreakEvent event) {
+        if (event.getBrokenItem().getType() == Material.SHIELD) {
+            triggerPassiveProtection(event.getPlayer());
+        }
+    }
+
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onEntityDamagePassive(@NotNull EntityDamageEvent event) {
         if (!(event.getEntity() instanceof Player victim)) {
@@ -67,14 +85,19 @@ public final class ShieldAbilityListener implements Listener {
         }
 
         final UUID uuid = victim.getUniqueId();
-
-        // 2. Passive Ability: 20% Damage Reduction when Shield is Stunned (On Cooldown)
         final String assigned = strengthService.getAssignedWeapon(victim);
-        if ("shield".equalsIgnoreCase(assigned)) {
-            if (victim.hasCooldown(Material.SHIELD)) {
-                // Reduce incoming damage by 20%
-                event.setDamage(event.getDamage() * 0.80);
-            }
+        if (!"shield".equalsIgnoreCase(assigned)) {
+            return;
+        }
+
+        final long now = System.currentTimeMillis();
+        final long expiry = passiveProtectionExpiry.getOrDefault(uuid, 0L);
+
+        // Passive Ability: Configurable damage reduction when shield is disabled/broken or on cooldown
+        if (now < expiry || victim.hasCooldown(Material.SHIELD)) {
+            final ShieldConfig settings = plugin.getConfigHandler().getShieldConfig();
+            final double multiplier = Math.max(0.0, 1.0 - (settings.passiveDamageReductionPercentage / 100.0));
+            event.setDamage(event.getDamage() * multiplier);
         }
     }
 
@@ -125,7 +148,9 @@ public final class ShieldAbilityListener implements Listener {
                     victim.playSound(victim.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.2f);
                 } else {
                     victim.sendMessage(
-                        ColorParser.of(settings.ultimateChargeProgressMessage)
+                        ColorParser.of(settings.ultimateChargeProgressMessage
+                            .replace("{charge}", String.valueOf(nextCharge))
+                            .replace("{target}", String.valueOf(targetCharge)))
                             .with("charge", String.valueOf(nextCharge))
                             .with("target", String.valueOf(targetCharge))
                             .build()
@@ -135,10 +160,33 @@ public final class ShieldAbilityListener implements Listener {
         }
     }
 
+    private void triggerPassiveProtection(@NotNull Player player) {
+        final String assigned = strengthService.getAssignedWeapon(player);
+        if (!"shield".equalsIgnoreCase(assigned)) {
+            return;
+        }
+
+        final ShieldConfig settings = plugin.getConfigHandler().getShieldConfig();
+        final long expiry = System.currentTimeMillis() + (settings.passiveProtectionDurationSeconds * 1000L);
+        passiveProtectionExpiry.put(player.getUniqueId(), expiry);
+
+        player.sendMessage(
+            ColorParser.of(settings.passiveActivatedMessage
+                .replace("{seconds}", String.valueOf(settings.passiveProtectionDurationSeconds))
+                .replace("{reduction}", String.valueOf((int) settings.passiveDamageReductionPercentage)))
+                .with("seconds", String.valueOf(settings.passiveProtectionDurationSeconds))
+                .with("reduction", String.valueOf((int) settings.passiveDamageReductionPercentage))
+                .build()
+        );
+        player.playSound(player.getLocation(), Sound.ITEM_SHIELD_BREAK, 1.0f, 0.8f);
+    }
+
     @EventHandler
     public void onPlayerQuit(@NotNull PlayerQuitEvent event) {
         final UUID uuid = event.getPlayer().getUniqueId();
         ultimateHits.remove(uuid);
         shieldUltimateActive.remove(uuid);
+        passiveProtectionExpiry.remove(uuid);
+        ultimateCooldowns.remove(uuid);
     }
 }
