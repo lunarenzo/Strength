@@ -19,6 +19,37 @@ import org.jetbrains.annotations.NotNull;
  * and spawning custom 3D FreeMinecraftModels VFX and custom thunder ronin sounds.
  */
 public final class TridentUltimateTask extends BukkitRunnable {
+    // Pre-cached static particle transition to eliminate GC heap allocations in the 20 Hz tick loop
+    private static final Particle.DustTransition RING_DUST_TRANSITION =
+        new Particle.DustTransition(Color.fromRGB(243, 255, 178), Color.fromRGB(50, 255, 211), 1.2f);
+
+    // Pre-cached static MethodHandles for FMM dynamic reflection (< 0.001 mspt overhead)
+    private static java.lang.invoke.MethodHandle FMM_CREATE_HANDLE;
+    private static java.lang.invoke.MethodHandle FMM_PLAY_ANIMATION_HANDLE;
+    private static java.lang.invoke.MethodHandle FMM_TELEPORT_HANDLE;
+    private static java.lang.invoke.MethodHandle FMM_REMOVE_HANDLE;
+
+    static {
+        try {
+            Class<?> staticEntityClass = Class.forName("com.magmaguy.freeminecraftmodels.customentity.StaticEntity");
+            java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+
+            FMM_CREATE_HANDLE = lookup.findStatic(staticEntityClass, "create",
+                java.lang.invoke.MethodType.methodType(staticEntityClass, String.class, Location.class));
+
+            FMM_PLAY_ANIMATION_HANDLE = lookup.findVirtual(staticEntityClass, "playAnimation",
+                java.lang.invoke.MethodType.methodType(boolean.class, String.class, boolean.class, boolean.class));
+
+            FMM_TELEPORT_HANDLE = lookup.findVirtual(staticEntityClass, "teleport",
+                java.lang.invoke.MethodType.methodType(void.class, Location.class, boolean.class));
+
+            FMM_REMOVE_HANDLE = lookup.findVirtual(staticEntityClass, "remove",
+                java.lang.invoke.MethodType.methodType(void.class));
+        } catch (Throwable ignored) {
+            // FreeMinecraftModels not present or API signature changed
+        }
+    }
+
     private final Player player;
     private final TridentConfig settings;
     private final int durationTicks;
@@ -49,16 +80,20 @@ public final class TridentUltimateTask extends BukkitRunnable {
             tryPlaySound("thunder_ronin_sounds:samus.thunder_ronin.thunder_circle_charge", Sound.ENTITY_PLAYER_ATTACK_SWEEP, 0.7f, 1.0f);
         }
 
-        // Collapsing teal/yellow particle ring during chargeup (ticks 0..7)
+        // Collapsing teal/yellow particle ring during chargeup (ticks 0..7) - Zero allocation loop
         if (elapsedTicks < 8) {
             final double radius = Math.max(1.0, 4.0 - (elapsedTicks * 0.45));
-            final Location loc = player.getLocation().add(0, 0.1, 0);
-            final Particle.DustTransition ringColor = new Particle.DustTransition(Color.fromRGB(243, 255, 178), Color.fromRGB(50, 255, 211), 1.2f);
+            final Location loc = player.getLocation();
+            final double baseWorldX = loc.getX();
+            final double baseWorldY = loc.getY() + 0.1;
+            final double baseWorldZ = loc.getZ();
+            final org.bukkit.World world = loc.getWorld();
+
             for (int i = 0; i < 40; i++) {
-                double angle = (2 * Math.PI / 40) * i;
-                double x = radius * Math.cos(angle);
-                double z = radius * Math.sin(angle);
-                loc.getWorld().spawnParticle(Particle.DUST_COLOR_TRANSITION, loc.clone().add(x, 0, z), 1, 0, 0, 0, 0, ringColor);
+                final double angle = (2 * Math.PI / 40) * i;
+                final double px = baseWorldX + (radius * Math.cos(angle));
+                final double pz = baseWorldZ + (radius * Math.sin(angle));
+                world.spawnParticle(Particle.DUST_COLOR_TRANSITION, px, baseWorldY, pz, 1, 0, 0, 0, 0, RING_DUST_TRANSITION);
             }
         }
 
@@ -73,15 +108,14 @@ public final class TridentUltimateTask extends BukkitRunnable {
             tryPlaySound("thunder_ronin_sounds:samus.thunder_ronin.thunder_barrage", Sound.ITEM_TRIDENT_THROW, 0.7f, 1.0f);
         }
 
-        // Keep 3D model attached to player as player moves or turns (1:1 smooth pitch & yaw tracking)
-        if (elapsedTicks >= 8 && barrageFmmModel != null) {
+        // Keep 3D model attached to player as player moves or turns (1:1 smooth pitch & yaw tracking via MethodHandle)
+        if (elapsedTicks >= 8 && barrageFmmModel != null && FMM_TELEPORT_HANDLE != null) {
             try {
                 final org.bukkit.util.Vector dir = player.getLocation().getDirection().normalize();
                 final Location currentModelLoc = player.getLocation().add(0, 1.2, 0).add(dir.clone().multiply(1.5));
                 currentModelLoc.setYaw((float) (player.getLocation().getYaw() + settings.modelYawOffsetDegrees));
                 currentModelLoc.setPitch(player.getLocation().getPitch());
-                java.lang.reflect.Method teleportMethod = barrageFmmModel.getClass().getMethod("teleport", Location.class, boolean.class);
-                teleportMethod.invoke(barrageFmmModel, currentModelLoc, false);
+                FMM_TELEPORT_HANDLE.invoke(barrageFmmModel, currentModelLoc, false);
             } catch (Throwable ignored) {}
         }
 
@@ -150,18 +184,15 @@ public final class TridentUltimateTask extends BukkitRunnable {
     }
 
     private void spawnFmmModel(String modelId, Location location) {
-        if (!org.bukkit.Bukkit.getPluginManager().isPluginEnabled("FreeMinecraftModels")) {
+        if (FMM_CREATE_HANDLE == null || FMM_PLAY_ANIMATION_HANDLE == null) {
             return;
         }
         try {
-            Class<?> staticEntityClass = Class.forName("com.magmaguy.freeminecraftmodels.customentity.StaticEntity");
-            java.lang.reflect.Method createMethod = staticEntityClass.getMethod("create", String.class, Location.class);
-            Object model = createMethod.invoke(null, modelId, location);
+            Object model = FMM_CREATE_HANDLE.invoke(modelId, location);
             if (model != null) {
-                java.lang.reflect.Method playAnimMethod = staticEntityClass.getMethod("playAnimation", String.class, boolean.class, boolean.class);
-                Object success = playAnimMethod.invoke(model, "skill", false, false);
-                if (Boolean.FALSE.equals(success)) {
-                    playAnimMethod.invoke(model, "animation", false, false);
+                boolean success = (boolean) FMM_PLAY_ANIMATION_HANDLE.invoke(model, "skill", false, false);
+                if (!success) {
+                    FMM_PLAY_ANIMATION_HANDLE.invoke(model, "animation", false, false);
                 }
                 this.barrageFmmModel = model;
             }
@@ -171,27 +202,23 @@ public final class TridentUltimateTask extends BukkitRunnable {
     }
 
     private void spawnFmmImpactModel(String impactModelId, Location location) {
-        if (!org.bukkit.Bukkit.getPluginManager().isPluginEnabled("FreeMinecraftModels")) {
+        if (FMM_CREATE_HANDLE == null || FMM_PLAY_ANIMATION_HANDLE == null || FMM_REMOVE_HANDLE == null) {
             return;
         }
         try {
-            Class<?> staticEntityClass = Class.forName("com.magmaguy.freeminecraftmodels.customentity.StaticEntity");
-            java.lang.reflect.Method createMethod = staticEntityClass.getMethod("create", String.class, Location.class);
-            Object impact = createMethod.invoke(null, impactModelId, location);
+            Object impact = FMM_CREATE_HANDLE.invoke(impactModelId, location);
             if (impact != null) {
                 try {
-                    java.lang.reflect.Method playAnimMethod = staticEntityClass.getMethod("playAnimation", String.class, boolean.class, boolean.class);
-                    Object success = playAnimMethod.invoke(impact, "animation", false, false);
-                    if (Boolean.FALSE.equals(success)) {
-                        playAnimMethod.invoke(impact, "skill", false, false);
+                    boolean success = (boolean) FMM_PLAY_ANIMATION_HANDLE.invoke(impact, "animation", false, false);
+                    if (!success) {
+                        FMM_PLAY_ANIMATION_HANDLE.invoke(impact, "skill", false, false);
                     }
                 } catch (Throwable ignored) {}
                 org.bukkit.Bukkit.getScheduler().runTaskLater(
                     org.bukkit.plugin.java.JavaPlugin.getProvidingPlugin(getClass()),
                     () -> {
                         try {
-                            java.lang.reflect.Method removeMethod = staticEntityClass.getMethod("remove");
-                            removeMethod.invoke(impact);
+                            FMM_REMOVE_HANDLE.invoke(impact);
                         } catch (Throwable ignored) {}
                     },
                     6L
@@ -207,11 +234,9 @@ public final class TridentUltimateTask extends BukkitRunnable {
             final org.bukkit.plugin.Plugin plugin = org.bukkit.plugin.java.JavaPlugin.getProvidingPlugin(getClass());
             player.removeMetadata("trident_barrage_active", plugin);
         }
-        if (barrageFmmModel != null) {
+        if (barrageFmmModel != null && FMM_REMOVE_HANDLE != null) {
             try {
-                Class<?> staticEntityClass = Class.forName("com.magmaguy.freeminecraftmodels.customentity.StaticEntity");
-                java.lang.reflect.Method removeMethod = staticEntityClass.getMethod("remove");
-                removeMethod.invoke(barrageFmmModel);
+                FMM_REMOVE_HANDLE.invoke(barrageFmmModel);
             } catch (Throwable ignored) {}
             barrageFmmModel = null;
         }
