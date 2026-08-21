@@ -55,6 +55,9 @@ public class TridentConfig implements VersionedConfig {
     @Comment("FreeMinecraftModels model ID for hit impact VFX")
     public String impactModelId = "vfx_hit_impact_1";
 
+    @Comment("Yaw rotation offset in degrees for 3D model alignment relative to player direction (e.g. 90.0)")
+    public double modelYawOffsetDegrees = 90.0;
+
     // Messages
     @Comment("Message sent when trident passive is triggered")
     public String passiveTriggeredMessage = "<yellow><bold>POSEIDON PASSIVE!</bold> Lightning struck for extra damage!</yellow>";
