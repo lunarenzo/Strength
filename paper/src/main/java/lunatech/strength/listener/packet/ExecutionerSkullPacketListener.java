@@ -24,7 +24,7 @@ public final class ExecutionerSkullPacketListener extends PacketListenerAbstract
         final PacketTypeCommon type = event.getPacketType();
 
         if (type == PacketType.Play.Server.ENTITY_TELEPORT) {
-            final WrapperPlayServerEntityTeleport packet = new WrapperPlayServerEntityTeleport(event);
+            final WrapperPlayServerEntityTeleport packet = new WrapperPlayServerEntityTeleport(event.clone());
             final int entityId = packet.getEntityId();
             final Integer skullDisplayId = AxeUltimateTask.activeSkullDisplaysByEntityId.get(entityId);
 
@@ -43,7 +43,7 @@ public final class ExecutionerSkullPacketListener extends PacketListenerAbstract
                 event.getUser().sendPacket(syncTeleport);
             }
         } else if (type == PacketType.Play.Server.ENTITY_RELATIVE_MOVE || type == PacketType.Play.Server.ENTITY_RELATIVE_MOVE_AND_ROTATION) {
-            final WrapperPlayServerEntityRelativeMove packet = new WrapperPlayServerEntityRelativeMove(event);
+            final WrapperPlayServerEntityRelativeMove packet = new WrapperPlayServerEntityRelativeMove(event.clone());
             final int entityId = packet.getEntityId();
             final Integer skullDisplayId = AxeUltimateTask.activeSkullDisplaysByEntityId.get(entityId);
 
@@ -61,7 +61,7 @@ public final class ExecutionerSkullPacketListener extends PacketListenerAbstract
                     float pitch = loc.getPitch();
 
                     if (type == PacketType.Play.Server.ENTITY_RELATIVE_MOVE_AND_ROTATION) {
-                        final WrapperPlayServerEntityRelativeMoveAndRotation rotPacket = new WrapperPlayServerEntityRelativeMoveAndRotation(event);
+                        final WrapperPlayServerEntityRelativeMoveAndRotation rotPacket = new WrapperPlayServerEntityRelativeMoveAndRotation(event.clone());
                         yaw = rotPacket.getYaw();
                         pitch = rotPacket.getPitch();
                     }
