@@ -32,6 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class AxeUltimateTask extends BukkitRunnable {
     public static final Map<Integer, Integer> activeSkullDisplaysByEntityId = new ConcurrentHashMap<>();
     public static final Map<Integer, Double> activeSkullYOffsetsByEntityId = new ConcurrentHashMap<>();
+    public static final Map<Integer, Player> activeSkullTargetPlayersByEntityId = new ConcurrentHashMap<>();
 
     private final Player attacker;
     private final Strength plugin;
@@ -185,6 +186,7 @@ public final class AxeUltimateTask extends BukkitRunnable {
         // Register for real-time PacketEvents Netty pipeline packet synchronization
         activeSkullDisplaysByEntityId.put(target.getEntityId(), display.getEntityId());
         activeSkullYOffsetsByEntityId.put(target.getEntityId(), yOffset);
+        activeSkullTargetPlayersByEntityId.put(target.getEntityId(), target);
     }
 
     private double getDynamicNametagHeight(Player target, AxeConfig settings) {
@@ -243,6 +245,7 @@ public final class AxeUltimateTask extends BukkitRunnable {
             if (p != null) {
                 activeSkullDisplaysByEntityId.remove(p.getEntityId());
                 activeSkullYOffsetsByEntityId.remove(p.getEntityId());
+                activeSkullTargetPlayersByEntityId.remove(p.getEntityId());
             }
         }
         skullDisplays.clear();

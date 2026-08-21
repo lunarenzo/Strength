@@ -9,11 +9,13 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEn
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityRelativeMoveAndRotation;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityTeleport;
 import lunatech.strength.task.AxeUltimateTask;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
 
 /**
  * High-performance PacketEvents listener that synchronizes visual skull entity movement
- * packets directly on the Netty channel pipeline. This ensures zero 1-tick delay during
- * player movement, jumping, and knockback while preserving 100% of player nametags.
+ * packets directly on the Netty channel pipeline. Converts relative movements into absolute
+ * teleport packets for ItemDisplay to eliminate client-side delta drift during jumps and knockback.
  */
 public final class ExecutionerSkullPacketListener extends PacketListenerAbstract {
 
@@ -40,37 +42,40 @@ public final class ExecutionerSkullPacketListener extends PacketListenerAbstract
                 );
                 event.getUser().sendPacket(syncTeleport);
             }
-        } else if (type == PacketType.Play.Server.ENTITY_RELATIVE_MOVE) {
+        } else if (type == PacketType.Play.Server.ENTITY_RELATIVE_MOVE || type == PacketType.Play.Server.ENTITY_RELATIVE_MOVE_AND_ROTATION) {
             final WrapperPlayServerEntityRelativeMove packet = new WrapperPlayServerEntityRelativeMove(event);
             final int entityId = packet.getEntityId();
             final Integer skullDisplayId = AxeUltimateTask.activeSkullDisplaysByEntityId.get(entityId);
 
             if (skullDisplayId != null) {
-                final WrapperPlayServerEntityRelativeMove syncMove = new WrapperPlayServerEntityRelativeMove(
-                    skullDisplayId,
-                    packet.getDeltaX(),
-                    packet.getDeltaY(),
-                    packet.getDeltaZ(),
-                    false
-                );
-                event.getUser().sendPacket(syncMove);
-            }
-        } else if (type == PacketType.Play.Server.ENTITY_RELATIVE_MOVE_AND_ROTATION) {
-            final WrapperPlayServerEntityRelativeMoveAndRotation packet = new WrapperPlayServerEntityRelativeMoveAndRotation(event);
-            final int entityId = packet.getEntityId();
-            final Integer skullDisplayId = AxeUltimateTask.activeSkullDisplaysByEntityId.get(entityId);
+                final Player targetPlayer = AxeUltimateTask.activeSkullTargetPlayersByEntityId.get(entityId);
+                if (targetPlayer != null && targetPlayer.isOnline()) {
+                    final double yOffset = AxeUltimateTask.activeSkullYOffsetsByEntityId.getOrDefault(entityId, 2.4);
+                    final Location loc = targetPlayer.getLocation();
 
-            if (skullDisplayId != null) {
-                final WrapperPlayServerEntityRelativeMoveAndRotation syncMoveRot = new WrapperPlayServerEntityRelativeMoveAndRotation(
-                    skullDisplayId,
-                    packet.getDeltaX(),
-                    packet.getDeltaY(),
-                    packet.getDeltaZ(),
-                    packet.getYaw(),
-                    packet.getPitch(),
-                    false
-                );
-                event.getUser().sendPacket(syncMoveRot);
+                    final double targetX = loc.getX() + packet.getDeltaX();
+                    final double targetY = loc.getY() + packet.getDeltaY() + yOffset;
+                    final double targetZ = loc.getZ() + packet.getDeltaZ();
+
+                    float yaw = loc.getYaw();
+                    float pitch = loc.getPitch();
+
+                    if (type == PacketType.Play.Server.ENTITY_RELATIVE_MOVE_AND_ROTATION) {
+                        final WrapperPlayServerEntityRelativeMoveAndRotation rotPacket = new WrapperPlayServerEntityRelativeMoveAndRotation(event);
+                        yaw = rotPacket.getYaw();
+                        pitch = rotPacket.getPitch();
+                    }
+
+                    final WrapperPlayServerEntityTeleport syncTeleport = new WrapperPlayServerEntityTeleport(
+                        skullDisplayId,
+                        new Vector3d(targetX, targetY, targetZ),
+                        yaw,
+                        pitch,
+                        false
+                    );
+
+                    event.getUser().sendPacket(syncTeleport);
+                }
             }
         }
     }
