@@ -7,7 +7,6 @@ import io.github.milkdrinkers.colorparser.paper.ColorParser;
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.destroystokyo.paper.profile.ProfileProperty;
 import org.bukkit.Bukkit;
-import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -27,19 +26,17 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Task managing active Axe Ultimate (Executioner's Mark): storing post-mitigation damage
- * for the configured duration, rendering a floating rotating skull ItemDisplay and bleeding particles,
- * and releasing capped burst damage upon expiration.
+ * for the configured duration, rendering a floating rotating skull ItemDisplay mounted as passenger (zero lag),
+ * dynamic TAB belowname nametag height clearance, authentic blood particle crumbs, and releasing capped burst damage upon expiration.
  */
 public final class AxeUltimateTask extends BukkitRunnable {
-    private static final Particle.DustOptions BLOOD_DUST = new Particle.DustOptions(Color.fromRGB(180, 0, 0), 1.2f);
-
     private final Player attacker;
     private final Strength plugin;
     private final int durationTicks;
     private int elapsedTicks = 0;
 
     private final Map<UUID, ItemDisplay> skullDisplays = new ConcurrentHashMap<>();
-    private final Map<UUID, Float> skullYaws = new ConcurrentHashMap<>();
+    private final Map<UUID, Float> skullAngles = new ConcurrentHashMap<>();
     private ItemStack customSkullItem = null;
 
     public AxeUltimateTask(@NotNull Player attacker, @NotNull Strength plugin, int durationSeconds) {
@@ -85,19 +82,12 @@ public final class AxeUltimateTask extends BukkitRunnable {
                     final String msg = settings.pendingDamageActionbarMessage.replace("{amount}", String.format("%.1f", total));
                     target.sendActionBar(ColorParser.of(msg).build());
 
-                    // 1. Floating & Rotating Skull ItemDisplay on target's head
+                    // 1. Floating & Rotating Skull ItemDisplay on target's head (Passenger Mounted for Zero Lag/Desync)
                     updateFloatingSkull(target, settings);
 
-                    // 2. Bleeding Particle Effect dripping from target's body
+                    // 2. Bleeding Particle Effect dripping from target's body (Authentic Blood Item/Block Crumbs)
                     if (settings.enableBleedParticles && elapsedTicks % Math.max(1, settings.bleedParticleFrequencyTicks) == 0) {
-                        target.getWorld().spawnParticle(
-                            Particle.DUST,
-                            target.getLocation().add(0, 1.0, 0),
-                            settings.bleedParticleCount,
-                            0.3, 0.6, 0.3,
-                            settings.bleedParticleSpeed,
-                            BLOOD_DUST
-                        );
+                        spawnBloodParticles(target, settings);
                     }
                 }
             }
@@ -106,33 +96,120 @@ public final class AxeUltimateTask extends BukkitRunnable {
         elapsedTicks++;
     }
 
+    private void spawnBloodParticles(Player target, AxeConfig settings) {
+        try {
+            Material mat = Material.matchMaterial(settings.bleedParticleMaterial);
+            if (mat == null) mat = Material.REDSTONE_BLOCK;
+
+            final String typeStr = settings.bleedParticleType != null ? settings.bleedParticleType.toUpperCase() : "ITEM_CRUMB";
+
+            if ("BLOCK_CRUMB".equals(typeStr)) {
+                target.getWorld().spawnParticle(
+                    Particle.BLOCK_CRUMB,
+                    target.getLocation().add(0, 1.0, 0),
+                    settings.bleedParticleCount,
+                    0.3, 0.5, 0.3,
+                    settings.bleedParticleSpeed,
+                    mat.createBlockData()
+                );
+            } else if ("DAMAGE_INDICATOR".equals(typeStr)) {
+                target.getWorld().spawnParticle(
+                    Particle.DAMAGE_INDICATOR,
+                    target.getLocation().add(0, 1.0, 0),
+                    settings.bleedParticleCount,
+                    0.3, 0.5, 0.3,
+                    settings.bleedParticleSpeed
+                );
+            } else {
+                // Default: ITEM_CRUMB (blood item crumbs)
+                target.getWorld().spawnParticle(
+                    Particle.ITEM_CRUMB,
+                    target.getLocation().add(0, 1.0, 0),
+                    settings.bleedParticleCount,
+                    0.3, 0.5, 0.3,
+                    settings.bleedParticleSpeed,
+                    new ItemStack(mat)
+                );
+            }
+        } catch (Throwable ignored) {
+            target.getWorld().spawnParticle(
+                Particle.ITEM_CRUMB,
+                target.getLocation().add(0, 1.0, 0),
+                settings.bleedParticleCount,
+                0.3, 0.5, 0.3,
+                settings.bleedParticleSpeed,
+                new ItemStack(Material.REDSTONE_BLOCK)
+            );
+        }
+    }
+
     private void updateFloatingSkull(Player target, AxeConfig settings) {
         final UUID targetUuid = target.getUniqueId();
-        float yaw = skullYaws.getOrDefault(targetUuid, 0.0f);
-        yaw = (float) ((yaw + settings.skullRotationSpeedDegrees) % 360.0);
-        skullYaws.put(targetUuid, yaw);
+        float angleRad = skullAngles.getOrDefault(targetUuid, 0.0f);
+        final float rotSpeedRad = (float) Math.toRadians(settings.skullRotationSpeedDegrees);
+        angleRad = (float) ((angleRad + rotSpeedRad) % (2.0 * Math.PI));
+        skullAngles.put(targetUuid, angleRad);
 
-        final Location headLoc = target.getLocation().add(0, target.getHeight() + settings.skullHeightOffset, 0);
-        headLoc.setYaw(yaw);
+        final float yOffset = (float) getDynamicNametagHeight(target, settings);
+        final float scale = (float) settings.skullScale;
 
         ItemDisplay display = skullDisplays.get(targetUuid);
         if (display == null || !display.isValid()) {
-            display = target.getWorld().spawn(headLoc, ItemDisplay.class, entity -> {
+            final Location spawnLoc = target.getLocation().add(0, yOffset, 0);
+            display = target.getWorld().spawn(spawnLoc, ItemDisplay.class, entity -> {
                 entity.setItemStack(customSkullItem != null ? customSkullItem : new ItemStack(Material.PLAYER_HEAD));
-                final float scale = (float) settings.skullScale;
                 entity.setTransformation(new Transformation(
-                    new Vector3f(0, 0, 0),
-                    new AxisAngle4f(0, 0, 1, 0),
+                    new Vector3f(0, yOffset, 0),
+                    new AxisAngle4f(angleRad, 0, 1, 0),
                     new Vector3f(scale, scale, scale),
                     new AxisAngle4f(0, 0, 1, 0)
                 ));
                 entity.setBillboard(ItemDisplay.Billboard.FIXED);
                 entity.setViewRange((float) (settings.skullViewDistanceBlocks / 64.0));
             });
+
+            target.addPassenger(display);
             skullDisplays.put(targetUuid, display);
         } else {
-            display.teleport(headLoc);
+            // Ensure passenger mounting is maintained
+            if (!target.getPassengers().contains(display)) {
+                target.addPassenger(display);
+            }
+
+            // Update transformation translation and rotation angle smoothly (rendered 1:1 on client)
+            display.setTransformation(new Transformation(
+                new Vector3f(0, yOffset, 0),
+                new AxisAngle4f(angleRad, 0, 1, 0),
+                new Vector3f(scale, scale, scale),
+                new AxisAngle4f(0, 0, 1, 0)
+            ));
         }
+    }
+
+    private double getDynamicNametagHeight(Player target, AxeConfig settings) {
+        // Base clearance above player head + default nametag
+        double height = target.getHeight() + settings.skullHeightOffset;
+
+        boolean hasBelowName = false;
+
+        // 1. Check Bukkit Scoreboard BelowName Objective
+        try {
+            final org.bukkit.scoreboard.Scoreboard board = target.getScoreboard();
+            if (board != null && board.getObjective(org.bukkit.scoreboard.DisplaySlot.BELOW_NAME) != null) {
+                hasBelowName = true;
+            }
+        } catch (Throwable ignored) {}
+
+        // 2. Check TAB plugin below-name feature
+        if (!hasBelowName && Bukkit.getPluginManager().isPluginEnabled("TAB")) {
+            hasBelowName = true;
+        }
+
+        if (hasBelowName) {
+            height += 0.35; // Add extra clearance so skull floats cleanly ABOVE nametag + belowname
+        }
+
+        return height;
     }
 
     private void endUltimate(Player attacker, Strength plugin) {
@@ -143,7 +220,7 @@ public final class AxeUltimateTask extends BukkitRunnable {
             }
         }
         skullDisplays.clear();
-        skullYaws.clear();
+        skullAngles.clear();
 
         final UUID attackerUuid = attacker.getUniqueId();
         AxeAbilityListener.activeUltimateAttackers.remove(attackerUuid);
