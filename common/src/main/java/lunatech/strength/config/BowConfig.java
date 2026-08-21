@@ -16,6 +16,12 @@ public class BowConfig implements VersionedConfig {
     @Comment("Hits required using bow to activate Passive (llama spit trail + cobweb)")
     public int passiveHitsRequired = 2;
 
+    @Comment("Particle type used for Bow passive web arrow trail (e.g. ITEM, CLOUD, POOF)")
+    public String passiveTrailParticleType = "ITEM";
+
+    @Comment("Material used for Bow passive web arrow trail crumbs (e.g. COBWEB, WHITE_WOOL)")
+    public String passiveTrailParticleMaterial = "COBWEB";
+
     @Comment("Duration in seconds that the faked cobweb traps the player")
     public int passiveCobwebDurationSeconds = 5;
 
