@@ -53,25 +53,20 @@ public final class TridentAbilityListener implements Listener {
             return;
         }
 
-        // Ignore ultimate barrage damage hits for passive / ultimate charge accumulation
-        if (damager.hasMetadata("trident_barrage_active")) {
-            return;
-        }
-
         final TridentConfig settings = plugin.getConfigHandler().getTridentConfig();
 
-        // 1. Passive Trigger: Every N hits, summon a lightning bolt and apply Nx damage multiplier
+        // 1. Passive Trigger: Every N hits, summon visual lightning bolt and apply configured passive damage
         final UUID damagerUuid = damager.getUniqueId();
         final int currentPassiveHits = passiveHits.merge(damagerUuid, 1, Integer::sum);
         if (currentPassiveHits >= settings.passiveHitsRequired) {
             passiveHits.put(damagerUuid, 0); // Reset count back to 0 immediately
 
-            // Apply Nx damage multiplier + extra bonus damage
+            // Apply configured damage multiplier + extra bonus damage
             final double baseDamage = event.getDamage();
             final double multipliedDamage = (baseDamage * settings.passiveDamageMultiplier) + settings.passiveLightningDamage;
             event.setDamage(multipliedDamage);
 
-            // Visual lightning effect (does not damage terrain or trigger fire/griefing)
+            // Visual lightning effect (does not deal vanilla 5.0 damage or start fires)
             damagee.getWorld().strikeLightningEffect(damagee.getLocation());
 
             // Yellow lightning particles
@@ -86,7 +81,11 @@ public final class TridentAbilityListener implements Listener {
             damager.sendMessage(ColorParser.of(settings.passiveTriggeredMessage).build());
         }
 
-        // 2. Ultimate Charge: Accumulate N hits to unlock the Ultimate ability
+        // 2. Ultimate Charge: Accumulate N hits to unlock Ultimate (skipped during active barrage to prevent infinite loops)
+        if (damager.hasMetadata("trident_barrage_active")) {
+            return;
+        }
+
         final int currentUltHits = ultimateHits.getOrDefault(damagerUuid, 0);
         final int targetUltHits = settings.ultimateHitsRequired;
         if (currentUltHits < targetUltHits) {
