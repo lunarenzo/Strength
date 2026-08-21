@@ -111,10 +111,7 @@ public final class AxeAbilityListener implements Listener {
     }
 
     public static final NamespacedKey STUN_JUMP_KEY = new NamespacedKey("strength", "seismic_stun_jump");
-    public static final Map<UUID, Location> lockedLocations = new ConcurrentHashMap<>();
-
     public static void applyStunAttributes(Player player) {
-        lockedLocations.put(player.getUniqueId(), player.getLocation());
         player.setSprinting(false);
 
         final AttributeInstance speedAttr = player.getAttribute(Attribute.MOVEMENT_SPEED);
@@ -139,8 +136,6 @@ public final class AxeAbilityListener implements Listener {
     }
 
     public static void removeStunAttributes(Player player) {
-        lockedLocations.remove(player.getUniqueId());
-
         final AttributeInstance speedAttr = player.getAttribute(Attribute.MOVEMENT_SPEED);
         if (speedAttr != null) {
             speedAttr.removeModifier(STUN_MODIFIER_KEY);
