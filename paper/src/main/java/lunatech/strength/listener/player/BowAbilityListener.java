@@ -89,8 +89,23 @@ public final class BowAbilityListener implements Listener {
                     if (arrow.isDead() || arrow.isOnGround()) {
                         cancel();
                         return;
+                    final lunatech.strength.config.BowConfig bowCfg = plugin.getConfigHandler().getBowConfig();
+                    try {
+                        org.bukkit.Material mat = org.bukkit.Material.matchMaterial(bowCfg.passiveTrailParticleMaterial);
+                        if (mat == null) mat = org.bukkit.Material.COBWEB;
+
+                        final String typeStr = bowCfg.passiveTrailParticleType != null ? bowCfg.passiveTrailParticleType.toUpperCase() : "ITEM";
+
+                        if ("CLOUD".equals(typeStr)) {
+                            arrow.getWorld().spawnParticle(Particle.CLOUD, arrow.getLocation(), 2, 0.05, 0.05, 0.05, 0.02);
+                        } else if ("POOF".equals(typeStr)) {
+                            arrow.getWorld().spawnParticle(Particle.POOF, arrow.getLocation(), 2, 0.05, 0.05, 0.05, 0.02);
+                        } else {
+                            arrow.getWorld().spawnParticle(Particle.ITEM, arrow.getLocation(), 2, 0.05, 0.05, 0.05, 0.02, new org.bukkit.inventory.ItemStack(mat));
+                        }
+                    } catch (Throwable ignored) {
+                        arrow.getWorld().spawnParticle(Particle.ITEM, arrow.getLocation(), 2, 0.05, 0.05, 0.05, 0.02, new org.bukkit.inventory.ItemStack(org.bukkit.Material.COBWEB));
                     }
-                    arrow.getWorld().spawnParticle(Particle.SPIT, arrow.getLocation(), 1, 0.0, 0.0, 0.0, 0.0);
                 }
             }.runTaskTimer(plugin, 0L, 1L);
 
