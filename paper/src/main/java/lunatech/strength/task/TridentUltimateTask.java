@@ -41,30 +41,53 @@ public final class TridentUltimateTask extends BukkitRunnable {
             return;
         }
 
-        // 1. Initial Telegraph & Slowness (Tick 0)
+        // 1. Initial Telegraph & Slowness (Ticks 0..7)
         if (elapsedTicks == 0) {
             player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, settings.slownessDurationTicks, settings.slownessAmplifier, false, false));
             tryPlaySound("thunder_ronin_sounds:samus.thunder_ronin.thunder_circle_charge", Sound.ENTITY_PLAYER_ATTACK_SWEEP, 0.7f, 1.0f);
         }
 
+        // Collapsing teal/yellow particle ring during chargeup (ticks 0..7)
+        if (elapsedTicks < 8) {
+            final double radius = Math.max(1.0, 4.0 - (elapsedTicks * 0.45));
+            final Location loc = player.getLocation().add(0, 0.1, 0);
+            final Particle.DustTransition ringColor = new Particle.DustTransition(Color.fromRGB(243, 255, 178), Color.fromRGB(50, 255, 211), 1.2f);
+            for (int i = 0; i < 40; i++) {
+                double angle = (2 * Math.PI / 40) * i;
+                double x = radius * Math.cos(angle);
+                double z = radius * Math.sin(angle);
+                loc.getWorld().spawnParticle(Particle.DUST_COLOR_TRANSITION, loc.clone().add(x, 0, z), 1, 0, 0, 0, 0, ringColor);
+            }
+        }
+
         // 2. Spawn FMM Model & Start Barrage Audio (Tick 8)
         if (elapsedTicks == 8) {
-            final Location spawnLoc = player.getLocation().add(0, 1.4, 0);
+            final Location spawnLoc = player.getLocation().add(0, 2.4, 0);
             spawnLoc.setYaw((float) (player.getLocation().getYaw() + settings.modelYawOffsetDegrees));
             spawnFmmModel(settings.barrageModelId, spawnLoc);
             tryPlaySound("thunder_ronin_sounds:samus.thunder_ronin.thunder_barrage", Sound.ITEM_TRIDENT_THROW, 0.7f, 1.0f);
         }
 
-        // 3. Multi-Thrust Damage Loop (9 hits spaced every configured interval ticks from tick 8 to duration)
+        // 3. Multi-Thrust Damage Loop & Scatter Barrage Beams (9 hits spaced every configured interval ticks)
         final int interval = Math.max(1, settings.lightningStrikeIntervalTicks);
         if (elapsedTicks >= 8 && (elapsedTicks - 8) % interval == 0) {
             final Location center = player.getLocation();
             final double coneRadius = settings.ultimateRadius;
-            final Particle.DustOptions yellowDust = new Particle.DustOptions(Color.fromRGB(255, 220, 0), 1.8f);
+            final Particle.DustTransition beamColor = new Particle.DustTransition(Color.fromRGB(50, 255, 211), Color.fromRGB(243, 255, 178), 1.5f);
 
-            // Forward thrust particle visuals
-            center.getWorld().spawnParticle(Particle.DUST, center.clone().add(center.getDirection().multiply(1.5)), 25, 0.4, 0.4, 0.4, yellowDust);
-            center.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, center.clone().add(center.getDirection().multiply(2.0)), 20, 0.5, 0.5, 0.5, 0.1);
+            // Forward thrust scatter beam visuals (3 parallel/scattered thrust rays matching screenshot)
+            org.bukkit.util.Vector dir = center.getDirection().normalize();
+            org.bukkit.util.Vector right = new org.bukkit.util.Vector(-dir.getZ(), 0, dir.getX()).normalize();
+            double[] sideOffsets = {-0.6, 0.0, 0.6};
+
+            for (double sideOffset : sideOffsets) {
+                Location start = center.clone().add(0, 1.2, 0).add(right.clone().multiply(sideOffset));
+                for (double dist = 0.5; dist <= 4.5; dist += 0.5) {
+                    Location point = start.clone().add(dir.clone().multiply(dist));
+                    center.getWorld().spawnParticle(Particle.DUST_COLOR_TRANSITION, point, 2, 0.05, 0.05, 0.05, 0, beamColor);
+                    center.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, point, 1, 0.1, 0.1, 0.1, 0.05);
+                }
+            }
 
             // Damage forward cone targets
             for (LivingEntity target : center.getWorld().getNearbyLivingEntities(center, coneRadius)) {
@@ -85,6 +108,7 @@ public final class TridentUltimateTask extends BukkitRunnable {
                 spawnFmmImpactModel(settings.impactModelId, targetLoc.clone().add(0, 0.95, 0));
 
                 target.getWorld().spawnParticle(Particle.CRIT, targetLoc.clone().add(0, 1, 0), 15, 0.3, 0.5, 0.3, 0.1);
+                target.getWorld().spawnParticle(Particle.GLOW, targetLoc.clone().add(0, 1, 0), 10, 0.4, 0.4, 0.4, 0.1);
             }
         }
 
