@@ -163,6 +163,13 @@ public final class AxeAbilityListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onStunnedJump(com.destroystokyo.paper.event.player.PlayerJumpEvent event) {
+        if (isStunned(event.getPlayer())) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onPlayerMove(PlayerMoveEvent event) {
         final Player player = event.getPlayer();
         if (!isStunned(player)) return;
