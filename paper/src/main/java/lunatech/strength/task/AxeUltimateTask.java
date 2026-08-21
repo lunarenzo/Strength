@@ -148,35 +148,32 @@ public final class AxeUltimateTask extends BukkitRunnable {
         final float finalAngleRad = (float) ((skullAngles.getOrDefault(targetUuid, 0.0f) + Math.toRadians(settings.skullRotationSpeedDegrees)) % (2.0 * Math.PI));
         skullAngles.put(targetUuid, finalAngleRad);
 
-        final float yOffset = (float) getDynamicNametagHeight(target, settings);
+        final double yOffset = getDynamicNametagHeight(target, settings);
         final float scale = (float) settings.skullScale;
+        final Location headLoc = target.getLocation().add(0, yOffset, 0);
 
         ItemDisplay display = skullDisplays.get(targetUuid);
         if (display == null || !display.isValid()) {
-            final Location spawnLoc = target.getLocation().add(0, yOffset, 0);
-            display = target.getWorld().spawn(spawnLoc, ItemDisplay.class, entity -> {
+            display = target.getWorld().spawn(headLoc, ItemDisplay.class, entity -> {
                 entity.setItemStack(customSkullItem != null ? customSkullItem : new ItemStack(Material.PLAYER_HEAD));
                 entity.setTransformation(new Transformation(
-                    new Vector3f(0, yOffset, 0),
+                    new Vector3f(0, 0, 0),
                     new AxisAngle4f(finalAngleRad, 0, 1, 0),
                     new Vector3f(scale, scale, scale),
                     new AxisAngle4f(0, 0, 1, 0)
                 ));
                 entity.setBillboard(ItemDisplay.Billboard.FIXED);
+                entity.setTeleportDuration(1); // Enable client-side smooth position interpolation
                 entity.setViewRange((float) (settings.skullViewDistanceBlocks / 64.0));
             });
 
-            target.addPassenger(display);
             skullDisplays.put(targetUuid, display);
         } else {
-            // Ensure passenger mounting is maintained
-            if (!target.getPassengers().contains(display)) {
-                target.addPassenger(display);
-            }
-
-            // Update transformation translation and rotation angle smoothly (rendered 1:1 on client)
+            // Smoothly update position via 1-tick interpolation and rotation transformation
+            display.setTeleportDuration(1);
+            display.teleport(headLoc);
             display.setTransformation(new Transformation(
-                new Vector3f(0, yOffset, 0),
+                new Vector3f(0, 0, 0),
                 new AxisAngle4f(finalAngleRad, 0, 1, 0),
                 new Vector3f(scale, scale, scale),
                 new AxisAngle4f(0, 0, 1, 0)
