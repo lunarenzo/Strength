@@ -103,10 +103,12 @@ public final class TridentUltimateTask extends BukkitRunnable {
             return;
         }
         try {
-            com.magmaguy.freeminecraftmodels.customentities.StaticEntity model =
-                com.magmaguy.freeminecraftmodels.customentities.StaticEntity.create(modelId, location);
+            Class<?> staticEntityClass = Class.forName("com.magmaguy.freeminecraftmodels.customentities.StaticEntity");
+            java.lang.reflect.Method createMethod = staticEntityClass.getMethod("create", String.class, Location.class);
+            Object model = createMethod.invoke(null, modelId, location);
             if (model != null) {
-                model.playAnimation("animation", false, false);
+                java.lang.reflect.Method playAnimMethod = staticEntityClass.getMethod("playAnimation", String.class, boolean.class, boolean.class);
+                playAnimMethod.invoke(model, "animation", false, false);
                 this.barrageFmmModel = model;
             }
         } catch (Throwable ignored) {
@@ -119,12 +121,18 @@ public final class TridentUltimateTask extends BukkitRunnable {
             return;
         }
         try {
-            com.magmaguy.freeminecraftmodels.customentities.StaticEntity impact =
-                com.magmaguy.freeminecraftmodels.customentities.StaticEntity.create(impactModelId, location);
+            Class<?> staticEntityClass = Class.forName("com.magmaguy.freeminecraftmodels.customentities.StaticEntity");
+            java.lang.reflect.Method createMethod = staticEntityClass.getMethod("create", String.class, Location.class);
+            Object impact = createMethod.invoke(null, impactModelId, location);
             if (impact != null) {
                 org.bukkit.Bukkit.getScheduler().runTaskLater(
                     org.bukkit.plugin.java.JavaPlugin.getProvidingPlugin(getClass()),
-                    impact::remove,
+                    () -> {
+                        try {
+                            java.lang.reflect.Method removeMethod = staticEntityClass.getMethod("remove");
+                            removeMethod.invoke(impact);
+                        } catch (Throwable ignored) {}
+                    },
                     6L
                 );
             }
@@ -136,7 +144,9 @@ public final class TridentUltimateTask extends BukkitRunnable {
     private void cleanup() {
         if (barrageFmmModel != null) {
             try {
-                ((com.magmaguy.freeminecraftmodels.customentities.StaticEntity) barrageFmmModel).remove();
+                Class<?> staticEntityClass = Class.forName("com.magmaguy.freeminecraftmodels.customentities.StaticEntity");
+                java.lang.reflect.Method removeMethod = staticEntityClass.getMethod("remove");
+                removeMethod.invoke(barrageFmmModel);
             } catch (Throwable ignored) {}
             barrageFmmModel = null;
         }
