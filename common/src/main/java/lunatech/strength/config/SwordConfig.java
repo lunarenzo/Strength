@@ -31,6 +31,12 @@ public class SwordConfig implements VersionedConfig {
     @Comment("Duration of Dual Wielding ultimate in seconds")
     public int ultimateDurationSeconds = 10;
 
+    @Comment("Maximum reach distance in blocks for offhand dual-wield attacks")
+    public double offhandReachDistance = 3.5;
+
+    @Comment("Base collateral sweep damage for offhand attacks")
+    public double offhandSweepDamageMultiplier = 1.0;
+
     // Messages
     @Comment("Message sent when sword passive Auto-Crit is triggered")
     public String passiveAutoCritMessage = "<gold><bold>Sword Passive triggered! AUTO-CRIT!</bold></gold>";
@@ -49,4 +55,13 @@ public class SwordConfig implements VersionedConfig {
 
     @Comment("Message sent when sword ultimate expires")
     public String ultimateExpiredMessage = "<red>Your Dual Wielding Sword Ultimate has expired!</red>";
+
+    @Comment("Message sent when player is not holding a Sword")
+    public String mustHoldSwordMessage = "<red>You must be holding a Sword to activate your ultimate!</red>";
+
+    @Comment("Message sent when player does not have enough strength")
+    public String notEnoughStrengthMessage = "<red>You do not have enough strength to activate your ultimate! (Required: <req>, Current: <current>)</red>";
+
+    @Comment("Message sent when ultimate is not charged yet")
+    public String notChargedMessage = "<red>Your ultimate is not charged yet! (Required: <req>, Current: <current> passive crits)</red>";
 }

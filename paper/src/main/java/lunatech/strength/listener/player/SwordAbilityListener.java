@@ -115,7 +115,7 @@ public final class SwordAbilityListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onSwordHit(EntityDamageByEntityEvent event) {
-        if (!(event.getEntity() instanceof Player victim) || !(event.getDamager() instanceof Player damager)) {
+        if (!(event.getEntity() instanceof LivingEntity victim) || !(event.getDamager() instanceof Player damager)) {
             return;
         }
 
@@ -136,6 +136,11 @@ public final class SwordAbilityListener implements Listener {
             return;
         }
 
+        final double modifiedDmg = processSwordHitCombo(damager, victim, event.getDamage());
+        event.setDamage(modifiedDmg);
+    }
+
+    private double processSwordHitCombo(Player damager, LivingEntity victim, double baseDamage) {
         final UUID uuid = damager.getUniqueId();
         final SwordConfig settings = plugin.getConfigHandler().getSwordConfig();
 
@@ -147,10 +152,11 @@ public final class SwordAbilityListener implements Listener {
         combo++;
         lastHitTimes.put(uuid, now);
 
+        double finalDamage = baseDamage;
+
         if (combo >= settings.passiveComboHitsRequired) {
             comboCounts.put(uuid, 0);
-
-            event.setDamage(event.getDamage() * settings.passiveCritDamageMultiplier);
+            finalDamage = baseDamage * settings.passiveCritDamageMultiplier;
 
             victim.getWorld().spawnParticle(Particle.CRIT, victim.getLocation().add(0, 1.0, 0), 15, 0.3, 0.5, 0.3, 0.1);
             victim.getWorld().spawnParticle(Particle.DAMAGE_INDICATOR, victim.getLocation().add(0, 1.0, 0), 5, 0.2, 0.4, 0.2, 0.1);
@@ -170,7 +176,9 @@ public final class SwordAbilityListener implements Listener {
                         damager.playSound(damager.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.2f);
                     } else {
                         damager.sendMessage(
-                            ColorParser.of(settings.ultimateChargeProgressMessage)
+                            ColorParser.of(settings.ultimateChargeProgressMessage
+                                .replace("{charge}", String.valueOf(nextUltHits))
+                                .replace("{target}", String.valueOf(targetUltHits)))
                                 .with("charge", String.valueOf(nextUltHits))
                                 .with("target", String.valueOf(targetUltHits))
                                 .build()
@@ -181,12 +189,16 @@ public final class SwordAbilityListener implements Listener {
         } else {
             comboCounts.put(uuid, combo);
             damager.sendMessage(
-                ColorParser.of(settings.passiveComboProgressMessage)
+                ColorParser.of(settings.passiveComboProgressMessage
+                    .replace("{combo}", String.valueOf(combo))
+                    .replace("{required}", String.valueOf(settings.passiveComboHitsRequired)))
                     .with("combo", String.valueOf(combo))
                     .with("required", String.valueOf(settings.passiveComboHitsRequired))
                     .build()
             );
         }
+
+        return finalDamage;
     }
 
     // Offhand Attack: Right-Click Entity
@@ -215,10 +227,11 @@ public final class SwordAbilityListener implements Listener {
                 event.setCancelled(true);
                 player.swingOffHand();
 
+                final SwordConfig settings = plugin.getConfigHandler().getSwordConfig();
                 final RayTraceResult result = player.getWorld().rayTraceEntities(
                     player.getEyeLocation(),
                     player.getEyeLocation().getDirection(),
-                    3.5,
+                    settings.offhandReachDistance,
                     e -> e instanceof LivingEntity && !e.equals(player)
                 );
 
@@ -252,6 +265,7 @@ public final class SwordAbilityListener implements Listener {
         // Reset attack cooldown bar after offhand strike
         player.resetCooldown();
 
+        final SwordConfig settings = plugin.getConfigHandler().getSwordConfig();
         final ItemStack offhand = player.getInventory().getItemInOffHand();
         final AttributeInstance damageAttr = player.getAttribute(Attribute.ATTACK_DAMAGE);
         double dmg = damageAttr != null ? damageAttr.getValue() : 6.0;
@@ -261,6 +275,9 @@ public final class SwordAbilityListener implements Listener {
             final int sharpLvl = offhand.getItemMeta().getEnchantLevel(org.bukkit.enchantments.Enchantment.SHARPNESS);
             dmg += (0.5 * sharpLvl + 0.5);
         }
+
+        // Apply passive combo tracking to offhand hits
+        dmg = processSwordHitCombo(player, target, dmg);
 
         // Native jump-crit condition: falling, not climbing, not in water, no blindness, not riding
         final boolean isCrit = player.getFallDistance() > 0.0F 
@@ -280,8 +297,8 @@ public final class SwordAbilityListener implements Listener {
             target.getWorld().spawnParticle(Particle.SWEEP_ATTACK, sweepLoc, 1, 0.0, 0.0, 0.0, 0.0);
             player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1.0f, 1.0f);
 
-            // Collateral AoE sweep damage to nearby entities (1.0 + Sweeping Edge level)
-            final double sweepDmg = 1.0 + (offhand != null && offhand.containsEnchantment(org.bukkit.enchantments.Enchantment.SWEEPING_EDGE) 
+            // Collateral AoE sweep damage to nearby entities
+            final double sweepDmg = settings.offhandSweepDamageMultiplier + (offhand != null && offhand.containsEnchantment(org.bukkit.enchantments.Enchantment.SWEEPING_EDGE) 
                 ? offhand.getEnchantmentLevel(org.bukkit.enchantments.Enchantment.SWEEPING_EDGE) : 0.0);
 
             for (org.bukkit.entity.Entity nearby : target.getWorld().getNearbyEntities(target.getBoundingBox().expand(1.0, 0.25, 1.0))) {
