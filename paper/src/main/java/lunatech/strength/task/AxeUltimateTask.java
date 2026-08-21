@@ -164,6 +164,7 @@ public final class AxeUltimateTask extends BukkitRunnable {
                 ));
                 entity.setBillboard(ItemDisplay.Billboard.FIXED);
                 entity.setViewRange((float) (settings.skullViewDistanceBlocks / 64.0));
+                entity.setMetadata("AxeExecutionerSkull", new org.bukkit.metadata.FixedMetadataValue(plugin, true));
             });
 
             target.addPassenger(display);

@@ -304,4 +304,11 @@ public final class AxeAbilityListener implements Listener {
             }
         }
     }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onSkullDismount(@NotNull org.bukkit.event.entity.EntityDismountEvent event) {
+        if (event.getEntity() instanceof org.bukkit.entity.ItemDisplay display && display.hasMetadata("AxeExecutionerSkull")) {
+            event.setCancelled(true);
+        }
+    }
 }
