@@ -172,16 +172,18 @@ public final class AxeAbilityListener implements Listener {
         final Player player = event.getPlayer();
         if (!isStunned(player)) return;
 
-        if (!event.hasChangedPosition()) return;
-
-        final Location anchor = lockedLocations.get(player.getUniqueId());
-        if (anchor == null) return;
-
-        final Location destination = anchor.clone();
-        destination.setYaw(event.getTo().getYaw());
-        destination.setPitch(event.getTo().getPitch());
-
-        event.setTo(destination);
+        // Allow knockback velocity and falling, only restrict walking away
+        if (event.hasChangedBlock()) {
+            final double dx = event.getTo().getX() - event.getFrom().getX();
+            final double dz = event.getTo().getZ() - event.getFrom().getZ();
+            if ((dx * dx + dz * dz) > 0.16) {
+                final Location adjusted = event.getFrom().clone();
+                adjusted.setY(event.getTo().getY());
+                adjusted.setYaw(event.getTo().getYaw());
+                adjusted.setPitch(event.getTo().getPitch());
+                event.setTo(adjusted);
+            }
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
