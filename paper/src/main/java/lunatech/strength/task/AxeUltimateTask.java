@@ -150,7 +150,12 @@ public final class AxeUltimateTask extends BukkitRunnable {
 
         final double yOffset = getDynamicNametagHeight(target, settings);
         final float scale = (float) settings.skullScale;
-        final Location headLoc = target.getLocation().add(0, yOffset, 0);
+
+        // Upward jump velocity compensation to prevent 1-tick jump sinking
+        final double velocityY = target.getVelocity().getY();
+        final double jumpCompensation = (velocityY > 0.02) ? (velocityY * 1.4) : 0.0;
+
+        final Location headLoc = target.getLocation().add(0, yOffset + jumpCompensation, 0);
 
         ItemDisplay display = skullDisplays.get(targetUuid);
         if (display == null || !display.isValid()) {
@@ -182,12 +187,31 @@ public final class AxeUltimateTask extends BukkitRunnable {
     }
 
     private double getDynamicNametagHeight(Player target, AxeConfig settings) {
-        // Base clearance above player head + default nametag
+        // Base clearance above player head
         double height = target.getHeight() + settings.skullHeightOffset;
+
+        // 1. Native Integration: UnlimitedNametags API
+        if (Bukkit.getPluginManager().isPluginEnabled("UnlimitedNametags")) {
+            try {
+                final Class<?> untApiClass = Class.forName("org.alexdev.unlimitednametags.api.UNTPaperAPI");
+                final Object untApiInstance = untApiClass.getMethod("getInstance").invoke(null);
+                if (untApiInstance != null) {
+                    final Object displays = untApiClass.getMethod("getPacketDisplayText", Player.class).invoke(untApiInstance, target);
+                    if (displays instanceof java.util.Collection<?> col && !col.isEmpty()) {
+                        // Each UnlimitedNametags TextDisplay row adds ~0.30 blocks of stack height above player head
+                        height += (col.size() * 0.30) + 0.15;
+                        return height;
+                    }
+                }
+            } catch (Throwable ignored) {
+                height += 0.65; // Fallback height for active UnlimitedNametags plugin
+                return height;
+            }
+        }
 
         boolean hasBelowName = false;
 
-        // 1. Check Bukkit Scoreboard BelowName Objective
+        // 2. Check Bukkit Scoreboard BelowName Objective
         try {
             final org.bukkit.scoreboard.Scoreboard board = target.getScoreboard();
             if (board != null && board.getObjective(org.bukkit.scoreboard.DisplaySlot.BELOW_NAME) != null) {
@@ -195,7 +219,7 @@ public final class AxeUltimateTask extends BukkitRunnable {
             }
         } catch (Throwable ignored) {}
 
-        // 2. Check TAB plugin below-name feature
+        // 3. Check TAB plugin below-name feature
         if (!hasBelowName && Bukkit.getPluginManager().isPluginEnabled("TAB")) {
             hasBelowName = true;
         }
