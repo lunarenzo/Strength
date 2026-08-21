@@ -101,11 +101,11 @@ public final class AxeUltimateTask extends BukkitRunnable {
             Material mat = Material.matchMaterial(settings.bleedParticleMaterial);
             if (mat == null) mat = Material.REDSTONE_BLOCK;
 
-            final String typeStr = settings.bleedParticleType != null ? settings.bleedParticleType.toUpperCase() : "ITEM_CRUMB";
+            final String typeStr = settings.bleedParticleType != null ? settings.bleedParticleType.toUpperCase() : "ITEM";
 
-            if ("BLOCK_CRUMB".equals(typeStr)) {
+            if ("BLOCK".equals(typeStr) || "BLOCK_CRUMB".equals(typeStr)) {
                 target.getWorld().spawnParticle(
-                    Particle.BLOCK_CRUMB,
+                    Particle.BLOCK,
                     target.getLocation().add(0, 1.0, 0),
                     settings.bleedParticleCount,
                     0.3, 0.5, 0.3,
@@ -121,9 +121,9 @@ public final class AxeUltimateTask extends BukkitRunnable {
                     settings.bleedParticleSpeed
                 );
             } else {
-                // Default: ITEM_CRUMB (blood item crumbs)
+                // Default: Particle.ITEM (blood item crumbs)
                 target.getWorld().spawnParticle(
-                    Particle.ITEM_CRUMB,
+                    Particle.ITEM,
                     target.getLocation().add(0, 1.0, 0),
                     settings.bleedParticleCount,
                     0.3, 0.5, 0.3,
@@ -133,7 +133,7 @@ public final class AxeUltimateTask extends BukkitRunnable {
             }
         } catch (Throwable ignored) {
             target.getWorld().spawnParticle(
-                Particle.ITEM_CRUMB,
+                Particle.ITEM,
                 target.getLocation().add(0, 1.0, 0),
                 settings.bleedParticleCount,
                 0.3, 0.5, 0.3,
