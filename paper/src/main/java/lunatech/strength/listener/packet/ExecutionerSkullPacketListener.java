@@ -12,12 +12,17 @@ import lunatech.strength.task.AxeUltimateTask;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
- * Ultra-low latency, zero-allocation PacketEvents listener that synchronizes visual skull entity movement
- * packets directly on the Netty channel pipeline. Reads each event buffer exactly once to prevent
- * DecoderExceptions while eliminating heap allocation overhead.
+ * Ultra-low latency, zero-allocation PacketEvents listener that maintains real-time vector accumulator
+ * tracking for visual skull entities directly on the Netty channel pipeline. Eliminates main-thread location lag
+ * and prevents up-and-down bouncing during knockback and vertical jumping.
  */
 public final class ExecutionerSkullPacketListener extends PacketListenerAbstract {
+
+    private static final Map<Integer, Vector3d> lastKnownSkullPositions = new ConcurrentHashMap<>();
 
     @Override
     public void onPacketSend(PacketSendEvent event) {
@@ -32,6 +37,7 @@ public final class ExecutionerSkullPacketListener extends PacketListenerAbstract
                 final double yOffset = AxeUltimateTask.activeSkullYOffsetsByEntityId.getOrDefault(entityId, 2.4);
                 final Vector3d origPos = packet.getPosition();
                 final Vector3d skullPos = new Vector3d(origPos.getX(), origPos.getY() + yOffset, origPos.getZ());
+                lastKnownSkullPositions.put(entityId, skullPos);
 
                 final WrapperPlayServerEntityTeleport syncTeleport = new WrapperPlayServerEntityTeleport(
                     skullDisplayId,
@@ -48,23 +54,19 @@ public final class ExecutionerSkullPacketListener extends PacketListenerAbstract
             final Integer skullDisplayId = AxeUltimateTask.activeSkullDisplaysByEntityId.get(entityId);
 
             if (skullDisplayId != null) {
-                final Player targetPlayer = AxeUltimateTask.activeSkullTargetPlayersByEntityId.get(entityId);
-                if (targetPlayer != null && targetPlayer.isOnline()) {
-                    final double yOffset = AxeUltimateTask.activeSkullYOffsetsByEntityId.getOrDefault(entityId, 2.4);
-                    final Location loc = targetPlayer.getLocation();
-
-                    final double targetX = loc.getX() + packet.getDeltaX();
-                    final double targetY = loc.getY() + packet.getDeltaY() + yOffset;
-                    final double targetZ = loc.getZ() + packet.getDeltaZ();
+                final Vector3d newSkullPos = updateAccumulatedPosition(entityId, packet.getDeltaX(), packet.getDeltaY(), packet.getDeltaZ());
+                if (newSkullPos != null) {
+                    final Player targetPlayer = AxeUltimateTask.activeSkullTargetPlayersByEntityId.get(entityId);
+                    final float yaw = targetPlayer != null && targetPlayer.isOnline() ? targetPlayer.getLocation().getYaw() : 0.0f;
+                    final float pitch = targetPlayer != null && targetPlayer.isOnline() ? targetPlayer.getLocation().getPitch() : 0.0f;
 
                     final WrapperPlayServerEntityTeleport syncTeleport = new WrapperPlayServerEntityTeleport(
                         skullDisplayId,
-                        new Vector3d(targetX, targetY, targetZ),
-                        loc.getYaw(),
-                        loc.getPitch(),
+                        newSkullPos,
+                        yaw,
+                        pitch,
                         false
                     );
-
                     event.getUser().sendPacket(syncTeleport);
                 }
             }
@@ -74,26 +76,43 @@ public final class ExecutionerSkullPacketListener extends PacketListenerAbstract
             final Integer skullDisplayId = AxeUltimateTask.activeSkullDisplaysByEntityId.get(entityId);
 
             if (skullDisplayId != null) {
-                final Player targetPlayer = AxeUltimateTask.activeSkullTargetPlayersByEntityId.get(entityId);
-                if (targetPlayer != null && targetPlayer.isOnline()) {
-                    final double yOffset = AxeUltimateTask.activeSkullYOffsetsByEntityId.getOrDefault(entityId, 2.4);
-                    final Location loc = targetPlayer.getLocation();
-
-                    final double targetX = loc.getX() + packet.getDeltaX();
-                    final double targetY = loc.getY() + packet.getDeltaY() + yOffset;
-                    final double targetZ = loc.getZ() + packet.getDeltaZ();
-
+                final Vector3d newSkullPos = updateAccumulatedPosition(entityId, packet.getDeltaX(), packet.getDeltaY(), packet.getDeltaZ());
+                if (newSkullPos != null) {
                     final WrapperPlayServerEntityTeleport syncTeleport = new WrapperPlayServerEntityTeleport(
                         skullDisplayId,
-                        new Vector3d(targetX, targetY, targetZ),
+                        newSkullPos,
                         packet.getYaw(),
                         packet.getPitch(),
                         false
                     );
-
                     event.getUser().sendPacket(syncTeleport);
                 }
             }
         }
+    }
+
+    private static Vector3d updateAccumulatedPosition(int entityId, double deltaX, double deltaY, double deltaZ) {
+        Vector3d lastPos = lastKnownSkullPositions.get(entityId);
+        if (lastPos == null) {
+            final Player targetPlayer = AxeUltimateTask.activeSkullTargetPlayersByEntityId.get(entityId);
+            if (targetPlayer == null || !targetPlayer.isOnline()) {
+                return null;
+            }
+            final double yOffset = AxeUltimateTask.activeSkullYOffsetsByEntityId.getOrDefault(entityId, 2.4);
+            final Location loc = targetPlayer.getLocation();
+            lastPos = new Vector3d(loc.getX(), loc.getY() + yOffset, loc.getZ());
+        }
+
+        final Vector3d newPos = new Vector3d(
+            lastPos.getX() + deltaX,
+            lastPos.getY() + deltaY,
+            lastPos.getZ() + deltaZ
+        );
+        lastKnownSkullPositions.put(entityId, newPos);
+        return newPos;
+    }
+
+    public static void removeEntityTracker(int entityId) {
+        lastKnownSkullPositions.remove(entityId);
     }
 }

@@ -246,6 +246,7 @@ public final class AxeUltimateTask extends BukkitRunnable {
                 activeSkullDisplaysByEntityId.remove(p.getEntityId());
                 activeSkullYOffsetsByEntityId.remove(p.getEntityId());
                 activeSkullTargetPlayersByEntityId.remove(p.getEntityId());
+                lunatech.strength.listener.packet.ExecutionerSkullPacketListener.removeEntityTracker(p.getEntityId());
             }
         }
         skullDisplays.clear();
