@@ -108,11 +108,25 @@ public final class TridentUltimateTask extends BukkitRunnable {
                 // Save velocity before damage to prevent knockback (1:1 MythicMobs pkb=true)
                 final org.bukkit.util.Vector preVel = target.getVelocity().clone();
 
+                // Bypass invulnerability frames matching MythicMobs hnp=true (Has No Protection)
+                target.setMaximumNoDamageTicks(0);
+                target.setNoDamageTicks(0);
+
                 // Deal barrage thrust damage
                 target.damage(settings.ultimateDamage, player);
+                target.setNoDamageTicks(0);
 
-                // Restore pre-damage velocity (prevents knockback so target stays inside barrage cone)
-                target.setVelocity(preVel);
+                // Cancel Spigot knockback impulse on next tick (1:1 MythicMobs pkb=true)
+                final LivingEntity finalTarget = target;
+                org.bukkit.Bukkit.getScheduler().runTaskLater(
+                    org.bukkit.plugin.java.JavaPlugin.getProvidingPlugin(getClass()),
+                    () -> {
+                        if (finalTarget.isValid() && !finalTarget.isDead()) {
+                            finalTarget.setVelocity(preVel);
+                        }
+                    },
+                    1L
+                );
 
                 // Spawn FMM impact VFX model on struck target
                 spawnFmmImpactModel(settings.impactModelId, target.getLocation().add(0, 0.95, 0));
