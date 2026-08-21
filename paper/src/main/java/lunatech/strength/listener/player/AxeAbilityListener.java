@@ -4,6 +4,7 @@ import lunatech.strength.Strength;
 import lunatech.strength.config.AxeConfig;
 import lunatech.strength.service.StrengthService;
 import io.github.milkdrinkers.colorparser.paper.ColorParser;
+import org.jetbrains.annotations.NotNull;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
