@@ -363,7 +363,9 @@ public final class AbilityCommand extends Command {
 
         if (currentStrength < settings.ultimateStrengthRequired) {
             player.sendMessage(
-                ColorParser.of("<red>You do not have enough strength to activate your ultimate! (Required: <req>, Current: <current>)</red>")
+                ColorParser.of(settings.notEnoughStrengthMessage
+                    .replace("{req}", String.valueOf(settings.ultimateStrengthRequired))
+                    .replace("{current}", String.valueOf(currentStrength)))
                     .with("req", String.valueOf(settings.ultimateStrengthRequired))
                     .with("current", String.valueOf(currentStrength))
                     .build()
@@ -375,7 +377,9 @@ public final class AbilityCommand extends Command {
         final int currentCharge = SwordAbilityListener.ultimateHits.getOrDefault(uuid, 0);
         if (currentCharge < settings.ultimateHitsRequired) {
             player.sendMessage(
-                ColorParser.of("<red>Your ultimate is not charged yet! (Required: <req>, Current: <current> passive crits)</red>")
+                ColorParser.of(settings.notChargedMessage
+                    .replace("{req}", String.valueOf(settings.ultimateHitsRequired))
+                    .replace("{current}", String.valueOf(currentCharge)))
                     .with("req", String.valueOf(settings.ultimateHitsRequired))
                     .with("current", String.valueOf(currentCharge))
                     .build()
@@ -385,7 +389,7 @@ public final class AbilityCommand extends Command {
 
         final ItemStack mainHand = player.getInventory().getItemInMainHand();
         if (mainHand == null || !Tag.ITEMS_SWORDS.isTagged(mainHand.getType())) {
-            player.sendMessage(ColorParser.of("<red>You must be holding a sword to activate Dual Wielding!</red>").build());
+            player.sendMessage(ColorParser.of(settings.mustHoldSwordMessage).build());
             return;
         }
 
