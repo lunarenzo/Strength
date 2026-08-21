@@ -128,6 +128,11 @@ public final class SwordAbilityListener implements Listener {
             return;
         }
 
+        // Ignore uncharged spam strikes (must be >= 0.9f full attack strength, matching 1:1 main-hand vanilla)
+        if (damager.getCooledAttackStrength(0.0f) < 0.9f) {
+            return;
+        }
+
         if (!Tag.ITEMS_SWORDS.isTagged(damager.getInventory().getItemInMainHand().getType())) {
             return;
         }
