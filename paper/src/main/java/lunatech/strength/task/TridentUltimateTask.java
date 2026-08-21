@@ -68,26 +68,11 @@ public final class TridentUltimateTask extends BukkitRunnable {
             tryPlaySound("thunder_ronin_sounds:samus.thunder_ronin.thunder_barrage", Sound.ITEM_TRIDENT_THROW, 0.7f, 1.0f);
         }
 
-        // 3. Multi-Thrust Damage Loop & Scatter Barrage Beams (9 hits spaced every configured interval ticks)
+        // 3. Multi-Thrust Damage Loop (9 hits spaced every configured interval ticks)
         final int interval = Math.max(1, settings.lightningStrikeIntervalTicks);
         if (elapsedTicks >= 8 && (elapsedTicks - 8) % interval == 0) {
             final Location center = player.getLocation();
             final double coneRadius = settings.ultimateRadius;
-            final Particle.DustTransition beamColor = new Particle.DustTransition(Color.fromRGB(50, 255, 211), Color.fromRGB(243, 255, 178), 1.5f);
-
-            // Forward thrust scatter beam visuals (3 parallel/scattered thrust rays matching screenshot)
-            org.bukkit.util.Vector dir = center.getDirection().normalize();
-            org.bukkit.util.Vector right = new org.bukkit.util.Vector(-dir.getZ(), 0, dir.getX()).normalize();
-            double[] sideOffsets = {-0.6, 0.0, 0.6};
-
-            for (double sideOffset : sideOffsets) {
-                Location start = center.clone().add(0, 1.2, 0).add(right.clone().multiply(sideOffset));
-                for (double dist = 0.5; dist <= 4.5; dist += 0.5) {
-                    Location point = start.clone().add(dir.clone().multiply(dist));
-                    center.getWorld().spawnParticle(Particle.DUST_COLOR_TRANSITION, point, 2, 0.05, 0.05, 0.05, 0, beamColor);
-                    center.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, point, 1, 0.1, 0.1, 0.1, 0.05);
-                }
-            }
 
             // Damage forward cone targets
             for (LivingEntity target : center.getWorld().getNearbyLivingEntities(center, coneRadius)) {
@@ -106,9 +91,6 @@ public final class TridentUltimateTask extends BukkitRunnable {
 
                 // Spawn FMM impact VFX model on struck target
                 spawnFmmImpactModel(settings.impactModelId, targetLoc.clone().add(0, 0.95, 0));
-
-                target.getWorld().spawnParticle(Particle.CRIT, targetLoc.clone().add(0, 1, 0), 15, 0.3, 0.5, 0.3, 0.1);
-                target.getWorld().spawnParticle(Particle.GLOW, targetLoc.clone().add(0, 1, 0), 10, 0.4, 0.4, 0.4, 0.1);
             }
         }
 
