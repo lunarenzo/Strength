@@ -77,18 +77,25 @@ public final class AxeUltimateTask extends BukkitRunnable {
         if (damageMap != null) {
             for (Map.Entry<UUID, Double> entry : damageMap.entrySet()) {
                 final Player target = plugin.getServer().getPlayer(entry.getKey());
-                if (target != null && target.isOnline() && !target.isDead() && entry.getValue() > 0.0) {
-                    final double total = entry.getValue() * settings.damageMultiplier;
-                    final String msg = settings.pendingDamageActionbarMessage.replace("{amount}", String.format("%.1f", total));
-                    target.sendActionBar(ColorParser.of(msg).build());
-
-                    // 1. Floating & Rotating Skull ItemDisplay on target's head (Passenger Mounted for Zero Lag/Desync)
-                    updateFloatingSkull(target, settings);
-
-                    // 2. Bleeding Particle Effect dripping from target's body (Authentic Blood Item/Block Crumbs)
-                    if (settings.enableBleedParticles && elapsedTicks % Math.max(1, settings.bleedParticleFrequencyTicks) == 0) {
-                        spawnBloodParticles(target, settings);
+                if (target == null || !target.isOnline() || target.isDead() || entry.getValue() <= 0.0) {
+                    final ItemDisplay deadDisplay = skullDisplays.remove(entry.getKey());
+                    if (deadDisplay != null && deadDisplay.isValid()) {
+                        deadDisplay.remove();
                     }
+                    skullAngles.remove(entry.getKey());
+                    continue;
+                }
+
+                final double total = entry.getValue() * settings.damageMultiplier;
+                final String msg = settings.pendingDamageActionbarMessage.replace("{amount}", String.format("%.1f", total));
+                target.sendActionBar(ColorParser.of(msg).build());
+
+                // 1. Floating & Rotating Skull ItemDisplay on target's head (Passenger Mounted for Zero Lag/Desync)
+                updateFloatingSkull(target, settings);
+
+                // 2. Bleeding Particle Effect dripping from target's body (Authentic Blood Item/Block Crumbs)
+                if (settings.enableBleedParticles && elapsedTicks % Math.max(1, settings.bleedParticleFrequencyTicks) == 0) {
+                    spawnBloodParticles(target, settings);
                 }
             }
         }
