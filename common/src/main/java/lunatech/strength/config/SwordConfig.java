@@ -64,4 +64,10 @@ public class SwordConfig implements VersionedConfig {
 
     @Comment("Message sent when ultimate is not charged yet")
     public String notChargedMessage = "<red>Your ultimate is not charged yet! (Required: <req>, Current: <current> passive crits)</red>";
+
+    @Comment("Actionbar progress bar message displayed while offhand attack is recharging during Dual Wielding")
+    public String offhandChargingActionbarMessage = "<gray>Offhand: <gold><bar></gold></gray>";
+
+    @Comment("Actionbar ready message displayed when offhand attack is fully charged during Dual Wielding")
+    public String offhandReadyActionbarMessage = "<green><bold>⚔ OFFHAND READY</bold></green>";
 }

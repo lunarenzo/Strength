@@ -34,20 +34,29 @@ public final class SwordUltimateTask extends BukkitRunnable {
             return;
         }
 
-        // Offhand Attack Cooldown Actionbar Indicator during Dual Wield state
+        // Offhand Attack Cooldown Actionbar Indicator during Dual Wield state (1:1 dynamic & configurable)
         final Long lastOffhandAttack = SwordAbilityListener.lastOffhandAttackTimes.get(uuid);
+        final lunatech.strength.config.SwordConfig settings = plugin.getConfigHandler().getSwordConfig();
         if (lastOffhandAttack != null) {
             final long now = System.currentTimeMillis();
             final long diff = now - lastOffhandAttack;
-            final long cooldownMs = 500; // 500ms attack cooldown (+100% attack speed)
+            final org.bukkit.attribute.AttributeInstance speedAttr = player.getAttribute(org.bukkit.attribute.Attribute.ATTACK_SPEED);
+            final double attackSpeed = (speedAttr != null) ? speedAttr.getValue() : 8.0;
+            final long cooldownMs = (long) (1000.0 / Math.max(1.0, attackSpeed));
 
             if (diff < cooldownMs) {
-                final double pct = (double) diff / (double) cooldownMs;
+                final double pct = Math.min(1.0, Math.max(0.0, (double) diff / (double) cooldownMs));
                 final int filled = (int) (pct * 8.0);
                 final String bar = "■".repeat(filled) + "□".repeat(8 - filled);
-                player.sendActionBar(io.github.milkdrinkers.colorparser.paper.ColorParser.of("<gray>Offhand: <gold>" + bar + "</gold></gray>").build());
+                player.sendActionBar(
+                    io.github.milkdrinkers.colorparser.paper.ColorParser.of(settings.offhandChargingActionbarMessage
+                        .replace("{bar}", bar)
+                        .replace("<bar>", bar))
+                        .with("bar", bar)
+                        .build()
+                );
             } else if (diff < cooldownMs + 300) {
-                player.sendActionBar(io.github.milkdrinkers.colorparser.paper.ColorParser.of("<green><bold>⚔ OFFHAND READY</bold></green>").build());
+                player.sendActionBar(io.github.milkdrinkers.colorparser.paper.ColorParser.of(settings.offhandReadyActionbarMessage).build());
             }
         }
 
