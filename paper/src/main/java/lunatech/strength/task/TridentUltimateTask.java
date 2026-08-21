@@ -63,7 +63,7 @@ public final class TridentUltimateTask extends BukkitRunnable {
         // 2. Spawn FMM Model & Start Barrage Audio (Tick 8)
         if (elapsedTicks == 8) {
             final org.bukkit.util.Vector forwardDir = player.getLocation().getDirection().setY(0).normalize();
-            final Location spawnLoc = player.getLocation().add(0, 1.2, 0).add(forwardDir.clone().multiply(4.5));
+            final Location spawnLoc = player.getLocation().add(0, 1.2, 0).add(forwardDir.clone().multiply(1.5));
             spawnLoc.setYaw((float) (player.getLocation().getYaw() + settings.modelYawOffsetDegrees));
             spawnFmmModel(settings.barrageModelId, spawnLoc);
             tryPlaySound("thunder_ronin_sounds:samus.thunder_ronin.thunder_barrage", Sound.ITEM_TRIDENT_THROW, 0.7f, 1.0f);
