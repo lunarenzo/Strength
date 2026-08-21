@@ -35,7 +35,6 @@ public class PacketEventsHook extends AbstractHook {
             return;
 
         PacketEvents.getAPI().init();
-        PacketEvents.getAPI().getEventManager().registerListener(new lunatech.strength.listener.packet.ExecutionerSkullPacketListener());
     }
 
     @Override

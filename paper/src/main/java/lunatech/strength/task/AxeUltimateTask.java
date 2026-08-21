@@ -30,10 +30,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * dynamic TAB belowname nametag height clearance, authentic blood particle crumbs, and releasing capped burst damage upon expiration.
  */
 public final class AxeUltimateTask extends BukkitRunnable {
-    public static final Map<Integer, Integer> activeSkullDisplaysByEntityId = new ConcurrentHashMap<>();
-    public static final Map<Integer, Double> activeSkullYOffsetsByEntityId = new ConcurrentHashMap<>();
-    public static final Map<Integer, Player> activeSkullTargetPlayersByEntityId = new ConcurrentHashMap<>();
-
     private final Player attacker;
     private final Strength plugin;
     private final int durationTicks;
@@ -152,101 +148,46 @@ public final class AxeUltimateTask extends BukkitRunnable {
         final float finalAngleRad = (float) ((skullAngles.getOrDefault(targetUuid, 0.0f) + Math.toRadians(settings.skullRotationSpeedDegrees)) % (2.0 * Math.PI));
         skullAngles.put(targetUuid, finalAngleRad);
 
-        final double yOffset = getDynamicNametagHeight(target, settings);
+        final float yTranslation = (float) settings.skullHeightOffset;
         final float scale = (float) settings.skullScale;
-        final Location headLoc = target.getLocation().add(0, yOffset, 0);
 
         ItemDisplay display = skullDisplays.get(targetUuid);
         if (display == null || !display.isValid()) {
-            display = target.getWorld().spawn(headLoc, ItemDisplay.class, entity -> {
+            final Location spawnLoc = target.getLocation().add(0, target.getHeight() + yTranslation, 0);
+            display = target.getWorld().spawn(spawnLoc, ItemDisplay.class, entity -> {
                 entity.setItemStack(customSkullItem != null ? customSkullItem : new ItemStack(Material.PLAYER_HEAD));
                 entity.setTransformation(new Transformation(
-                    new Vector3f(0, 0, 0),
+                    new Vector3f(0, yTranslation, 0),
                     new AxisAngle4f(finalAngleRad, 0, 1, 0),
                     new Vector3f(scale, scale, scale),
                     new AxisAngle4f(0, 0, 1, 0)
                 ));
                 entity.setBillboard(ItemDisplay.Billboard.FIXED);
-                entity.setTeleportDuration(1);
-                entity.setInterpolationDuration(1);
                 entity.setViewRange((float) (settings.skullViewDistanceBlocks / 64.0));
             });
 
+            target.addPassenger(display);
             skullDisplays.put(targetUuid, display);
         } else {
-            // Update transformation angle and position
+            // Ensure passenger mounting is maintained (client locks position with 100% 60fps/144fps smooth tracking)
+            if (!target.getPassengers().contains(display)) {
+                target.addPassenger(display);
+            }
+
             display.setTransformation(new Transformation(
-                new Vector3f(0, 0, 0),
+                new Vector3f(0, yTranslation, 0),
                 new AxisAngle4f(finalAngleRad, 0, 1, 0),
                 new Vector3f(scale, scale, scale),
                 new AxisAngle4f(0, 0, 1, 0)
             ));
         }
-
-        // Register for real-time PacketEvents Netty pipeline packet synchronization
-        activeSkullDisplaysByEntityId.put(target.getEntityId(), display.getEntityId());
-        activeSkullYOffsetsByEntityId.put(target.getEntityId(), yOffset);
-        activeSkullTargetPlayersByEntityId.put(target.getEntityId(), target);
-    }
-
-    private double getDynamicNametagHeight(Player target, AxeConfig settings) {
-        // Base clearance above player head
-        double height = target.getHeight() + settings.skullHeightOffset;
-
-        // 1. Native Integration: UnlimitedNametags API
-        if (Bukkit.getPluginManager().isPluginEnabled("UnlimitedNametags")) {
-            try {
-                final Class<?> untApiClass = Class.forName("org.alexdev.unlimitednametags.api.UNTPaperAPI");
-                final Object untApiInstance = untApiClass.getMethod("getInstance").invoke(null);
-                if (untApiInstance != null) {
-                    final Object displays = untApiClass.getMethod("getPacketDisplayText", Player.class).invoke(untApiInstance, target);
-                    if (displays instanceof java.util.Collection<?> col && !col.isEmpty()) {
-                        // Each UnlimitedNametags TextDisplay row adds ~0.30 blocks of stack height above player head
-                        height += (col.size() * 0.30) + 0.15;
-                        return height;
-                    }
-                }
-            } catch (Throwable ignored) {
-                height += 0.65; // Fallback height for active UnlimitedNametags plugin
-                return height;
-            }
-        }
-
-        boolean hasBelowName = false;
-
-        // 2. Check Bukkit Scoreboard BelowName Objective
-        try {
-            final org.bukkit.scoreboard.Scoreboard board = target.getScoreboard();
-            if (board != null && board.getObjective(org.bukkit.scoreboard.DisplaySlot.BELOW_NAME) != null) {
-                hasBelowName = true;
-            }
-        } catch (Throwable ignored) {}
-
-        // 3. Check TAB plugin below-name feature
-        if (!hasBelowName && Bukkit.getPluginManager().isPluginEnabled("TAB")) {
-            hasBelowName = true;
-        }
-
-        if (hasBelowName) {
-            height += 0.35; // Add extra clearance so skull floats cleanly ABOVE nametag + belowname
-        }
-
-        return height;
     }
 
     private void endUltimate(Player attacker, Strength plugin) {
         // Despawn all floating skull ItemDisplays
-        for (Map.Entry<UUID, ItemDisplay> entry : skullDisplays.entrySet()) {
-            final ItemDisplay display = entry.getValue();
+        for (ItemDisplay display : skullDisplays.values()) {
             if (display != null && display.isValid()) {
                 display.remove();
-            }
-            final Player p = plugin.getServer().getPlayer(entry.getKey());
-            if (p != null) {
-                activeSkullDisplaysByEntityId.remove(p.getEntityId());
-                activeSkullYOffsetsByEntityId.remove(p.getEntityId());
-                activeSkullTargetPlayersByEntityId.remove(p.getEntityId());
-                lunatech.strength.listener.packet.ExecutionerSkullPacketListener.removeEntityTracker(p.getEntityId());
             }
         }
         skullDisplays.clear();
