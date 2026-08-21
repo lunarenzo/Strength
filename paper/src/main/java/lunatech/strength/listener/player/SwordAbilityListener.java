@@ -230,16 +230,27 @@ public final class SwordAbilityListener implements Listener {
     }
 
     private void executeOffhandDamage(Player player, LivingEntity target) {
+        // 1. Check attack cooldown indicator (must be >= 0.9f full charge to strike, matching 1:1 main-hand vanilla)
+        if (player.getAttackCooldown() < 0.9f) {
+            return;
+        }
+
         final UUID uuid = player.getUniqueId();
         final long now = System.currentTimeMillis();
+        final AttributeInstance attackSpeedAttr = player.getAttribute(Attribute.ATTACK_SPEED);
+        final double attackSpeed = (attackSpeedAttr != null) ? attackSpeedAttr.getValue() : 4.0;
+        final long minIntervalMs = (long) (1000.0 / Math.max(1.0, attackSpeed));
         final long last = lastOffhandAttackTimes.getOrDefault(uuid, 0L);
 
-        // 1. Debounce 200ms to prevent double-hit when both interact events fire for the same click
-        if (now - last < 200L) {
+        // 2. Debounce based on player attack speed attribute to match vanilla main-hand swing rhythm
+        if (now - last < minIntervalMs) {
             return;
         }
 
         lastOffhandAttackTimes.put(uuid, now);
+
+        // Reset attack cooldown bar after offhand strike
+        player.resetCooldown();
 
         final ItemStack offhand = player.getInventory().getItemInOffHand();
         final AttributeInstance damageAttr = player.getAttribute(Attribute.ATTACK_DAMAGE);
