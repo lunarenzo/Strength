@@ -30,6 +30,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * dynamic TAB belowname nametag height clearance, authentic blood particle crumbs, and releasing capped burst damage upon expiration.
  */
 public final class AxeUltimateTask extends BukkitRunnable {
+    public static final Map<Integer, Integer> activeSkullPassengers = new ConcurrentHashMap<>();
+
     private final Player attacker;
     private final Strength plugin;
     private final int durationTicks;
@@ -149,38 +151,36 @@ public final class AxeUltimateTask extends BukkitRunnable {
         skullAngles.put(targetUuid, finalAngleRad);
 
         final double yOffset = getDynamicNametagHeight(target, settings);
+        final float yTranslation = (float) (yOffset - target.getHeight());
         final float scale = (float) settings.skullScale;
-
-        // Upward jump velocity compensation to prevent 1-tick jump sinking
-        final double velocityY = target.getVelocity().getY();
-        final double jumpCompensation = (velocityY > 0.02) ? (velocityY * 1.4) : 0.0;
-
-        final Location headLoc = target.getLocation().add(0, yOffset + jumpCompensation, 0);
 
         ItemDisplay display = skullDisplays.get(targetUuid);
         if (display == null || !display.isValid()) {
-            display = target.getWorld().spawn(headLoc, ItemDisplay.class, entity -> {
+            final Location spawnLoc = target.getLocation().add(0, yOffset, 0);
+            display = target.getWorld().spawn(spawnLoc, ItemDisplay.class, entity -> {
                 entity.setItemStack(customSkullItem != null ? customSkullItem : new ItemStack(Material.PLAYER_HEAD));
                 entity.setTransformation(new Transformation(
-                    new Vector3f(0, 0, 0),
+                    new Vector3f(0, yTranslation, 0),
                     new AxisAngle4f(finalAngleRad, 0, 1, 0),
                     new Vector3f(scale, scale, scale),
                     new AxisAngle4f(0, 0, 1, 0)
                 ));
                 entity.setBillboard(ItemDisplay.Billboard.FIXED);
-                entity.setTeleportDuration(1); // Enable client-side smooth position interpolation
-                entity.setInterpolationDuration(1); // Enable client-side smooth rotation/scale interpolation
                 entity.setViewRange((float) (settings.skullViewDistanceBlocks / 64.0));
             });
 
+            target.addPassenger(display);
             skullDisplays.put(targetUuid, display);
+            activeSkullPassengers.put(target.getEntityId(), display.getEntityId());
         } else {
-            // Smoothly update position via 1-tick interpolation and rotation transformation
-            display.setTeleportDuration(1);
-            display.setInterpolationDuration(1);
-            display.teleport(headLoc);
+            // Ensure passenger mounting is maintained (client locks position with 100% 60fps/144fps smooth tracking)
+            if (!target.getPassengers().contains(display)) {
+                target.addPassenger(display);
+            }
+
+            activeSkullPassengers.put(target.getEntityId(), display.getEntityId());
             display.setTransformation(new Transformation(
-                new Vector3f(0, 0, 0),
+                new Vector3f(0, yTranslation, 0),
                 new AxisAngle4f(finalAngleRad, 0, 1, 0),
                 new Vector3f(scale, scale, scale),
                 new AxisAngle4f(0, 0, 1, 0)
@@ -235,9 +235,14 @@ public final class AxeUltimateTask extends BukkitRunnable {
 
     private void endUltimate(Player attacker, Strength plugin) {
         // Despawn all floating skull ItemDisplays
-        for (ItemDisplay display : skullDisplays.values()) {
+        for (Map.Entry<UUID, ItemDisplay> entry : skullDisplays.entrySet()) {
+            final ItemDisplay display = entry.getValue();
             if (display != null && display.isValid()) {
                 display.remove();
+            }
+            final Player p = plugin.getServer().getPlayer(entry.getKey());
+            if (p != null) {
+                activeSkullPassengers.remove(p.getEntityId());
             }
         }
         skullDisplays.clear();
