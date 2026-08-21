@@ -84,26 +84,38 @@ public final class TridentUltimateTask extends BukkitRunnable {
         // 3. Multi-Thrust Damage Loop (9 hits spaced every configured interval ticks)
         final int interval = Math.max(1, settings.lightningStrikeIntervalTicks);
         if (elapsedTicks >= 8 && (elapsedTicks - 8) % interval == 0) {
-            final Location center = player.getLocation();
+            final Location eyeLoc = player.getEyeLocation();
+            final org.bukkit.util.Vector lookDir = eyeLoc.getDirection().normalize();
             final double coneRadius = settings.ultimateRadius;
 
-            // Damage forward cone targets
-            for (LivingEntity target : center.getWorld().getNearbyLivingEntities(center, coneRadius)) {
-                if (target.equals(player) || target instanceof ArmorStand) {
+            // Real-time damage cone raycast following live camera direction
+            for (LivingEntity target : player.getWorld().getNearbyLivingEntities(eyeLoc, coneRadius)) {
+                if (target.equals(player) || target instanceof ArmorStand || !target.isValid() || target.isDead()) {
                     continue;
                 }
 
-                // Verify target is in forward hemisphere cone
-                final Location targetLoc = target.getLocation();
-                if (center.getDirection().dot(targetLoc.toVector().subtract(center.toVector()).normalize()) < 0.2) {
+                final org.bukkit.util.Vector toTarget = target.getEyeLocation().toVector().subtract(eyeLoc.toVector());
+                final double distance = toTarget.length();
+                if (distance > coneRadius || distance < 0.1) {
                     continue;
                 }
+
+                // Check forward camera cone alignment (dot product >= 0.4 for ~66-degree forward cone)
+                if (lookDir.dot(toTarget.normalize()) < 0.4) {
+                    continue;
+                }
+
+                // Save velocity before damage to prevent knockback (1:1 MythicMobs pkb=true)
+                final org.bukkit.util.Vector preVel = target.getVelocity().clone();
 
                 // Deal barrage thrust damage
                 target.damage(settings.ultimateDamage, player);
 
+                // Restore pre-damage velocity (prevents knockback so target stays inside barrage cone)
+                target.setVelocity(preVel);
+
                 // Spawn FMM impact VFX model on struck target
-                spawnFmmImpactModel(settings.impactModelId, targetLoc.clone().add(0, 0.95, 0));
+                spawnFmmImpactModel(settings.impactModelId, target.getLocation().add(0, 0.95, 0));
             }
         }
 
