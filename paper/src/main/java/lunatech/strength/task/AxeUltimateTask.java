@@ -169,6 +169,7 @@ public final class AxeUltimateTask extends BukkitRunnable {
                 ));
                 entity.setBillboard(ItemDisplay.Billboard.FIXED);
                 entity.setTeleportDuration(1); // Enable client-side smooth position interpolation
+                entity.setInterpolationDuration(1); // Enable client-side smooth rotation/scale interpolation
                 entity.setViewRange((float) (settings.skullViewDistanceBlocks / 64.0));
             });
 
@@ -176,6 +177,7 @@ public final class AxeUltimateTask extends BukkitRunnable {
         } else {
             // Smoothly update position via 1-tick interpolation and rotation transformation
             display.setTeleportDuration(1);
+            display.setInterpolationDuration(1);
             display.teleport(headLoc);
             display.setTransformation(new Transformation(
                 new Vector3f(0, 0, 0),
