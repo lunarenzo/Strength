@@ -108,7 +108,10 @@ public final class TridentUltimateTask extends BukkitRunnable {
             Object model = createMethod.invoke(null, modelId, location);
             if (model != null) {
                 java.lang.reflect.Method playAnimMethod = staticEntityClass.getMethod("playAnimation", String.class, boolean.class, boolean.class);
-                playAnimMethod.invoke(model, "animation", false, false);
+                Object success = playAnimMethod.invoke(model, "skill", false, false);
+                if (Boolean.FALSE.equals(success)) {
+                    playAnimMethod.invoke(model, "animation", false, false);
+                }
                 this.barrageFmmModel = model;
             }
         } catch (Throwable ignored) {
@@ -125,6 +128,13 @@ public final class TridentUltimateTask extends BukkitRunnable {
             java.lang.reflect.Method createMethod = staticEntityClass.getMethod("create", String.class, Location.class);
             Object impact = createMethod.invoke(null, impactModelId, location);
             if (impact != null) {
+                try {
+                    java.lang.reflect.Method playAnimMethod = staticEntityClass.getMethod("playAnimation", String.class, boolean.class, boolean.class);
+                    Object success = playAnimMethod.invoke(impact, "animation", false, false);
+                    if (Boolean.FALSE.equals(success)) {
+                        playAnimMethod.invoke(impact, "skill", false, false);
+                    }
+                } catch (Throwable ignored) {}
                 org.bukkit.Bukkit.getScheduler().runTaskLater(
                     org.bukkit.plugin.java.JavaPlugin.getProvidingPlugin(getClass()),
                     () -> {
