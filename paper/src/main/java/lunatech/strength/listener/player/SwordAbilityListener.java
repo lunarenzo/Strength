@@ -123,7 +123,8 @@ public final class SwordAbilityListener implements Listener {
             return;
         }
 
-        if (damager.getAttackCooldown() < 0.9f) {
+        // Ignore offhand strikes (offhand combo counter is already processed in executeOffhandDamage)
+        if (damager.hasMetadata("sword_offhand_strike")) {
             return;
         }
 
@@ -313,7 +314,13 @@ public final class SwordAbilityListener implements Listener {
             target.getWorld().spawnParticle(Particle.ENCHANTED_HIT, target.getLocation().add(0, 1.0, 0), 15, 0.3, 0.5, 0.3, 0.1);
         }
 
-        target.damage(dmg, player);
+        final org.bukkit.plugin.Plugin plugin = org.bukkit.plugin.java.JavaPlugin.getProvidingPlugin(getClass());
+        player.setMetadata("sword_offhand_strike", new org.bukkit.metadata.FixedMetadataValue(plugin, true));
+        try {
+            target.damage(dmg, player);
+        } finally {
+            player.removeMetadata("sword_offhand_strike", plugin);
+        }
         player.swingOffHand();
     }
 
