@@ -69,6 +69,18 @@ public final class TridentUltimateTask extends BukkitRunnable {
             tryPlaySound("thunder_ronin_sounds:samus.thunder_ronin.thunder_barrage", Sound.ITEM_TRIDENT_THROW, 0.7f, 1.0f);
         }
 
+        // Keep 3D model attached to player as player moves or turns (1:1 smooth pitch & yaw tracking)
+        if (elapsedTicks >= 8 && barrageFmmModel != null) {
+            try {
+                final org.bukkit.util.Vector dir = player.getLocation().getDirection().normalize();
+                final Location currentModelLoc = player.getLocation().add(0, 1.2, 0).add(dir.clone().multiply(1.5));
+                currentModelLoc.setYaw((float) (player.getLocation().getYaw() + settings.modelYawOffsetDegrees));
+                currentModelLoc.setPitch(player.getLocation().getPitch());
+                java.lang.reflect.Method teleportMethod = barrageFmmModel.getClass().getMethod("teleport", Location.class, boolean.class);
+                teleportMethod.invoke(barrageFmmModel, currentModelLoc, false);
+            } catch (Throwable ignored) {}
+        }
+
         // 3. Multi-Thrust Damage Loop (9 hits spaced every configured interval ticks)
         final int interval = Math.max(1, settings.lightningStrikeIntervalTicks);
         if (elapsedTicks >= 8 && (elapsedTicks - 8) % interval == 0) {
