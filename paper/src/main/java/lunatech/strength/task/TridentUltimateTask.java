@@ -33,6 +33,8 @@ public final class TridentUltimateTask extends BukkitRunnable {
         this.durationTicks = settings.ultimateDurationTicks;
     }
 
+    private int executedHits = 0;
+
     @Override
     public void run() {
         if (!player.isOnline() || player.isDead() || elapsedTicks >= durationTicks) {
@@ -62,6 +64,8 @@ public final class TridentUltimateTask extends BukkitRunnable {
 
         // 2. Spawn FMM Model & Start Barrage Audio (Tick 8)
         if (elapsedTicks == 8) {
+            final org.bukkit.plugin.Plugin plugin = org.bukkit.plugin.java.JavaPlugin.getProvidingPlugin(getClass());
+            player.setMetadata("trident_barrage_active", new org.bukkit.metadata.FixedMetadataValue(plugin, true));
             final org.bukkit.util.Vector forwardDir = player.getLocation().getDirection().setY(0).normalize();
             final Location spawnLoc = player.getLocation().add(0, 1.2, 0).add(forwardDir.clone().multiply(1.5));
             spawnLoc.setYaw((float) (player.getLocation().getYaw() + settings.modelYawOffsetDegrees));
@@ -81,9 +85,10 @@ public final class TridentUltimateTask extends BukkitRunnable {
             } catch (Throwable ignored) {}
         }
 
-        // 3. Multi-Thrust Damage Loop (9 hits spaced every configured interval ticks)
+        // 3. Multi-Thrust Damage Loop (up to maxBarrageHits spaced every configured interval ticks)
         final int interval = Math.max(1, settings.lightningStrikeIntervalTicks);
-        if (elapsedTicks >= 8 && (elapsedTicks - 8) % interval == 0) {
+        if (elapsedTicks >= 8 && (elapsedTicks - 8) % interval == 0 && executedHits < settings.maxBarrageHits) {
+            executedHits++;
             final Location eyeLoc = player.getEyeLocation();
             final org.bukkit.util.Vector lookDir = eyeLoc.getDirection().normalize();
             final double coneRadius = settings.ultimateRadius;
@@ -198,6 +203,10 @@ public final class TridentUltimateTask extends BukkitRunnable {
     }
 
     private void cleanup() {
+        if (player.hasMetadata("trident_barrage_active")) {
+            final org.bukkit.plugin.Plugin plugin = org.bukkit.plugin.java.JavaPlugin.getProvidingPlugin(getClass());
+            player.removeMetadata("trident_barrage_active", plugin);
+        }
         if (barrageFmmModel != null) {
             try {
                 Class<?> staticEntityClass = Class.forName("com.magmaguy.freeminecraftmodels.customentity.StaticEntity");
