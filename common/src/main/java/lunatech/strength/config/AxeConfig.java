@@ -64,8 +64,8 @@ public class AxeConfig implements VersionedConfig {
     @Comment("Interval in ticks between blood dripping particle bursts")
     public int bleedParticleFrequencyTicks = 2;
 
-    @Comment("Particle type used for bleeding effect (e.g. ITEM_CRUMB, BLOCK_CRUMB, DAMAGE_INDICATOR)")
-    public String bleedParticleType = "ITEM_CRUMB";
+    @Comment("Particle type used for bleeding effect (e.g. ITEM, BLOCK, DAMAGE_INDICATOR)")
+    public String bleedParticleType = "ITEM";
 
     @Comment("Material used for bleeding particle crumbs (e.g. REDSTONE_BLOCK, NETHER_WART_BLOCK, RED_WOOL)")
     public String bleedParticleMaterial = "REDSTONE_BLOCK";
