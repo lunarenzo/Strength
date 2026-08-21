@@ -145,10 +145,8 @@ public final class AxeUltimateTask extends BukkitRunnable {
 
     private void updateFloatingSkull(Player target, AxeConfig settings) {
         final UUID targetUuid = target.getUniqueId();
-        float angleRad = skullAngles.getOrDefault(targetUuid, 0.0f);
-        final float rotSpeedRad = (float) Math.toRadians(settings.skullRotationSpeedDegrees);
-        angleRad = (float) ((angleRad + rotSpeedRad) % (2.0 * Math.PI));
-        skullAngles.put(targetUuid, angleRad);
+        final float finalAngleRad = (float) ((skullAngles.getOrDefault(targetUuid, 0.0f) + Math.toRadians(settings.skullRotationSpeedDegrees)) % (2.0 * Math.PI));
+        skullAngles.put(targetUuid, finalAngleRad);
 
         final float yOffset = (float) getDynamicNametagHeight(target, settings);
         final float scale = (float) settings.skullScale;
@@ -160,7 +158,7 @@ public final class AxeUltimateTask extends BukkitRunnable {
                 entity.setItemStack(customSkullItem != null ? customSkullItem : new ItemStack(Material.PLAYER_HEAD));
                 entity.setTransformation(new Transformation(
                     new Vector3f(0, yOffset, 0),
-                    new AxisAngle4f(angleRad, 0, 1, 0),
+                    new AxisAngle4f(finalAngleRad, 0, 1, 0),
                     new Vector3f(scale, scale, scale),
                     new AxisAngle4f(0, 0, 1, 0)
                 ));
@@ -179,7 +177,7 @@ public final class AxeUltimateTask extends BukkitRunnable {
             // Update transformation translation and rotation angle smoothly (rendered 1:1 on client)
             display.setTransformation(new Transformation(
                 new Vector3f(0, yOffset, 0),
-                new AxisAngle4f(angleRad, 0, 1, 0),
+                new AxisAngle4f(finalAngleRad, 0, 1, 0),
                 new Vector3f(scale, scale, scale),
                 new AxisAngle4f(0, 0, 1, 0)
             ));
