@@ -53,6 +53,11 @@ public final class TridentAbilityListener implements Listener {
             return;
         }
 
+        // Ignore ultimate barrage damage hits for passive / ultimate charge accumulation
+        if (damager.hasMetadata("trident_barrage_active")) {
+            return;
+        }
+
         final TridentConfig settings = plugin.getConfigHandler().getTridentConfig();
 
         // 1. Passive Trigger: Every N hits, summon a lightning bolt and apply Nx damage multiplier
