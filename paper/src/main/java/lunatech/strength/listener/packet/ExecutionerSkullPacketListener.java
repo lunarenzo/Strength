@@ -42,7 +42,7 @@ public final class ExecutionerSkullPacketListener extends PacketListenerAbstract
             }
         } else if (type == PacketType.Play.Server.ENTITY_RELATIVE_MOVE) {
             final WrapperPlayServerEntityRelativeMove packet = new WrapperPlayServerEntityRelativeMove(event);
-            final int entityId = packet.getEntityID();
+            final int entityId = packet.getEntityId();
             final Integer skullDisplayId = AxeUltimateTask.activeSkullDisplaysByEntityId.get(entityId);
 
             if (skullDisplayId != null) {
@@ -57,7 +57,7 @@ public final class ExecutionerSkullPacketListener extends PacketListenerAbstract
             }
         } else if (type == PacketType.Play.Server.ENTITY_RELATIVE_MOVE_AND_ROTATION) {
             final WrapperPlayServerEntityRelativeMoveAndRotation packet = new WrapperPlayServerEntityRelativeMoveAndRotation(event);
-            final int entityId = packet.getEntityID();
+            final int entityId = packet.getEntityId();
             final Integer skullDisplayId = AxeUltimateTask.activeSkullDisplaysByEntityId.get(entityId);
 
             if (skullDisplayId != null) {
