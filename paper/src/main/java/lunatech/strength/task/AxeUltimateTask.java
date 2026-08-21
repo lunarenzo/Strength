@@ -30,7 +30,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * dynamic TAB belowname nametag height clearance, authentic blood particle crumbs, and releasing capped burst damage upon expiration.
  */
 public final class AxeUltimateTask extends BukkitRunnable {
-    public static final Map<Integer, Integer> activeSkullPassengers = new ConcurrentHashMap<>();
+    public static final Map<Integer, Integer> activeSkullDisplaysByEntityId = new ConcurrentHashMap<>();
+    public static final Map<Integer, Double> activeSkullYOffsetsByEntityId = new ConcurrentHashMap<>();
 
     private final Player attacker;
     private final Strength plugin;
@@ -152,12 +153,7 @@ public final class AxeUltimateTask extends BukkitRunnable {
 
         final double yOffset = getDynamicNametagHeight(target, settings);
         final float scale = (float) settings.skullScale;
-
-        // Upward jump / knockback Y velocity compensation
-        final double velocityY = target.getVelocity().getY();
-        final double jumpCompensation = (velocityY > 0.02) ? (velocityY * 1.2) : 0.0;
-
-        final Location headLoc = target.getLocation().add(0, yOffset + jumpCompensation, 0);
+        final Location headLoc = target.getLocation().add(0, yOffset, 0);
 
         ItemDisplay display = skullDisplays.get(targetUuid);
         if (display == null || !display.isValid()) {
@@ -177,10 +173,7 @@ public final class AxeUltimateTask extends BukkitRunnable {
 
             skullDisplays.put(targetUuid, display);
         } else {
-            // Smoothly update position on every tick / movement (100% position retention on knockback)
-            display.setTeleportDuration(1);
-            display.setInterpolationDuration(1);
-            display.teleport(headLoc);
+            // Update transformation angle and position
             display.setTransformation(new Transformation(
                 new Vector3f(0, 0, 0),
                 new AxisAngle4f(finalAngleRad, 0, 1, 0),
@@ -188,6 +181,10 @@ public final class AxeUltimateTask extends BukkitRunnable {
                 new AxisAngle4f(0, 0, 1, 0)
             ));
         }
+
+        // Register for real-time PacketEvents Netty pipeline packet synchronization
+        activeSkullDisplaysByEntityId.put(target.getEntityId(), display.getEntityId());
+        activeSkullYOffsetsByEntityId.put(target.getEntityId(), yOffset);
     }
 
     private double getDynamicNametagHeight(Player target, AxeConfig settings) {
@@ -244,7 +241,8 @@ public final class AxeUltimateTask extends BukkitRunnable {
             }
             final Player p = plugin.getServer().getPlayer(entry.getKey());
             if (p != null) {
-                activeSkullPassengers.remove(p.getEntityId());
+                activeSkullDisplaysByEntityId.remove(p.getEntityId());
+                activeSkullYOffsetsByEntityId.remove(p.getEntityId());
             }
         }
         skullDisplays.clear();
