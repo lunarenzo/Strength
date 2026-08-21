@@ -89,6 +89,7 @@ public final class BowAbilityListener implements Listener {
                     if (arrow.isDead() || arrow.isOnGround()) {
                         cancel();
                         return;
+                    }
                     final lunatech.strength.config.BowConfig bowCfg = plugin.getConfigHandler().getBowConfig();
                     try {
                         org.bukkit.Material mat = org.bukkit.Material.matchMaterial(bowCfg.passiveTrailParticleMaterial);
