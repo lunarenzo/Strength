@@ -31,39 +31,42 @@ public class TridentConfig implements VersionedConfig {
     @Comment("Cooldown in seconds for Poseidon's Calling Ultimate")
     public int ultimateCooldownSeconds = 16;
 
-    @Comment("Duration in ticks for Poseidon's Calling storm slam (20 ticks = 1 second)")
-    public int ultimateDurationTicks = 20;
+    @Comment("Duration in ticks for Thunderous Barrage sequence (40 ticks = 2 seconds)")
+    public int ultimateDurationTicks = 40;
 
-    @Comment("Radius in blocks for Poseidon's Calling area lightning strikes")
-    public double ultimateRadius = 20.0;
+    @Comment("Radius/cone length in blocks for Thunderous Barrage strike area")
+    public double ultimateRadius = 4.0;
 
-    @Comment("Damage dealt by each Poseidon lightning strike")
-    public double ultimateDamage = 15.0;
+    @Comment("Damage dealt per thrust strike during Thunderous Barrage (9 strikes total)")
+    public double ultimateDamage = 5.0;
 
-    @Comment("Interval in ticks between lightning strikes during Poseidon's Calling (e.g. every 5 ticks)")
-    public int lightningStrikeIntervalTicks = 5;
+    @Comment("Interval in ticks between thrust strikes during Thunderous Barrage (e.g. every 4 ticks)")
+    public int lightningStrikeIntervalTicks = 4;
 
-    @Comment("Slowness amplifier applied to struck enemies (e.g. 5 = Slowness VI)")
-    public int slownessAmplifier = 5;
+    @Comment("Slowness amplifier applied to caster during barrage (e.g. 1 = Slowness II)")
+    public int slownessAmplifier = 1;
 
-    @Comment("Slowness duration in ticks applied to struck enemies (40 ticks = 2 seconds)")
-    public int slownessDurationTicks = 40;
+    @Comment("Slowness duration in ticks applied to caster during barrage (30 ticks = 1.5 seconds)")
+    public int slownessDurationTicks = 30;
 
-    @Comment("Custom model data for yellow lightning display entity (if resourcepack is loaded)")
-    public int yellowLightningCustomModelData = 12350;
+    @Comment("FreeMinecraftModels model ID for Thunderous Barrage visual effect")
+    public String barrageModelId = "thunderous_barrage";
+
+    @Comment("FreeMinecraftModels model ID for hit impact VFX")
+    public String impactModelId = "vfx_hit_impact_1";
 
     // Messages
     @Comment("Message sent when trident passive is triggered")
     public String passiveTriggeredMessage = "<yellow><bold>POSEIDON PASSIVE!</bold> Lightning struck for extra damage!</yellow>";
 
     @Comment("Message sent when trident ultimate is fully charged")
-    public String ultimateChargedMessage = "<green><bold>Poseidon's Calling is fully charged! Type /ability to activate!</bold></green>";
+    public String ultimateChargedMessage = "<green><bold>Thunderous Barrage is fully charged! Type /ability to activate!</bold></green>";
 
     @Comment("Message sent indicating ultimate charge progress")
     public String ultimateChargeProgressMessage = "<gray>Ultimate Charge: <gold><charge>/<target></gold> hits</gray>";
 
-    @Comment("Message sent when Poseidon's Calling ultimate is activated")
-    public String ultimateActivatedMessage = "<gold><bold>POSEIDON'S CALLING ACTIVATED!</bold> Slammed trident and summoned a lightning storm!</gold>";
+    @Comment("Message sent when Thunderous Barrage ultimate is activated")
+    public String ultimateActivatedMessage = "<gold><bold>THUNDEROUS BARRAGE ACTIVATED!</bold> Unleashed a lightning fast strike barrage!</gold>";
 
     @Comment("Message sent when player is not on the ground or in water when activating Poseidon's Calling")
     public String mustBeOnGroundMessage = "<red>You must be standing on the ground or in water to perform Poseidon's Calling!</red>";
