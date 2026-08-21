@@ -39,6 +39,34 @@ public class AxeConfig implements VersionedConfig {
     @Comment("Multiplier applied to total stored damage when ultimate expires (e.g. 1.5x)")
     public double damageMultiplier = 1.5;
 
+    // Executioner's Mark Visual FX Settings
+    @Comment("Base64 texture string for floating skull ItemDisplay on marked player head")
+    public String skullBase64Texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjUzMzQ0ODZiNzA4OGIwZDY2M2FjZjhlNzMxOWRmOWY2NmFmN2Y3OWI5YzkwZTI1YzVjM2MwMmYwNzc1Yjc4YiJ9fX0=";
+
+    @Comment("Height offset in blocks for floating skull above marked player head")
+    public double skullHeightOffset = 0.6;
+
+    @Comment("Scale of the floating skull ItemDisplay")
+    public double skullScale = 0.85;
+
+    @Comment("Rotation speed in degrees per tick for floating skull (positive = clockwise, negative = counterclockwise)")
+    public double skullRotationSpeedDegrees = 8.0;
+
+    @Comment("Maximum view distance in blocks for marked player visual skull & particle effects")
+    public double skullViewDistanceBlocks = 40.0;
+
+    @Comment("Enable bleeding particle effect dripping from marked player body")
+    public boolean enableBleedParticles = true;
+
+    @Comment("Number of blood dripping particles spawned per burst")
+    public int bleedParticleCount = 6;
+
+    @Comment("Interval in ticks between blood dripping particle bursts")
+    public int bleedParticleFrequencyTicks = 2;
+
+    @Comment("Velocity speed of blood dripping particles")
+    public double bleedParticleSpeed = 0.08;
+
     // Messages
     @Comment("Message sent when Axe passive stun triggers")
     public String passiveTriggeredAttackerMessage = "<gold><bold>Axe Passive Triggered!</bold> Target stunned for {seconds}s!</gold>";
