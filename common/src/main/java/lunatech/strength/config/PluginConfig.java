@@ -95,6 +95,32 @@ public class PluginConfig implements VersionedConfig {
         );
     }
 
+    @Comment("Craftable Strength Item Recipe settings")
+    public RecipeSettings recipe = new RecipeSettings();
+
+    @ConfigSerializable
+    public static class RecipeSettings {
+        @Comment("Should crafting the physical strength item be enabled?")
+        public boolean enabled = true;
+
+        @Comment("Amount of strength stored in the crafted item")
+        public int resultStrengthAmount = 1;
+
+        @Comment("Crafting grid shape (3 lines of 3 characters each)")
+        public List<String> shape = List.of(
+            "DGD",
+            "GNG",
+            "DGD"
+        );
+
+        @Comment("Ingredients mapping for recipe shape characters")
+        public Map<String, String> ingredients = Map.of(
+            "D", "DIAMOND_BLOCK",
+            "G", "GOLD_BLOCK",
+            "N", "NETHER_STAR"
+        );
+    }
+
     @Comment("Weapon Rolling and Passive/Ultimate Ability settings")
     public WeaponSettings weapons = new WeaponSettings();
 

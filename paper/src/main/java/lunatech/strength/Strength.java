@@ -31,6 +31,7 @@ public class Strength extends AbstractStrength {
     private UpdateHandler updateHandler;
     private SchedulerHandler schedulerHandler;
     private CooldownHandler cooldownHandler;
+    private lunatech.strength.recipe.RecipeHandler recipeHandler;
     private StrengthAPIProvider apiHandler;
     private lunatech.strength.service.StrengthService strengthService;
 
@@ -56,6 +57,7 @@ public class Strength extends AbstractStrength {
         updateHandler = new UpdateHandler(this);
         schedulerHandler = new SchedulerHandler();
         cooldownHandler = new CooldownHandler();
+        recipeHandler = new lunatech.strength.recipe.RecipeHandler(this);
         apiHandler = new StrengthAPIProvider(this);
 
         handlers = List.of(
@@ -67,6 +69,7 @@ public class Strength extends AbstractStrength {
             updateHandler,
             schedulerHandler,
             cooldownHandler,
+            recipeHandler,
             apiHandler
         );
 
