@@ -1,5 +1,6 @@
 package lunatech.strength.listener.player;
 
+import lunatech.strength.Strength;
 import lunatech.strength.config.ConfigHandler;
 import lunatech.strength.config.PluginConfig.MessagesConfig;
 import lunatech.strength.config.PluginConfig.StrengthSettings;
