@@ -89,6 +89,24 @@ public final class AbilityCommand extends Command {
         }
 
         final UUID uuid = player.getUniqueId();
+
+        // Check Cooldown Requirement
+        final long lastUse = lunatech.strength.listener.player.AxeAbilityListener.ultimateCooldowns.getOrDefault(uuid, 0L);
+        final long cooldownMillis = settings.ultimateCooldownSeconds * 1000L;
+        final long now = System.currentTimeMillis();
+
+        if (now - lastUse < cooldownMillis) {
+            final long secondsLeft = (cooldownMillis - (now - lastUse)) / 1000L + 1;
+            player.sendMessage(
+                ColorParser.of(settings.ultimateCooldownMessage
+                    .replace("<seconds>", String.valueOf(secondsLeft))
+                    .replace("{seconds}", String.valueOf(secondsLeft)))
+                    .with("seconds", String.valueOf(secondsLeft))
+                    .build()
+            );
+            return;
+        }
+
         final int currentCharge = lunatech.strength.listener.player.AxeAbilityListener.ultimateHitsMap.getOrDefault(uuid, 0);
         if (currentCharge < settings.ultimateCritsRequired) {
             player.sendMessage(ColorParser.of("<red>Your ultimate is not charged yet! (Required: " + settings.ultimateCritsRequired + ", Current: " + currentCharge + " critical hits)</red>").build());
@@ -106,8 +124,9 @@ public final class AbilityCommand extends Command {
             return;
         }
 
-        // Reset charge & activate ultimate
+        // Reset charge, set cooldown timestamp & activate ultimate
         lunatech.strength.listener.player.AxeAbilityListener.ultimateHitsMap.put(uuid, 0);
+        lunatech.strength.listener.player.AxeAbilityListener.ultimateCooldowns.put(uuid, now);
         lunatech.strength.listener.player.AxeAbilityListener.activeUltimateAttackers.put(uuid, true);
 
         player.sendMessage(ColorParser.of(settings.ultimateActivatedMessage.replace("{seconds}", String.valueOf(settings.ultimateDurationSeconds)).replace("{multiplier}", String.valueOf(settings.damageMultiplier))).build());

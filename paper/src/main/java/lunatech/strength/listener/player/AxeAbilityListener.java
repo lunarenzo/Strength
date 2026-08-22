@@ -46,6 +46,7 @@ public final class AxeAbilityListener implements Listener {
     public static final Map<UUID, Integer> criticalHitsMap = new ConcurrentHashMap<>();
     public static final Map<UUID, Integer> ultimateHitsMap = new ConcurrentHashMap<>();
     public static final Map<UUID, Long> stunnedPlayers = new ConcurrentHashMap<>();
+    public static final Map<UUID, Long> ultimateCooldowns = new ConcurrentHashMap<>();
     public static final Map<UUID, Boolean> activeUltimateAttackers = new ConcurrentHashMap<>();
     public static final Map<UUID, Map<UUID, Double>> storedDamagePools = new ConcurrentHashMap<>();
 
@@ -215,6 +216,18 @@ public final class AxeAbilityListener implements Listener {
         if (isStunned(event.getPlayer())) {
             event.setCancelled(true);
         }
+    }
+
+    @EventHandler
+    public void onPlayerQuit(org.bukkit.event.player.PlayerQuitEvent event) {
+        final UUID uuid = event.getPlayer().getUniqueId();
+        criticalHitsMap.remove(uuid);
+        ultimateHitsMap.remove(uuid);
+        stunnedPlayers.remove(uuid);
+        ultimateCooldowns.remove(uuid);
+        activeUltimateAttackers.remove(uuid);
+        storedDamagePools.remove(uuid);
+        removeStunAttributes(event.getPlayer());
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
