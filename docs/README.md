@@ -76,7 +76,6 @@ configuration and repository maintenance.
 * MiniMessage support using [Adventure](https://docs.advntr.dev/index.html) with utility
   library [ColorParser](https://github.com/milkdrinkers/ColorParser).
 * Command creation and handling using [CommandAPI](https://github.com/JorelAli/CommandAPI).
-* GUIs using [Triumph GUI](https://github.com/TriumphTeam/triumph-gui).
 * YAML, JSON & TOML Configuration files using [Crate](https://github.com/milkdrinkers/Crate).
 * Standalone Persistent Storage:
     - Native [PersistentDataContainer (PDC)](https://docs.papermc.io/paper/dev/api/pdc) support for high-performance player data serialization.
@@ -95,7 +94,6 @@ configuration and repository maintenance.
 ### Minecraft APIs
 
 * **CommandAPI** - [Link](https://commandapi.jorel.dev/latest.html)
-* **Triumph GUI** - [Link](https://triumphteam.dev/library/triumph-gui/introduction)
 * **Crate** - [Link](https://milkdrinkers.github.io/Crate/introduction)
 
 ### Storage Tooling

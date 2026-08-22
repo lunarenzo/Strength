@@ -22,9 +22,6 @@ dependencies {
 
     // API
     implementation(libs.commandapi.shade.paper)
-    implementation(libs.triumph.gui) {
-        exclude("net.kyori")
-    }
     api(libs.colorparser.paper) {
         exclude("net.kyori")
     }
@@ -70,7 +67,6 @@ tasks {
         reloc("org.snakeyaml", "snakeyaml")
         reloc("org.json", "json")
         reloc("dev.jorel.commandapi", "commandapi")
-        reloc("dev.triumphteam.gui", "triumphgui")
         reloc("org.bstats", "bstats")
 
         reloc("io.leangen.geantyref", "geantyref")
