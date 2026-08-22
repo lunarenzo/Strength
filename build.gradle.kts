@@ -43,6 +43,7 @@ subprojects {
         maven("https://repo.codemc.org/repository/maven-public/") {
             content {
                 includeGroup("com.github.retrooper") // PacketEvents
+                includeGroup("fr.xephi") // AuthMe
             }
         }
         maven("https://jitpack.io/") {

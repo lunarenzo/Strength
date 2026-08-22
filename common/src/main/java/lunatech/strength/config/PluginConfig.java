@@ -247,6 +247,15 @@ public class PluginConfig implements VersionedConfig {
         public String fillerDisplayName = "";
     }
 
+    @Comment("AuthMe integration settings")
+    public AuthMeSettings authme = new AuthMeSettings();
+
+    @ConfigSerializable
+    public static class AuthMeSettings {
+        @Comment("Enable AuthMe integration (waits for player login/register before rolling weapon)")
+        public boolean enabled = true;
+    }
+
     @Comment("Weapon Rolling and Passive/Ultimate Ability settings")
     public WeaponSettings weapons = new WeaponSettings();
 

@@ -30,7 +30,8 @@ dependencies {
     // Plugin dependencies
     implementation(libs.bstats)
     compileOnly(libs.packetevents)
-    compileOnly(libs.placeholderapi) {
+    compileOnly(libs.placeholderapi)
+    compileOnly(libs.authme) {
         exclude("me.clip.placeholderapi.libs", "kyori")
     }
     // Testing - Core
@@ -112,7 +113,7 @@ bukkit { // Options: https://docs.eldoria.de/pluginyml/bukkit/
     // Misc properties
     load = net.minecrell.pluginyml.bukkit.BukkitPluginDescription.PluginLoadOrder.POSTWORLD // STARTUP or POSTWORLD
     depend = listOf()
-    softDepend = listOf("Vault", "PlaceholderAPI")
+    softDepend = listOf("Vault", "PlaceholderAPI", "AuthMe")
     loadBefore = listOf()
     provides = listOf()
 }
@@ -145,6 +146,9 @@ paper { // Options: https://docs.eldoria.de/pluginyml/paper/
             load = PaperPluginDescription.RelativeLoadOrder.BEFORE
             required = false
         }
+        register("AuthMe") {
+            load = PaperPluginDescription.RelativeLoadOrder.BEFORE
+            required = false
+        }
     }
-    provides = listOf()
 }
