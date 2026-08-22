@@ -70,4 +70,10 @@ public class SwordConfig implements VersionedConfig {
 
     @Comment("Actionbar ready message displayed when offhand attack is fully charged during Dual Wielding")
     public String offhandReadyActionbarMessage = "<green><bold>⚔ OFFHAND READY</bold></green>";
+
+    @Comment("Cooldown in seconds before Sword Ultimate can be used again")
+    public int ultimateCooldownSeconds = 60;
+
+    @Comment("Message sent when Sword Ultimate is on cooldown")
+    public String ultimateCooldownMessage = "<red>Your Ultimate is on cooldown for another <seconds>s!</red>";
 }

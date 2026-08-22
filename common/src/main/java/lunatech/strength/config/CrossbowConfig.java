@@ -48,7 +48,13 @@ public class CrossbowConfig implements VersionedConfig {
     public String immobilizedShooterMessage = "<green><bold>CROSSBOW ULTIMATE HIT!</bold> Target immobilized!</green>";
 
     @Comment("Message sent to the victim when hit by ultimate shot")
-    public String immobilizedVictimMessage = "<red><bold>IMMOBILIZED! You are struck by Crossbow Ultimate!</bold></red>";
+    public String immobilizedVictimMessage = "<dark_red><bold>YOU HAVE BEEN IMMOBILIZED BY A TRANQUILIZER SHOT!</bold></dark_red>";
+
+    @Comment("Cooldown in seconds before Crossbow Ultimate can be used again")
+    public int ultimateCooldownSeconds = 60;
+
+    @Comment("Message sent when Crossbow Ultimate is on cooldown")
+    public String ultimateCooldownMessage = "<red>Your Ultimate is on cooldown for another <seconds>s!</red>";
 
     @Comment("Message sent to the immobilized player when attempting to move or teleport")
     public String trapEscapeBlockedMessage = "<red>You are immobilized and cannot move or teleport!</red>";

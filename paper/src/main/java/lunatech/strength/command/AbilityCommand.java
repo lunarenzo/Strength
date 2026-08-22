@@ -368,8 +368,25 @@ public final class AbilityCommand extends Command {
             return;
         }
 
-        // 3. Validate Hit Charge Requirement
+        // 3. Validate Cooldown Requirement
         final UUID uuid = player.getUniqueId();
+        final long lastUse = CrossbowAbilityListener.ultimateCooldowns.getOrDefault(uuid, 0L);
+        final long cooldownMillis = settings.ultimateCooldownSeconds * 1000L;
+        final long now = System.currentTimeMillis();
+
+        if (now - lastUse < cooldownMillis) {
+            final long secondsLeft = (cooldownMillis - (now - lastUse)) / 1000L + 1;
+            player.sendMessage(
+                ColorParser.of(settings.ultimateCooldownMessage
+                    .replace("<seconds>", String.valueOf(secondsLeft))
+                    .replace("{seconds}", String.valueOf(secondsLeft)))
+                    .with("seconds", String.valueOf(secondsLeft))
+                    .build()
+            );
+            return;
+        }
+
+        // 4. Validate Hit Charge Requirement
         final int currentCharge = CrossbowAbilityListener.ultimateHits.getOrDefault(uuid, 0);
         if (currentCharge < settings.ultimateHitsRequired) {
             player.sendMessage(
@@ -381,8 +398,9 @@ public final class AbilityCommand extends Command {
             return;
         }
 
-        // 4. Clear Ultimate Charge and prime crossbow
+        // 5. Clear Ultimate Charge, record cooldown timestamp & prime crossbow
         CrossbowAbilityListener.ultimateHits.put(uuid, 0);
+        CrossbowAbilityListener.ultimateCooldowns.put(uuid, now);
         CrossbowAbilityListener.crossbowUltimatePrimed.put(uuid, true);
 
         // Feedbacks
@@ -407,6 +425,24 @@ public final class AbilityCommand extends Command {
         }
 
         final UUID uuid = player.getUniqueId();
+
+        // Validate Cooldown Requirement
+        final long lastUse = SwordAbilityListener.ultimateCooldowns.getOrDefault(uuid, 0L);
+        final long cooldownMillis = settings.ultimateCooldownSeconds * 1000L;
+        final long now = System.currentTimeMillis();
+
+        if (now - lastUse < cooldownMillis) {
+            final long secondsLeft = (cooldownMillis - (now - lastUse)) / 1000L + 1;
+            player.sendMessage(
+                ColorParser.of(settings.ultimateCooldownMessage
+                    .replace("<seconds>", String.valueOf(secondsLeft))
+                    .replace("{seconds}", String.valueOf(secondsLeft)))
+                    .with("seconds", String.valueOf(secondsLeft))
+                    .build()
+            );
+            return;
+        }
+
         final int currentCharge = SwordAbilityListener.ultimateHits.getOrDefault(uuid, 0);
         if (currentCharge < settings.ultimateHitsRequired) {
             player.sendMessage(
@@ -426,8 +462,9 @@ public final class AbilityCommand extends Command {
             return;
         }
 
-        // Clear charge
+        // Clear charge & record cooldown timestamp
         SwordAbilityListener.ultimateHits.put(uuid, 0);
+        SwordAbilityListener.ultimateCooldowns.put(uuid, now);
 
         // Save original offhand item if present
         final ItemStack originalOffhand = player.getInventory().getItemInOffHand();

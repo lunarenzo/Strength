@@ -53,6 +53,7 @@ public final class SwordAbilityListener implements Listener {
     public static final Map<UUID, Integer> comboCounts = new ConcurrentHashMap<>();
     public static final Map<UUID, Long> lastHitTimes = new ConcurrentHashMap<>();
     public static final Map<UUID, Integer> ultimateHits = new ConcurrentHashMap<>();
+    public static final Map<UUID, Long> ultimateCooldowns = new ConcurrentHashMap<>();
     public static final Map<UUID, Boolean> activeDualWield = new ConcurrentHashMap<>();
     public static final Map<UUID, ItemStack> originalOffhandItems = new ConcurrentHashMap<>();
     public static final Map<UUID, Long> lastOffhandAttackTimes = new ConcurrentHashMap<>();
@@ -373,6 +374,7 @@ public final class SwordAbilityListener implements Listener {
         comboCounts.remove(uuid);
         lastHitTimes.remove(uuid);
         ultimateHits.remove(uuid);
+        ultimateCooldowns.remove(uuid);
         endDualWield(player, plugin);
     }
 }
