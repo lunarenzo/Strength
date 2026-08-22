@@ -38,6 +38,9 @@ dependencies {
     compileOnly(libs.worldguard) {
         isTransitive = false
     }
+    compileOnly(libs.worldedit) {
+        isTransitive = false
+    }
     // Testing - Core
     testImplementation(libs.annotations)
     testImplementation(platform(libs.junit.bom))
