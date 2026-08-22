@@ -75,7 +75,7 @@ public final class RerollConfirmationGui {
 
             final io.papermc.paper.dialog.Dialog dialog = io.papermc.paper.dialog.Dialog.create(builder -> builder.empty()
                 .base(io.papermc.paper.registry.data.dialog.DialogBase.builder(title)
-                    .body(List.of(
+                    .body(List.<io.papermc.paper.registry.data.dialog.body.DialogBody>of(
                         io.papermc.paper.registry.data.dialog.body.DialogBody.plainMessage(message),
                         io.papermc.paper.registry.data.dialog.body.DialogBody.item(plugin.getStrengthService().createRerollItem())
                     ))
