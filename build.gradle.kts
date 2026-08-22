@@ -44,12 +44,12 @@ subprojects {
             content {
                 includeGroup("com.github.retrooper") // PacketEvents
                 includeGroup("fr.xephi") // AuthMe
-                includeGroup("me.chancesd.pvpmanager") // PvPManager
             }
         }
         maven("https://jitpack.io/") {
             content {
                 includeGroup("com.github.MilkBowl") // VaultAPI
+                includeGroup("com.github.ChanceSD") // PvPManager
             }
         }
 
