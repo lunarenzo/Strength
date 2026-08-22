@@ -48,15 +48,19 @@ public final class SwordUltimateTask extends BukkitRunnable {
                 final double pct = Math.min(1.0, Math.max(0.0, (double) diff / (double) cooldownMs));
                 final int filled = (int) (pct * 8.0);
                 final String bar = "■".repeat(filled) + "□".repeat(8 - filled);
-                player.sendActionBar(
-                    io.github.milkdrinkers.colorparser.paper.ColorParser.of(settings.offhandChargingActionbarMessage
-                        .replace("{bar}", bar)
-                        .replace("<bar>", bar))
-                        .with("bar", bar)
-                        .build()
-                );
+                if (settings.offhandChargingActionbarMessage != null && !settings.offhandChargingActionbarMessage.trim().isEmpty()) {
+                    player.sendActionBar(
+                        io.github.milkdrinkers.colorparser.paper.ColorParser.of(settings.offhandChargingActionbarMessage
+                            .replace("{bar}", bar)
+                            .replace("<bar>", bar))
+                            .with("bar", bar)
+                            .build()
+                    );
+                }
             } else if (diff < cooldownMs + 300) {
-                player.sendActionBar(io.github.milkdrinkers.colorparser.paper.ColorParser.of(settings.offhandReadyActionbarMessage).build());
+                if (settings.offhandReadyActionbarMessage != null && !settings.offhandReadyActionbarMessage.trim().isEmpty()) {
+                    player.sendActionBar(io.github.milkdrinkers.colorparser.paper.ColorParser.of(settings.offhandReadyActionbarMessage).build());
+                }
             }
         }
 
