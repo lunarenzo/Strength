@@ -70,14 +70,10 @@ public final class RerollConsumeListener implements Listener {
         player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 0.8f, 1.2f);
         player.spawnParticle(Particle.ENCHANT, player.getLocation().add(0, 1.0, 0), 20, 0.5, 0.5, 0.5, 0.2);
 
-        final StrengthService strengthService = plugin.getStrengthService();
-        final List<String> availableWeapons = plugin.getConfigHandler().getConfig().weapons.availableWeapons;
-        final String rollStartTitle = plugin.getConfigHandler().getConfig().weapons.rollStartTitle;
-
         // Send consumed message if configured
         MessageUtil.send(player, plugin.getConfigHandler().getConfig().messages.consumedRerollBookMessage);
 
         // Trigger visual weapon reroll task
-        new WeaponRollTask(player, availableWeapons, strengthService, rollStartTitle).runTaskTimer(plugin, 0L, 2L);
+        new WeaponRollTask(plugin, player).start();
     }
 }
