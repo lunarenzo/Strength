@@ -350,7 +350,7 @@ public class PluginConfig implements VersionedConfig {
         @Comment("Message sent when consuming a physical Strength Shard")
         public String consumeShardMessage = "<green>You consumed a Strength Shard and gained +<amount> Strength!</green>";
 
-        @Comment("Message sent when checking own strength (/strength or /strength info)")
+        @Comment("Message sent when checking own strength (/strength or /strength info). Supports multiline with <newline> or <br>")
         public String strengthCheckMessage = "<light_purple>Your current Strength is <gold><strength></gold> and your assigned weapon is <gold><weapon></gold>.</light_purple>";
 
         @Comment("Fallback string for weapon placeholder when player has no weapon assigned")
