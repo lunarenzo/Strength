@@ -69,29 +69,16 @@ public final class TridentAbilityListener implements Listener {
             // Visual lightning effect (does not deal vanilla 5.0 damage or start fires)
             damagee.getWorld().strikeLightningEffect(damagee.getLocation());
 
-            // Zero-collision CustomModelData yellow lightning particle (NAUTILUS_SHELL CMD 12348)
-            org.bukkit.Particle particleType = org.bukkit.Particle.ITEM;
+            // Animated 2D Billboard Yellow Lightning Particle (DUST_PLUMES mapped to lightning_yellow_*.png)
+            org.bukkit.Particle particleType = org.bukkit.Particle.DUST_PLUMES;
             try {
                 particleType = org.bukkit.Particle.valueOf(settings.passiveParticleType.toUpperCase());
             } catch (Exception ignored) {}
 
-            org.bukkit.Material mat = org.bukkit.Material.NAUTILUS_SHELL;
-            try {
-                mat = org.bukkit.Material.valueOf(settings.passiveParticleMaterial.toUpperCase());
-            } catch (Exception ignored) {}
-
-            final org.bukkit.inventory.ItemStack particleItem = new org.bukkit.inventory.ItemStack(mat);
-            final org.bukkit.inventory.meta.ItemMeta meta = particleItem.getItemMeta();
-            if (meta != null) {
-                meta.setCustomModelData(settings.passiveParticleCustomModelData);
-                particleItem.setItemMeta(meta);
-            }
-
             damagee.getWorld().spawnParticle(
                 particleType,
                 damagee.getLocation().add(0, 1, 0),
-                25, 0.4, 1.0, 0.4, 0.1,
-                particleItem
+                15, 0.4, 0.8, 0.4, 0.05
             );
 
             damagee.playSound(damagee.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 0.8f, 1.0f);
