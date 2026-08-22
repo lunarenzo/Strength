@@ -1,6 +1,7 @@
 package lunatech.strength.listener.player;
 
 import lunatech.strength.config.ConfigHandler;
+import lunatech.strength.config.PluginConfig.MessagesConfig;
 import lunatech.strength.config.PluginConfig.StrengthSettings;
 import lunatech.strength.service.StrengthService;
 import io.github.milkdrinkers.colorparser.paper.ColorParser;
