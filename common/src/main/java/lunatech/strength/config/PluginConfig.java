@@ -143,6 +143,69 @@ public class PluginConfig implements VersionedConfig {
 
         @Comment("Title message shown when rolling starts")
         public String rollStartTitle = "<yellow>Assigning Weapon...</yellow>";
+    }
 
+    @Comment("""
+        ================================================================================
+         _____ _____     _   _ _____ _       ___ _____ _____ _____ _   _ _____ 
+        |_   _/  ___|   | | | /  ___| |     / _ \_   _|_   _/  ___| | | /  ___|
+          | | \ `--.    | |_| \ `--.| |    / /_\ \| |   | | \ `--.| |_| \ `--. 
+          | |  `--. \   |  _  |`--. \ |___ |  _  || |   | |  `--. \  _  |`--. \
+          \_/ \____/    |_| |_|____/\_____/|_| |_|\_/   \_/ \____/|_| |_|____/ 
+        
+        Customize all plugin messages below. Set any message to "" (empty string) to disable sending it.
+        ================================================================================
+        """)
+    public MessagesConfig messages = new MessagesConfig();
+
+    @ConfigSerializable
+    public static class MessagesConfig {
+        @Comment("Message sent to victim when losing strength on death")
+        public String deathLossMessage = "<red>You lost <loss> Strength on death. (New Strength: <strength>)</red>";
+
+        @Comment("Message sent to killer when gaining strength for a kill")
+        public String killRewardMessage = "<green>You gained +<reward> Strength for killing <victim>! (New Strength: <strength>)</green>";
+
+        @Comment("Message sent to killer when victim has 0 strength to lose")
+        public String killNoStrengthMessage = "<yellow><victim> had no Strength to lose, so no Strength was gained!</yellow>";
+
+        @Comment("Message sent to killer when victim dropped a Strength Shard on death")
+        public String killDroppedItemMessage = "<green>You killed <victim>! A Strength Shard has dropped on the ground!</green>";
+
+        @Comment("Message sent when consuming a physical Strength Shard")
+        public String consumeShardMessage = "<green>You consumed a Strength Shard and gained +<amount> Strength!</green>";
+
+        @Comment("Message sent when checking own strength (/strength)")
+        public String strengthCheckMessage = "<white>Your current strength level is: <gold><strength></gold>.</white>";
+
+        @Comment("Message sent when failing to withdraw strength due to low balance")
+        public String withdrawNotEnoughMessage = "<red>You do not have enough strength to withdraw <amount>! (Minimum required to keep: <min>, Current: <current>)</red>";
+
+        @Comment("Message sent when failing to withdraw strength because inventory is full")
+        public String withdrawFullInventoryMessage = "<red>Your inventory is full!</red>";
+
+        @Comment("Message sent upon successfully withdrawing strength into a physical item")
+        public String withdrawSuccessMessage = "<green>Successfully withdrew <amount> Strength into a physical item!</green>";
+
+        @Comment("Message sent to sender when changing a player's assigned weapon")
+        public String changeWeaponSuccessSenderMessage = "<green>Successfully changed <target>'s assigned weapon to <weapon>!</green>";
+
+        @Comment("Message sent to target player when their assigned weapon is changed by admin")
+        public String changeWeaponSuccessTargetMessage = "<gold>Your assigned weapon has been set to <weapon> by an admin!</gold>";
+
+        @Comment("Message sent when providing an invalid weapon name")
+        public String changeWeaponInvalidMessage = "<red>Invalid weapon type! Available: <list></red>";
+
+        @Comment("Message sent upon setting a player's strength level via admin command")
+        public String setStrengthSuccessMessage = "<green>Successfully set <target>'s strength from <old> to <amount>!</green>";
+
+        @Comment("Message sent when target player is not found or offline")
+        public String targetNotFoundMessage = "<red>Target player not found or offline!</red>";
+
+        @Comment("Message sent when attempting to use weapon ability without an assigned weapon")
+        public String noWeaponAssignedMessage = "<red>You have no weapon assigned! Weapon abilities are disabled.</red>";
+
+        @Comment("Message sent when assigned weapon does not have an ultimate ability implemented")
+        public String weaponNoUltimateMessage = "<red>Your assigned weapon (<weapon>) does not have an ultimate ability implemented.</red>";
     }
 }

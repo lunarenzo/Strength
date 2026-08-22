@@ -56,9 +56,10 @@ public final class AbilityCommand extends Command {
     private void executeAbility(Player player, CommandArguments args) {
         final StrengthService strengthService = plugin.getStrengthService();
         final String assignedWeapon = strengthService.getAssignedWeapon(player);
+        final lunatech.strength.config.PluginConfig.MessagesConfig messages = plugin.getConfigHandler().getConfig().messages;
 
         if (assignedWeapon == null) {
-            player.sendMessage(ColorParser.of("<red>You have no weapon assigned! Weapon abilities are disabled.</red>").build());
+            lunatech.strength.utility.MessageUtil.send(player, messages.noWeaponAssignedMessage);
             return;
         }
 
@@ -75,7 +76,11 @@ public final class AbilityCommand extends Command {
         } else if ("axe".equalsIgnoreCase(assignedWeapon)) {
             triggerAxeUltimate(player, strengthService);
         } else {
-            player.sendMessage(ColorParser.of("<red>Your assigned weapon (" + assignedWeapon.toUpperCase() + ") does not have an ultimate ability implemented in this phase.</red>").build());
+            lunatech.strength.utility.MessageUtil.send(
+                player,
+                messages.weaponNoUltimateMessage,
+                "weapon", assignedWeapon.toUpperCase()
+            );
         }
     }
 
@@ -129,12 +134,12 @@ public final class AbilityCommand extends Command {
 
         final org.bukkit.inventory.ItemStack mainhand = player.getInventory().getItemInMainHand();
         if (mainhand == null || !org.bukkit.Tag.ITEMS_AXES.isTagged(mainhand.getType())) {
-            player.sendMessage(ColorParser.of(settings.mustHoldAxeMessage).build());
+            lunatech.strength.utility.MessageUtil.send(player, settings.mustHoldAxeMessage);
             return;
         }
 
         if (lunatech.strength.listener.player.AxeAbilityListener.activeUltimateAttackers.getOrDefault(uuid, false)) {
-            player.sendMessage(ColorParser.of(settings.alreadyActiveMessage).build());
+            lunatech.strength.utility.MessageUtil.send(player, settings.alreadyActiveMessage);
             return;
         }
 
@@ -143,7 +148,12 @@ public final class AbilityCommand extends Command {
         lunatech.strength.listener.player.AxeAbilityListener.ultimateCooldowns.put(uuid, now);
         lunatech.strength.listener.player.AxeAbilityListener.activeUltimateAttackers.put(uuid, true);
 
-        player.sendMessage(ColorParser.of(settings.ultimateActivatedMessage.replace("{seconds}", String.valueOf(settings.ultimateDurationSeconds)).replace("{multiplier}", String.valueOf(settings.damageMultiplier))).build());
+        lunatech.strength.utility.MessageUtil.send(
+            player,
+            settings.ultimateActivatedMessage
+                .replace("{seconds}", String.valueOf(settings.ultimateDurationSeconds))
+                .replace("{multiplier}", String.valueOf(settings.damageMultiplier))
+        );
 
         new lunatech.strength.task.AxeUltimateTask(player, plugin, settings.ultimateDurationSeconds).runTaskTimer(plugin, 0L, 1L);
     }

@@ -75,12 +75,14 @@ final class StrengthCommand extends Command {
 
     private void executorStrength(CommandSender sender, CommandArguments args) {
         final StrengthService strengthService = plugin.getStrengthService();
+        final lunatech.strength.config.PluginConfig.MessagesConfig messages = plugin.getConfigHandler().getConfig().messages;
+
         if (sender instanceof Player player) {
             final int strength = strengthService.getStrength(player);
-            player.sendMessage(
-                ColorParser.of("<white>Your current strength level is: <gold><strength></gold>.")
-                    .with("strength", String.valueOf(strength))
-                    .build()
+            lunatech.strength.utility.MessageUtil.send(
+                player,
+                messages.strengthCheckMessage,
+                "strength", String.valueOf(strength)
             );
         } else {
             sender.sendMessage(
@@ -96,22 +98,21 @@ final class StrengthCommand extends Command {
         final StrengthService strengthService = plugin.getStrengthService();
         final int currentStrength = strengthService.getStrength(player);
         final int minStrength = plugin.getConfigHandler().getConfig().strength.minStrength;
+        final lunatech.strength.config.PluginConfig.MessagesConfig messages = plugin.getConfigHandler().getConfig().messages;
 
         if (currentStrength - amount < minStrength) {
-            player.sendMessage(
-                ColorParser.of("<red>You do not have enough strength to withdraw <amount>! (Minimum required to keep: <min>, Current: <current>)</red>")
-                    .with("amount", String.valueOf(amount))
-                    .with("min", String.valueOf(minStrength))
-                    .with("current", String.valueOf(currentStrength))
-                    .build()
+            lunatech.strength.utility.MessageUtil.send(
+                player,
+                messages.withdrawNotEnoughMessage,
+                java.util.Map.of("amount", String.valueOf(amount), "min", String.valueOf(minStrength), "current", String.valueOf(currentStrength))
             );
             return;
         }
 
         if (player.getInventory().firstEmpty() == -1) {
-            player.sendMessage(
-                ColorParser.of("<red>Your inventory is full!</red>")
-                    .build()
+            lunatech.strength.utility.MessageUtil.send(
+                player,
+                messages.withdrawFullInventoryMessage
             );
             return;
         }
@@ -123,10 +124,10 @@ final class StrengthCommand extends Command {
         final ItemStack strengthItem = strengthService.createStrengthItem(amount);
         player.getInventory().addItem(strengthItem);
 
-        player.sendMessage(
-            ColorParser.of("<green>Successfully withdrew <amount> Strength into a physical item!</green>")
-                .with("amount", String.valueOf(amount))
-                .build()
+        lunatech.strength.utility.MessageUtil.send(
+            player,
+            messages.withdrawSuccessMessage,
+            "amount", String.valueOf(amount)
         );
     }
 
@@ -137,17 +138,18 @@ final class StrengthCommand extends Command {
             .stream()
             .map(String::toLowerCase)
             .toList();
+        final lunatech.strength.config.PluginConfig.MessagesConfig messages = plugin.getConfigHandler().getConfig().messages;
 
         if (target == null) {
-            sender.sendMessage(ColorParser.of("<red>Target player not found or offline!</red>").build());
+            lunatech.strength.utility.MessageUtil.send(sender, messages.targetNotFoundMessage);
             return;
         }
 
         if (!availableWeapons.contains(weapon)) {
-            sender.sendMessage(
-                ColorParser.of("<red>Invalid weapon type! Available: <list></red>")
-                    .with("list", String.join(", ", availableWeapons))
-                    .build()
+            lunatech.strength.utility.MessageUtil.send(
+                sender,
+                messages.changeWeaponInvalidMessage,
+                "list", String.join(", ", availableWeapons)
             );
             return;
         }
@@ -155,26 +157,26 @@ final class StrengthCommand extends Command {
         final StrengthService strengthService = plugin.getStrengthService();
         strengthService.setAssignedWeapon(target, weapon);
 
-        sender.sendMessage(
-            ColorParser.of("<green>Successfully changed <target>'s assigned weapon to <weapon>!</green>")
-                .with("target", target.getName())
-                .with("weapon", weapon.toUpperCase())
-                .build()
+        lunatech.strength.utility.MessageUtil.send(
+            sender,
+            messages.changeWeaponSuccessSenderMessage,
+            java.util.Map.of("target", target.getName(), "weapon", weapon.toUpperCase())
         );
 
-        target.sendMessage(
-            ColorParser.of("<gold>Your assigned weapon has been set to <weapon> by an admin!</gold>")
-                .with("weapon", weapon.toUpperCase())
-                .build()
+        lunatech.strength.utility.MessageUtil.send(
+            target,
+            messages.changeWeaponSuccessTargetMessage,
+            "weapon", weapon.toUpperCase()
         );
     }
 
     private void executorSetStrength(CommandSender sender, CommandArguments args) {
         final Player target = (Player) args.get("target");
         final int amount = (int) args.get("amount");
+        final lunatech.strength.config.PluginConfig.MessagesConfig messages = plugin.getConfigHandler().getConfig().messages;
 
         if (target == null) {
-            sender.sendMessage(ColorParser.of("<red>Target player not found or offline!</red>").build());
+            lunatech.strength.utility.MessageUtil.send(sender, messages.targetNotFoundMessage);
             return;
         }
 
@@ -182,18 +184,10 @@ final class StrengthCommand extends Command {
         final int oldStrength = strengthService.getStrength(target);
         strengthService.setStrength(target, amount);
 
-        sender.sendMessage(
-            ColorParser.of("<green>Successfully set <target>'s strength from <old> to <amount>!</green>")
-                .with("target", target.getName())
-                .with("old", String.valueOf(oldStrength))
-                .with("amount", String.valueOf(amount))
-                .build()
-        );
-
-        target.sendMessage(
-            ColorParser.of("<gold>Your strength level was set to <amount> by an admin!</gold>")
-                .with("amount", String.valueOf(amount))
-                .build()
+        lunatech.strength.utility.MessageUtil.send(
+            sender,
+            messages.setStrengthSuccessMessage,
+            java.util.Map.of("target", target.getName(), "old", String.valueOf(oldStrength), "amount", String.valueOf(amount))
         );
     }
 

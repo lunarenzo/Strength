@@ -21,9 +21,11 @@ import org.jetbrains.annotations.NotNull;
  */
 public final class StrengthConsumeListener implements Listener {
     private final StrengthService strengthService;
+    private final lunatech.strength.config.ConfigHandler configHandler;
 
-    public StrengthConsumeListener(@NotNull StrengthService strengthService) {
+    public StrengthConsumeListener(@NotNull StrengthService strengthService, @NotNull lunatech.strength.config.ConfigHandler configHandler) {
         this.strengthService = strengthService;
+        this.configHandler = configHandler;
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
@@ -63,10 +65,10 @@ public final class StrengthConsumeListener implements Listener {
         player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.2f);
         player.spawnParticle(Particle.HAPPY_VILLAGER, player.getLocation().add(0, 1.0, 0), 12, 0.5, 0.5, 0.5, 0.1);
 
-        player.sendMessage(
-            ColorParser.of("<green>You consumed a Strength Shard and gained +<amount> Strength!</green>")
-                .with("amount", String.valueOf(strengthAmount))
-                .build()
+        lunatech.strength.utility.MessageUtil.send(
+            player,
+            configHandler.getConfig().messages.consumeShardMessage,
+            "amount", String.valueOf(strengthAmount)
         );
     }
 }
