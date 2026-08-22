@@ -91,4 +91,10 @@ public class AxeConfig implements VersionedConfig {
 
     @Comment("Actionbar displayed on target accumulating pending damage")
     public String pendingDamageActionbarMessage = "<dark_red><bold>☠ PENDING BURST DAMAGE: {amount}</bold></dark_red>";
+
+    @Comment("Cooldown in seconds before Axe Ultimate can be used again")
+    public int ultimateCooldownSeconds = 60;
+
+    @Comment("Message sent when Axe Ultimate is on cooldown")
+    public String ultimateCooldownMessage = "<red>Your Ultimate is on cooldown for another <seconds>s!</red>";
 }
