@@ -47,6 +47,7 @@ public final class CrossbowAbilityListener implements Listener {
     // Collections to manage active weapon state and eliminate memory leaks
     public static final Map<UUID, Integer> passiveHits = new ConcurrentHashMap<>();
     public static final Map<UUID, Integer> ultimateHits = new ConcurrentHashMap<>();
+    public static final Map<UUID, Long> ultimateCooldowns = new ConcurrentHashMap<>();
     public static final Map<UUID, Boolean> crossbowUltimatePrimed = new ConcurrentHashMap<>();
     public static final Map<UUID, Location> immobilizedPlayers = new ConcurrentHashMap<>();
     public static final Map<UUID, Long> lastPassiveHitTime = new ConcurrentHashMap<>();
@@ -223,6 +224,7 @@ public final class CrossbowAbilityListener implements Listener {
         final UUID uuid = event.getPlayer().getUniqueId();
         passiveHits.remove(uuid);
         ultimateHits.remove(uuid);
+        ultimateCooldowns.remove(uuid);
         crossbowUltimatePrimed.remove(uuid);
         immobilizedPlayers.remove(uuid);
         lastPassiveHitTime.remove(uuid);
