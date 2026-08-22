@@ -69,8 +69,8 @@ public final class TridentAbilityListener implements Listener {
             // Visual lightning effect (does not deal vanilla 5.0 damage or start fires)
             damagee.getWorld().strikeLightningEffect(damagee.getLocation());
 
-            // Animated 2D Billboard Yellow Lightning Particle (DUST_PLUMES mapped to lightning_yellow_*.png)
-            org.bukkit.Particle particleType = org.bukkit.Particle.DUST_PLUMES;
+            // Animated 2D Billboard Yellow Lightning Particle (wax_off mapped to lightning_yellow_*.png)
+            org.bukkit.Particle particleType = org.bukkit.Particle.WAX_OFF;
             try {
                 particleType = org.bukkit.Particle.valueOf(settings.passiveParticleType.toUpperCase());
             } catch (Exception ignored) {}
