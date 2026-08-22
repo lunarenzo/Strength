@@ -7,7 +7,6 @@ import lunatech.strength.cooldown.CooldownHandler;
 import lunatech.strength.hook.HookManager;
 import lunatech.strength.listener.ListenerHandler;
 import lunatech.strength.threadutil.SchedulerHandler;
-import lunatech.strength.translation.TranslationHandler;
 import lunatech.strength.updatechecker.UpdateHandler;
 import lunatech.strength.utility.Logger;
 import io.github.milkdrinkers.colorparser.paper.ColorParser;
