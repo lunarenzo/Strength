@@ -40,6 +40,7 @@ subprojects {
         maven("https://repo.papermc.io/repository/maven-public/")
         maven("https://mvn-repo.arim.space/lesser-gpl3/")
         maven("https://repo.extendedclip.com/content/repositories/placeholderapi/") // PlaceholderAPI
+        maven("https://maven.enginehub.org/repo/") // EngineHub (WorldGuard / WorldEdit)
         maven("https://repo.codemc.org/repository/maven-public/") {
             content {
                 includeGroup("com.github.retrooper") // PacketEvents
