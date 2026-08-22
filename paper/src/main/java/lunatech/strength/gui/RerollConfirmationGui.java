@@ -1,23 +1,23 @@
 package lunatech.strength.gui;
 
-import dev.triumphteam.gui.builder.item.ItemBuilder;
-import dev.triumphteam.gui.guis.Gui;
-import dev.triumphteam.gui.guis.GuiItem;
 import lunatech.strength.Strength;
 import lunatech.strength.config.PluginConfig.ChestGuiSettings;
 import lunatech.strength.config.PluginConfig.RerollDialogSettings;
 import lunatech.strength.constant.PDCKeys;
 import lunatech.strength.service.StrengthService;
 import lunatech.strength.task.WeaponRollTask;
+import lunatech.strength.utility.ItemResolver;
 import lunatech.strength.utility.Logger;
 import lunatech.strength.utility.MessageUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickCallback;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -26,7 +26,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 /**
- * Manager responsible for opening the Weapon Reroll Confirmation interface via Paper Dialog API or TriumphGUI Chest Inventory.
+ * Manager responsible for opening the Weapon Reroll Confirmation interface via Paper Dialog API or native Chest Inventory.
  */
 public final class RerollConfirmationGui {
 
@@ -43,7 +43,7 @@ public final class RerollConfirmationGui {
             }
         }
 
-        // Default or Fallback to Chest GUI
+        // Default or Fallback to Native Chest GUI
         openChestGui(plugin, player, dialogSettings);
     }
 
@@ -98,57 +98,66 @@ public final class RerollConfirmationGui {
 
         final Component title = mm.deserialize(dialogSettings.title);
         final int rows = Math.max(1, Math.min(6, guiSettings.rows));
+        final int totalSlots = rows * 9;
 
-        final Gui gui = Gui.gui()
-            .title(title)
-            .rows(rows)
-            .disableAllInteractions()
-            .create();
+        final RerollConfirmationHolder holder = new RerollConfirmationHolder();
+        final Inventory inv = Bukkit.createInventory(holder, totalSlots, title);
+        holder.setInventory(inv);
 
-        // 1. Confirm (YES) Button
-        Material confirmMat = Material.matchMaterial(guiSettings.confirmMaterial);
-        if (confirmMat == null) confirmMat = Material.LIME_CONCRETE;
+        // 1. Filler background items
+        ItemStack fillerItem = ItemResolver.resolveItemStack(guiSettings.fillerMaterial, plugin.getStrengthService());
+        if (fillerItem == null) {
+            fillerItem = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
+        }
+        fillerItem.editMeta(meta -> meta.displayName(Component.empty()));
 
-        final GuiItem yesItem = ItemBuilder.from(confirmMat)
-            .name(mm.deserialize(dialogSettings.confirmButton))
-            .lore(mm.deserialize("<gray>Click to confirm and consume reroll book.</gray>"))
-            .asGuiItem(event -> {
-                player.closeInventory();
-                executeReroll(plugin, player);
-            });
-        gui.setItem(guiSettings.confirmSlot, yesItem);
+        for (int i = 0; i < totalSlots; i++) {
+            inv.setItem(i, fillerItem.clone());
+        }
 
-        // 2. Info / Preview Item
-        final ItemStack rerollItem = plugin.getStrengthService().createRerollItem();
-        final GuiItem previewItem = ItemBuilder.from(rerollItem)
-            .name(mm.deserialize(dialogSettings.title))
-            .lore(mm.deserialize(dialogSettings.message))
-            .asGuiItem(event -> event.setCancelled(true));
-        gui.setItem(guiSettings.previewSlot, previewItem);
+        // 2. Confirm (YES) Button
+        ItemStack confirmItem = ItemResolver.resolveItemStack(guiSettings.confirmMaterial, plugin.getStrengthService());
+        if (confirmItem == null) {
+            confirmItem = new ItemStack(Material.LIME_CONCRETE);
+        }
+        confirmItem.editMeta(meta -> {
+            meta.displayName(mm.deserialize(dialogSettings.confirmButton));
+            meta.lore(List.of(mm.deserialize("<gray>Click to confirm and consume reroll book.</gray>")));
+        });
 
-        // 3. Cancel (NO) Button
-        Material cancelMat = Material.matchMaterial(guiSettings.cancelMaterial);
-        if (cancelMat == null) cancelMat = Material.RED_CONCRETE;
+        if (guiSettings.confirmSlot >= 0 && guiSettings.confirmSlot < totalSlots) {
+            inv.setItem(guiSettings.confirmSlot, confirmItem);
+        }
 
-        final GuiItem noItem = ItemBuilder.from(cancelMat)
-            .name(mm.deserialize(dialogSettings.cancelButton))
-            .lore(mm.deserialize("<gray>Click to cancel.</gray>"))
-            .asGuiItem(event -> player.closeInventory());
-        gui.setItem(guiSettings.cancelSlot, noItem);
+        // 3. Info / Preview Item
+        final ItemStack previewItem = plugin.getStrengthService().createRerollItem();
+        previewItem.editMeta(meta -> {
+            meta.displayName(mm.deserialize(dialogSettings.title));
+            meta.lore(List.of(mm.deserialize(dialogSettings.message)));
+        });
 
-        // Filler items for aesthetic border
-        Material fillerMat = Material.matchMaterial(guiSettings.fillerMaterial);
-        if (fillerMat == null) fillerMat = Material.GRAY_STAINED_GLASS_PANE;
+        if (guiSettings.previewSlot >= 0 && guiSettings.previewSlot < totalSlots) {
+            inv.setItem(guiSettings.previewSlot, previewItem);
+        }
 
-        final GuiItem filler = ItemBuilder.from(fillerMat)
-            .name(Component.empty())
-            .asGuiItem();
-        gui.getFiller().fill(filler);
+        // 4. Cancel (NO) Button
+        ItemStack cancelItem = ItemResolver.resolveItemStack(guiSettings.cancelMaterial, plugin.getStrengthService());
+        if (cancelItem == null) {
+            cancelItem = new ItemStack(Material.RED_CONCRETE);
+        }
+        cancelItem.editMeta(meta -> {
+            meta.displayName(mm.deserialize(dialogSettings.cancelButton));
+            meta.lore(List.of(mm.deserialize("<gray>Click to cancel.</gray>")));
+        });
 
-        gui.open(player);
+        if (guiSettings.cancelSlot >= 0 && guiSettings.cancelSlot < totalSlots) {
+            inv.setItem(guiSettings.cancelSlot, cancelItem);
+        }
+
+        player.openInventory(inv);
     }
 
-    private static void executeReroll(@NotNull Strength plugin, @NotNull Player player) {
+    public static void executeReroll(@NotNull Strength plugin, @NotNull Player player) {
         // Find and consume 1 Reroll Book from inventory or hand
         ItemStack targetItem = player.getInventory().getItemInMainHand();
         if (!isRerollBook(targetItem)) {
