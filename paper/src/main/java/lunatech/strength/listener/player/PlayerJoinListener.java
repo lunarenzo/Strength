@@ -42,11 +42,13 @@ public final class PlayerJoinListener implements Listener {
             final List<String> available = plugin.getConfigHandler().getConfig().weapons.availableWeapons;
             if (available != null && !available.isEmpty()) {
                 final int delaySeconds = plugin.getConfigHandler().getConfig().weapons.rollDelaySeconds;
-                final String rollStartTitle = plugin.getConfigHandler().getConfig().weapons.rollStartTitle;
                 
                 // Run the roll title effect after the configured delay
-                new WeaponRollTask(player, available, strengthService, rollStartTitle)
-                    .runTaskTimer(plugin, delaySeconds * 20L, 4L);
+                plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                    if (player.isOnline()) {
+                        new WeaponRollTask(plugin, player).start();
+                    }
+                }, delaySeconds * 20L);
             }
         }
     }

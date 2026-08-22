@@ -258,8 +258,54 @@ public class PluginConfig implements VersionedConfig {
         @Comment("The list of weapons available for rolling")
         public List<String> availableWeapons = List.of("Trident", "Sword", "Axe", "Bow", "Shield", "Crossbow");
 
-        @Comment("Title message shown when rolling starts")
+        @Comment("Total number of animation steps during rolling")
+        public int rollSteps = 15;
+
+        @Comment("Tick delay between each animation step (20 ticks = 1 second)")
+        public int stepIntervalTicks = 2;
+
+        @Comment("Title message shown while rolling")
         public String rollStartTitle = "<yellow>Assigning Weapon...</yellow>";
+
+        @Comment("Subtitle message shown while rolling (supports <weapon> placeholder)")
+        public String rollSubtitle = "<gray>ROLLING: <gold><weapon></gold></gray>";
+
+        @Comment("Main title message shown when a weapon is assigned (supports <weapon> placeholder)")
+        public String assignedTitle = "<gold><bold><weapon></bold></gold>";
+
+        @Comment("Subtitle message shown when a weapon is assigned (supports <weapon> placeholder)")
+        public String assignedSubtitle = "<green>Weapon Assigned!</green>";
+
+        @Comment("Custom display messages for specific weapons (overrides <weapon> placeholder if present)")
+        public Map<String, String> weaponCustomMessages = Map.of(
+            "Trident", "<aqua><bold>THUNDEROUS TRIDENT</bold></aqua>",
+            "Sword", "<red><bold>INFERNAL SWORD</bold></red>",
+            "Axe", "<dark_red><bold>EXECUTIONER AXE</bold></dark_red>",
+            "Bow", "<green><bold>WIND BOW</bold></green>",
+            "Shield", "<gold><bold>AEGIS SHIELD</bold></gold>",
+            "Crossbow", "<purple><bold>VOID CROSSBOW</bold></purple>"
+        );
+
+        @Comment("Sound played during each animation step")
+        public String rollTickSound = "UI_BUTTON_CLICK";
+
+        @Comment("Volume for roll tick sound")
+        public float rollTickVolume = 1.0f;
+
+        @Comment("Pitch for roll tick sound")
+        public float rollTickPitch = 1.2f;
+
+        @Comment("Sound played when weapon assignment completes")
+        public String completionSound = "ENTITY_PLAYER_LEVELUP";
+
+        @Comment("Volume for completion sound")
+        public float completionSoundVolume = 1.0f;
+
+        @Comment("Pitch for completion sound")
+        public float completionSoundPitch = 1.0f;
+
+        @Comment("Delay in ticks before playing completion sound after title animation completes")
+        public int completionSoundDelayTicks = 0;
     }
 
     @Comment("""
