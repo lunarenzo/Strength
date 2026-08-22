@@ -45,13 +45,17 @@ subprojects {
                 includeGroup("com.github.retrooper") // PacketEvents
                 includeGroup("fr.xephi") // AuthMe
                 includeGroup("me.chancesd.pvpmanager") // PvPManager
+                includeGroup("me.chancesd.sdutils") // sdutils
             }
         }
-        maven("https://repo.codemc.io/repository/maven-public/") {
+        maven("https://repo.codemc.org/repository/maven-snapshots/") {
             content {
-                includeGroup("me.chancesd.pvpmanager") // PvPManager fallback
+                includeGroup("me.chancesd.pvpmanager") // PvPManager
+                includeGroup("me.chancesd.sdutils") // sdutils
             }
         }
+        maven("https://repo.codemc.io/repository/maven-public/")
+        maven("https://repo.codemc.io/repository/maven-snapshots/")
         maven("https://jitpack.io/") {
             content {
                 includeGroup("com.github.MilkBowl") // VaultAPI
