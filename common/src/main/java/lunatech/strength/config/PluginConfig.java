@@ -256,6 +256,24 @@ public class PluginConfig implements VersionedConfig {
         public boolean enabled = true;
     }
 
+    @Comment("PvPManager integration settings")
+    public PvPManagerSettings pvpmanager = new PvPManagerSettings();
+
+    @ConfigSerializable
+    public static class PvPManagerSettings {
+        @Comment("Enable PvPManager integration")
+        public boolean enabled = true;
+
+        @Comment("Apply Strength loss penalty when a player combat logs out during PvP")
+        public boolean handleCombatLogPenalty = true;
+
+        @Comment("Prevent players from consuming reroll items or opening confirmation GUI while in combat")
+        public boolean preventRerollInCombat = true;
+
+        @Comment("Prevent players from withdrawing strength into physical items while in combat")
+        public boolean preventWithdrawInCombat = true;
+    }
+
     @Comment("Weapon Rolling and Passive/Ultimate Ability settings")
     public WeaponSettings weapons = new WeaponSettings();
 
@@ -409,5 +427,14 @@ public class PluginConfig implements VersionedConfig {
 
         @Comment("Message sent when consuming a Weapon Reroll Book")
         public String consumedRerollBookMessage = "<green>You consumed a Weapon Reroll Book!</green>";
+
+        @Comment("Message sent when attempting to reroll weapons while in combat")
+        public String cannotRerollInCombatMessage = "<red>You cannot reroll weapons while in combat!</red>";
+
+        @Comment("Message sent when attempting to withdraw strength while in combat")
+        public String cannotWithdrawInCombatMessage = "<red>You cannot withdraw strength while in combat!</red>";
+
+        @Comment("Message sent when combat logging causes strength loss penalty")
+        public String combatLogPenaltyMessage = "<red>You combat logged during PvP and lost <loss> Strength!</red>";
     }
 }

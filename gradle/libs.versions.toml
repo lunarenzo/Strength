@@ -35,6 +35,7 @@ vault = "com.github.MilkBowl:VaultAPI:1.7.1"
 packetevents = "com.github.retrooper:packetevents-spigot:2.13.0"
 placeholderapi = "me.clip:placeholderapi:2.12.3"
 authme = "fr.xephi:authme-core:6.0.0-SNAPSHOT"
+pvpmanager = "me.chancesd.pvpmanager:pvpmanager:4.0.4"
 
 # Testing
 junit-bom = "org.junit:junit-bom:6.1.2"

@@ -225,6 +225,20 @@ final class StrengthCommand extends Command {
         final int minStrength = plugin.getConfigHandler().getConfig().strength.minStrength;
         final PluginConfig.MessagesConfig messages = plugin.getConfigHandler().getConfig().messages;
 
+        // Check if PvPManager is active and player is in combat
+        if (plugin.getConfigHandler().getConfig().pvpmanager.enabled && plugin.getConfigHandler().getConfig().pvpmanager.preventWithdrawInCombat) {
+            if (plugin.getServer().getPluginManager().isPluginEnabled("PvPManager")) {
+                try {
+                    final me.chancesd.pvpmanager.player.CombatPlayer pvpPlayer = me.chancesd.pvpmanager.PvPManager.getInstance().getPlayerManager().get(player);
+                    if (pvpPlayer != null && pvpPlayer.isInCombat()) {
+                        lunatech.strength.utility.MessageUtil.send(player, messages.cannotWithdrawInCombatMessage);
+                        return;
+                    }
+                } catch (Throwable ignored) {
+                }
+            }
+        }
+
         if (currentStrength - amount < minStrength) {
             lunatech.strength.utility.MessageUtil.send(
                 player,
