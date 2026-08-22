@@ -24,7 +24,6 @@ public class Strength extends AbstractStrength {
     private static Strength instance;
 
     private ConfigHandler configHandler;
-    private TranslationHandler translationHandler;
     private HookManager hookManager;
     private CommandHandler commandHandler;
     private ListenerHandler listenerHandler;
@@ -43,7 +42,6 @@ public class Strength extends AbstractStrength {
         instance = this;
 
         configHandler = new ConfigHandler(this);
-        translationHandler = new TranslationHandler(configHandler);
 
         // Initialize Strength Service
         strengthService = new lunatech.strength.service.impl.DefaultStrengthService(
@@ -62,7 +60,6 @@ public class Strength extends AbstractStrength {
 
         handlers = List.of(
             configHandler,
-            translationHandler,
             hookManager,
             commandHandler,
             listenerHandler,

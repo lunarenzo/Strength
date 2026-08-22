@@ -7,7 +7,6 @@ import dev.jorel.commandapi.executors.CommandArguments;
 import lunatech.strength.Strength;
 import io.github.milkdrinkers.colorparser.paper.ColorParser;
 import io.github.milkdrinkers.threadutil.Scheduler;
-import io.github.milkdrinkers.wordweaver.Translation;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
@@ -61,14 +60,14 @@ final class DumpCommand extends Command {
     }
 
     private void executorDump(CommandSender sender, CommandArguments args) {
-        sender.sendMessage(Translation.as("commands.dump.dumping"));
+        sender.sendMessage(ColorParser.of("<yellow>Generating and uploading server dump...</yellow>").build());
 
         Scheduler.async(() -> {
                 try {
                     return upload(log());
                 } catch (Exception e) {
                     sender.sendMessage(
-                        ColorParser.of(Translation.of("commands.dump.failure"))
+                        ColorParser.of("<red>Failed to upload dump: <error></red>")
                             .with("error", e.getMessage())
                             .build()
                     );
@@ -80,7 +79,7 @@ final class DumpCommand extends Command {
                     return;
 
                 sender.sendMessage(
-                    ColorParser.of(Translation.of("commands.dump.success"))
+                    ColorParser.of("<green>Successfully uploaded dump: <link></green>")
                         .with("link", link)
                         .build()
                 );

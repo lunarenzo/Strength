@@ -47,9 +47,6 @@ public class PluginConfig implements VersionedConfig {
         public boolean op = true;
     }
 
-    @Comment("Language, specify the language file to use, for strength `en_US` which will load `/lang/en_US.json`")
-    public String language = "en_US";
-
     @Comment("Strength SMP Settings")
     public StrengthSettings strength = new StrengthSettings();
 
