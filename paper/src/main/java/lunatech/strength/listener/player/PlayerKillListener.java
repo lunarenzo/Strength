@@ -28,6 +28,7 @@ public final class PlayerKillListener implements Listener {
         final Player victim = event.getEntity();
         final Player killer = victim.getKiller();
         final StrengthSettings settings = configHandler.getConfig().strength;
+        final MessagesConfig messages = configHandler.getConfig().messages;
 
         final boolean isPvp = killer != null && !killer.getUniqueId().equals(victim.getUniqueId());
         final boolean shouldProcessDeathLoss = settings.deathLoss > 0 && (isPvp || settings.loseStrengthOnNaturalDeath);
@@ -48,11 +49,10 @@ public final class PlayerKillListener implements Listener {
                     event.getDrops().add(strengthService.createStrengthItem(actualLoss));
                 }
 
-                victim.sendMessage(
-                    ColorParser.of("<red>You lost <loss> Strength on death. (New Strength: <strength>)")
-                        .with("loss", String.valueOf(actualLoss))
-                        .with("strength", String.valueOf(victimNewStrength))
-                        .build()
+                lunatech.strength.utility.MessageUtil.send(
+                    victim,
+                    messages.deathLossMessage,
+                    Map.of("loss", String.valueOf(actualLoss), "strength", String.valueOf(victimNewStrength))
                 );
             }
         }
@@ -68,25 +68,23 @@ public final class PlayerKillListener implements Listener {
                     final int killerNewStrength = Math.min(settings.maxStrength, killerOldStrength + settings.killReward);
                     strengthService.setStrength(killer, killerNewStrength);
 
-                    killer.sendMessage(
-                        ColorParser.of("<green>You gained +<reward> Strength for killing <victim>! (New Strength: <strength>)")
-                            .with("reward", String.valueOf(settings.killReward))
-                            .with("victim", victim.getName())
-                            .with("strength", String.valueOf(killerNewStrength))
-                            .build()
+                    lunatech.strength.utility.MessageUtil.send(
+                        killer,
+                        messages.killRewardMessage,
+                        Map.of("reward", String.valueOf(settings.killReward), "victim", victim.getName(), "strength", String.valueOf(killerNewStrength))
                     );
                 } else {
-                    killer.sendMessage(
-                        ColorParser.of("<green>You killed <victim>! A Strength Shard has dropped on the ground!</green>")
-                            .with("victim", victim.getName())
-                            .build()
+                    lunatech.strength.utility.MessageUtil.send(
+                        killer,
+                        messages.killDroppedItemMessage,
+                        Map.of("victim", victim.getName())
                     );
                 }
             } else {
-                killer.sendMessage(
-                    ColorParser.of("<yellow><victim> had no Strength to lose, so no Strength was gained!</yellow>")
-                        .with("victim", victim.getName())
-                        .build()
+                lunatech.strength.utility.MessageUtil.send(
+                    killer,
+                    messages.killNoStrengthMessage,
+                    Map.of("victim", victim.getName())
                 );
             }
         }

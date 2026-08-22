@@ -232,7 +232,7 @@ public final class AxeUltimateTask extends BukkitRunnable {
         }
 
         if (attacker.isOnline()) {
-            attacker.sendMessage(ColorParser.of(settings.ultimateExpiredMessage).build());
+            lunatech.strength.utility.MessageUtil.send(attacker, settings.ultimateExpiredMessage);
         }
     }
 }

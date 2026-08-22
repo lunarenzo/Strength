@@ -107,7 +107,7 @@ public final class ShieldUltimateTask extends BukkitRunnable {
         }
 
         if (player.isOnline()) {
-            player.sendMessage(io.github.milkdrinkers.colorparser.paper.ColorParser.of(settings.ultimateExpiredMessage).build());
+            lunatech.strength.utility.MessageUtil.send(player, settings.ultimateExpiredMessage);
             player.playSound(player.getLocation(), Sound.BLOCK_BEACON_DEACTIVATE, 1.0f, 1.0f);
         }
     }
