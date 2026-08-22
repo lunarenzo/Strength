@@ -61,6 +61,9 @@ public class PluginConfig implements VersionedConfig {
         @Comment("Amount of strength lost on death (use 0 to disable loss)")
         public int deathLoss = 1;
 
+        @Comment("Should the strength lost on death be dropped as a physical strength item?")
+        public boolean dropItemOnDeath = false;
+
         @Comment("Minimum strength value a player can have")
         public int minStrength = 0;
 

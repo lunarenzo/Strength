@@ -33,11 +33,17 @@ public final class PlayerKillListener implements Listener {
         if (settings.deathLoss > 0) {
             final int victimOldStrength = strengthService.getStrength(victim);
             final int victimNewStrength = Math.max(settings.minStrength, victimOldStrength - settings.deathLoss);
+            final int actualLoss = victimOldStrength - victimNewStrength;
             strengthService.setStrength(victim, victimNewStrength);
             
+            // Drop strength item on death if enabled and actual loss > 0
+            if (settings.dropItemOnDeath && actualLoss > 0) {
+                event.getDrops().add(strengthService.createStrengthItem(actualLoss));
+            }
+
             victim.sendMessage(
                 ColorParser.of("<red>You lost <loss> Strength on death. (New Strength: <strength>)")
-                    .with("loss", String.valueOf(settings.deathLoss))
+                    .with("loss", String.valueOf(actualLoss))
                     .with("strength", String.valueOf(victimNewStrength))
                     .build()
             );
