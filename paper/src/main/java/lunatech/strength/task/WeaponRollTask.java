@@ -18,7 +18,8 @@ import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Task that runs a visual rolling title animation to assign a random weapon to players.
- * Features quadratic deceleration easing for a realistic wheel-spinning feel.
+ * Features quadratic deceleration easing for a realistic wheel-spinning feel, and ensures
+ * the final roll frame perfectly lands on the assigned weapon.
  */
 public final class WeaponRollTask {
     private final Strength plugin;
@@ -26,6 +27,7 @@ public final class WeaponRollTask {
     private final StrengthService strengthService;
     private final WeaponSettings settings;
     private final int totalSteps;
+    private final String selectedWeapon;
     private int currentStep = 0;
 
     public WeaponRollTask(@NotNull Strength plugin, @NotNull Player player) {
@@ -34,6 +36,15 @@ public final class WeaponRollTask {
         this.strengthService = plugin.getStrengthService();
         this.settings = plugin.getConfigHandler().getConfig().weapons;
         this.totalSteps = Math.max(1, settings.rollSteps);
+
+        // Pre-select the winning weapon upfront so the roll visual lands on it seamlessly
+        final List<String> available = settings.availableWeapons;
+        if (available != null && !available.isEmpty()) {
+            final int chosenIndex = ThreadLocalRandom.current().nextInt(available.size());
+            this.selectedWeapon = available.get(chosenIndex);
+        } else {
+            this.selectedWeapon = "Sword";
+        }
     }
 
     public void start() {
@@ -52,9 +63,14 @@ public final class WeaponRollTask {
         }
 
         if (currentStep < totalSteps) {
-            // Pick random weapon for rolling frame
-            final int randomIndex = ThreadLocalRandom.current().nextInt(available.size());
-            final String weaponKey = available.get(randomIndex);
+            final String weaponKey;
+            // On the final step of the rolling animation, land ON the pre-selected winning weapon!
+            if (currentStep == totalSteps - 1) {
+                weaponKey = selectedWeapon;
+            } else {
+                final int randomIndex = ThreadLocalRandom.current().nextInt(available.size());
+                weaponKey = available.get(randomIndex);
+            }
             final String weaponDisplay = getWeaponDisplayString(weaponKey);
 
             final Component mainTitle = mm.deserialize(settings.rollStartTitle);
@@ -80,12 +96,10 @@ public final class WeaponRollTask {
             long nextDelay = calculateStepDelay(currentStep);
             Bukkit.getScheduler().runTaskLater(plugin, this::runNextFrame, Math.max(1L, nextDelay));
         } else {
-            // Final weapon assignment frame
-            final int finalIndex = ThreadLocalRandom.current().nextInt(available.size());
-            final String finalWeapon = available.get(finalIndex);
-            final String finalWeaponDisplay = getWeaponDisplayString(finalWeapon);
+            // Final weapon assignment frame - uses selectedWeapon!
+            final String finalWeaponDisplay = getWeaponDisplayString(selectedWeapon);
 
-            strengthService.setAssignedWeapon(player, finalWeapon);
+            strengthService.setAssignedWeapon(player, selectedWeapon);
 
             final Component mainTitle = mm.deserialize(settings.assignedTitle.replace("<weapon>", finalWeaponDisplay));
             final Component subtitle = mm.deserialize(settings.assignedSubtitle.replace("<weapon>", finalWeaponDisplay));
