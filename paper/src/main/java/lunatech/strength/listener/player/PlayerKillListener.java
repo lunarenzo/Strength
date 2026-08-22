@@ -62,17 +62,26 @@ public final class PlayerKillListener implements Listener {
             final boolean allowReward = !settings.requireVictimStrengthForReward || actualLoss > 0;
 
             if (allowReward) {
-                final int killerOldStrength = strengthService.getStrength(killer);
-                final int killerNewStrength = Math.min(settings.maxStrength, killerOldStrength + settings.killReward);
-                strengthService.setStrength(killer, killerNewStrength);
+                // Prevent duplication: if item is dropped on death, do not also auto-grant base strength unless explicitly enabled
+                if (!settings.dropItemOnDeath || settings.giveDirectRewardWhenItemDropped) {
+                    final int killerOldStrength = strengthService.getStrength(killer);
+                    final int killerNewStrength = Math.min(settings.maxStrength, killerOldStrength + settings.killReward);
+                    strengthService.setStrength(killer, killerNewStrength);
 
-                killer.sendMessage(
-                    ColorParser.of("<green>You gained +<reward> Strength for killing <victim>! (New Strength: <strength>)")
-                        .with("reward", String.valueOf(settings.killReward))
-                        .with("victim", victim.getName())
-                        .with("strength", String.valueOf(killerNewStrength))
-                        .build()
-                );
+                    killer.sendMessage(
+                        ColorParser.of("<green>You gained +<reward> Strength for killing <victim>! (New Strength: <strength>)")
+                            .with("reward", String.valueOf(settings.killReward))
+                            .with("victim", victim.getName())
+                            .with("strength", String.valueOf(killerNewStrength))
+                            .build()
+                    );
+                } else {
+                    killer.sendMessage(
+                        ColorParser.of("<green>You killed <victim>! A Strength Shard has dropped on the ground!</green>")
+                            .with("victim", victim.getName())
+                            .build()
+                    );
+                }
             } else {
                 killer.sendMessage(
                     ColorParser.of("<yellow><victim> had no Strength to lose, so no Strength was gained!</yellow>")
