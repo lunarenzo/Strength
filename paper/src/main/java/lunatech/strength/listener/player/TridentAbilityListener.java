@@ -69,12 +69,16 @@ public final class TridentAbilityListener implements Listener {
             // Visual lightning effect (does not deal vanilla 5.0 damage or start fires)
             damagee.getWorld().strikeLightningEffect(damagee.getLocation());
 
-            // Yellow lightning particles
+            // Custom yellow lightning particles (resource pack rebinds ELECTRIC_SPARK to yellow lightning textures)
+            org.bukkit.Particle particleType = org.bukkit.Particle.ELECTRIC_SPARK;
+            try {
+                particleType = org.bukkit.Particle.valueOf(settings.passiveParticleType.toUpperCase());
+            } catch (Exception ignored) {}
+
             damagee.getWorld().spawnParticle(
-                org.bukkit.Particle.DUST,
+                particleType,
                 damagee.getLocation().add(0, 1, 0),
-                25, 0.4, 1.0, 0.4,
-                new org.bukkit.Particle.DustOptions(org.bukkit.Color.fromRGB(255, 220, 0), 1.8f)
+                25, 0.4, 1.0, 0.4, 0.1
             );
 
             damagee.playSound(damagee.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 0.8f, 1.0f);
