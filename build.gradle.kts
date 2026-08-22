@@ -44,6 +44,12 @@ subprojects {
             content {
                 includeGroup("com.github.retrooper") // PacketEvents
                 includeGroup("fr.xephi") // AuthMe
+                includeGroup("me.chancesd.pvpmanager") // PvPManager
+            }
+        }
+        maven("https://repo.codemc.io/repository/maven-public/") {
+            content {
+                includeGroup("me.chancesd.pvpmanager") // PvPManager fallback
             }
         }
         maven("https://jitpack.io/") {
