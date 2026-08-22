@@ -36,7 +36,6 @@ final class StrengthCommand extends Command {
             .withHelp("Base command.", "Base command.")
             .withPermission(BASE_PERM)
             .withSubcommands(
-                new DumpCommand().command(),
                 new CommandAPICommand("withdraw")
                     .withHelp("Withdraw strength into a physical item.", "Withdraw strength into a physical item.")
                     .withArguments(new IntegerArgument("amount", 1))
