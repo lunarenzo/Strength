@@ -169,25 +169,61 @@ public class PluginConfig implements VersionedConfig {
         );
     }
 
-    @Comment("Confirmation dialog settings when consuming a Weapon Reroll Book")
+    @Comment("Confirmation dialog / GUI settings when consuming a Weapon Reroll Book")
     public RerollDialogSettings rerollDialog = new RerollDialogSettings();
 
     @ConfigSerializable
     public static class RerollDialogSettings {
-        @Comment("Should a confirmation dialog pop up when a player tries to consume a Weapon Reroll Book?")
+        @Comment("Should a confirmation dialog/GUI pop up when a player tries to consume a Weapon Reroll Book?")
         public boolean enabled = true;
 
-        @Comment("Title of the confirmation dialog")
+        @Comment("Confirmation display mode: 'DIALOG' (Native Paper 1.21 Dialog API) or 'GUI' (TriumphGUI Chest Inventory)")
+        public String mode = "DIALOG";
+
+        @Comment("Title of the confirmation dialog/GUI (MiniMessage format)")
         public String title = "<light_purple><bold>Confirm Weapon Reroll</bold></light_purple>";
 
-        @Comment("Message body inside the confirmation dialog")
+        @Comment("Message body inside the confirmation dialog/GUI (MiniMessage format)")
         public String message = "<gray>Are you sure you want to consume 1 Weapon Reroll Book to reroll your assigned weapon?</gray>";
 
-        @Comment("Text for the Confirm / Yes button")
+        @Comment("Text for the Confirm / Yes button (MiniMessage format)")
         public String confirmButton = "<green><bold>YES</bold></green>";
 
-        @Comment("Text for the Cancel / No button")
+        @Comment("Tooltip for the Confirm button (used in DIALOG mode)")
+        public String confirmTooltip = "<gray>Click to confirm reroll</gray>";
+
+        @Comment("Text for the Cancel / No button (MiniMessage format)")
         public String cancelButton = "<red><bold>NO</bold></red>";
+
+        @Comment("Tooltip for the Cancel button (used in DIALOG mode)")
+        public String cancelTooltip = "<gray>Click to cancel</gray>";
+
+        @Comment("Chest GUI specific settings (used when mode is 'GUI' or as fallback)")
+        public ChestGuiSettings gui = new ChestGuiSettings();
+    }
+
+    @ConfigSerializable
+    public static class ChestGuiSettings {
+        @Comment("Number of rows for the chest GUI (1 to 6)")
+        public int rows = 3;
+
+        @Comment("Slot for the Confirm (YES) button (0-indexed)")
+        public int confirmSlot = 11;
+
+        @Comment("Material for the Confirm button item")
+        public String confirmMaterial = "LIME_CONCRETE";
+
+        @Comment("Slot for the Cancel (NO) button (0-indexed)")
+        public int cancelSlot = 15;
+
+        @Comment("Material for the Cancel button item")
+        public String cancelMaterial = "RED_CONCRETE";
+
+        @Comment("Slot for the Preview item (0-indexed)")
+        public int previewSlot = 13;
+
+        @Comment("Material for filler background items")
+        public String fillerMaterial = "GRAY_STAINED_GLASS_PANE";
     }
 
     @Comment("Weapon Rolling and Passive/Ultimate Ability settings")
