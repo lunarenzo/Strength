@@ -261,8 +261,20 @@ public class PluginConfig implements VersionedConfig {
         @Comment("Total number of animation steps during rolling")
         public int rollSteps = 15;
 
-        @Comment("Tick delay between each animation step (20 ticks = 1 second)")
-        public int stepIntervalTicks = 2;
+        @Comment("Initial tick delay between animation frames at the start of rolling (Fast)")
+        public int initialStepDelayTicks = 1;
+
+        @Comment("Final tick delay between animation frames at the end of rolling (Slow)")
+        public int maxStepDelayTicks = 10;
+
+        @Comment("Sound played when consuming a reroll book")
+        public String consumeSound = "ITEM_BOOK_PAGE_TURN";
+
+        @Comment("Volume for consume sound")
+        public float consumeSoundVolume = 1.0f;
+
+        @Comment("Pitch for consume sound")
+        public float consumeSoundPitch = 1.0f;
 
         @Comment("Title message shown while rolling")
         public String rollStartTitle = "<yellow>Assigning Weapon...</yellow>";
