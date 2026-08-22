@@ -59,12 +59,12 @@ public final class MessageUtil {
         if (message == null || message.trim().isEmpty()) {
             return;
         }
-        ColorParser parser = ColorParser.of(message);
+        io.github.milkdrinkers.colorparser.paper.PaperComponentBuilder builder = ColorParser.of(message);
         for (Map.Entry<String, String> entry : placeholders.entrySet()) {
             if (entry.getKey() != null && entry.getValue() != null) {
-                parser = parser.with(entry.getKey(), entry.getValue());
+                builder = builder.with(entry.getKey(), entry.getValue());
             }
         }
-        sender.sendMessage(parser.build());
+        sender.sendMessage(builder.build());
     }
 }

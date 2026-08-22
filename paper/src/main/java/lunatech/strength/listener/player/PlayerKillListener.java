@@ -11,6 +11,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
+
 /**
  * Listener that awards strength to killers and deducts strength from victims.
  */
