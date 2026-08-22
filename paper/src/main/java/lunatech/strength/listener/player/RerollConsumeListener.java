@@ -56,7 +56,13 @@ public final class RerollConsumeListener implements Listener {
 
         final Player player = event.getPlayer();
 
-        // Consume one item from the stack
+        // If confirmation dialog is enabled in config, pop up dialog GUI for confirmation
+        if (plugin.getConfigHandler().getConfig().rerollDialog.enabled) {
+            lunatech.strength.gui.RerollConfirmationGui.open(plugin, player);
+            return;
+        }
+
+        // Direct consumption if confirmation dialog is disabled
         item.setAmount(item.getAmount() - 1);
 
         // Visual and audio feedback
