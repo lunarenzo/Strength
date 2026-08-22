@@ -28,7 +28,6 @@ threadutil-common = { module = "io.github.milkdrinkers:threadutil-common", versi
 threadutil-bukkit = { module = "io.github.milkdrinkers:threadutil-bukkit", version.ref = "threadutil" }
 commandapi-core = { module = "dev.jorel:commandapi-core", version.ref = "commandapi" }
 commandapi-shade-paper = { module = "dev.jorel:commandapi-paper-shade", version.ref = "commandapi" }
-triumph-gui = "dev.triumphteam:triumph-gui-paper:3.1.13"
 
 # Plugin dependencies
 bstats = "org.bstats:bstats-bukkit:3.2.1"
