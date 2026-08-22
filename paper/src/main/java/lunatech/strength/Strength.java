@@ -42,6 +42,11 @@ public class Strength extends AbstractStrength {
 
         configHandler = new ConfigHandler(this);
 
+        try {
+            lunatech.strength.integration.WorldGuardHook.registerFlags();
+        } catch (Throwable ignored) {
+        }
+
         // Initialize Strength Service
         strengthService = new lunatech.strength.service.impl.DefaultStrengthService(
             new lunatech.strength.data.repository.impl.PDCPlayerRepository(),

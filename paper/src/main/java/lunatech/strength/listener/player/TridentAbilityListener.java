@@ -53,6 +53,12 @@ public final class TridentAbilityListener implements Listener {
             return;
         }
 
+        // WorldGuard region check for weapon ability
+        if (!lunatech.strength.integration.WorldGuardHook.isAbilityAllowed(plugin, damager, damagee.getLocation())) {
+            lunatech.strength.utility.MessageUtil.send(damager, plugin.getConfigHandler().getConfig().messages.cannotUseAbilityInRegionMessage);
+            return;
+        }
+
         final TridentConfig settings = plugin.getConfigHandler().getTridentConfig();
 
         // 1. Passive Trigger: Every N hits, summon visual lightning bolt and apply configured passive damage

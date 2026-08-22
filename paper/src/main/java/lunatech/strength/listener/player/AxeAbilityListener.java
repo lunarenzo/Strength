@@ -251,6 +251,11 @@ public final class AxeAbilityListener implements Listener {
             return;
         }
 
+        // WorldGuard region check for weapon ability
+        if (!lunatech.strength.integration.WorldGuardHook.isAbilityAllowed(plugin, damager, victim.getLocation())) {
+            return;
+        }
+
         // 2. Active Ultimate Damage Interception & Storage (ALL attacks: normal & crit)
         if (activeUltimateAttackers.getOrDefault(damagerUuid, false)) {
             final double finalDamage = event.getFinalDamage();

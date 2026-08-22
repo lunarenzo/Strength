@@ -34,6 +34,12 @@ public final class PlayerKillListener implements Listener {
         final MessagesConfig messages = configHandler.getConfig().messages;
 
         final boolean isPvp = killer != null && !killer.getUniqueId().equals(victim.getUniqueId());
+
+        // WorldGuard region check: if strength loss is disabled in this region, bypass death processing
+        if (isPvp && !lunatech.strength.integration.WorldGuardHook.isPvPLossAllowed(configHandler.getPlugin(), victim, victim.getLocation())) {
+            return;
+        }
+
         final boolean shouldProcessDeathLoss = settings.deathLoss > 0 && (isPvp || settings.loseStrengthOnNaturalDeath);
 
         int actualLoss = 0;
