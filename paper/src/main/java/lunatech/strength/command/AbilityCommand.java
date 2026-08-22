@@ -353,14 +353,16 @@ public final class AbilityCommand extends Command {
 
         // 1. Validate Weapon Held Requirement
         if (player.getInventory().getItemInMainHand().getType() != Material.CROSSBOW) {
-            player.sendMessage(ColorParser.of("<red>You must be holding a Crossbow to activate your ultimate!</red>").build());
+            player.sendMessage(ColorParser.of(settings.mustHoldCrossbowMessage).build());
             return;
         }
 
         // 2. Validate Strength Requirement
         if (currentStrength < settings.ultimateStrengthRequired) {
             player.sendMessage(
-                ColorParser.of("<red>You do not have enough strength to activate your ultimate! (Required: <req>, Current: <current>)</red>")
+                ColorParser.of(settings.notEnoughStrengthMessage
+                    .replace("{req}", String.valueOf(settings.ultimateStrengthRequired))
+                    .replace("{current}", String.valueOf(currentStrength)))
                     .with("req", String.valueOf(settings.ultimateStrengthRequired))
                     .with("current", String.valueOf(currentStrength))
                     .build()
@@ -390,7 +392,9 @@ public final class AbilityCommand extends Command {
         final int currentCharge = CrossbowAbilityListener.ultimateHits.getOrDefault(uuid, 0);
         if (currentCharge < settings.ultimateHitsRequired) {
             player.sendMessage(
-                ColorParser.of("<red>Your ultimate is not charged yet! (Required: <req>, Current: <current> passive hits)</red>")
+                ColorParser.of(settings.notChargedMessage
+                    .replace("{req}", String.valueOf(settings.ultimateHitsRequired))
+                    .replace("{current}", String.valueOf(currentCharge)))
                     .with("req", String.valueOf(settings.ultimateHitsRequired))
                     .with("current", String.valueOf(currentCharge))
                     .build()
