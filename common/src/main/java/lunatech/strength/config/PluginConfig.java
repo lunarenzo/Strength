@@ -64,6 +64,9 @@ public class PluginConfig implements VersionedConfig {
         @Comment("Should the strength lost on death be dropped as a physical strength item?")
         public boolean dropItemOnDeath = false;
 
+        @Comment("If dropItemOnDeath is enabled, should the killer ALSO receive direct strength added to their base? (Set false to prevent strength inflation)")
+        public boolean giveDirectRewardWhenItemDropped = false;
+
         @Comment("Should killer only gain strength if the killed victim actually had strength to lose?")
         public boolean requireVictimStrengthForReward = true;
 
