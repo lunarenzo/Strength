@@ -61,13 +61,9 @@ public class RecipeHandler implements Reloadable {
                     final char keyChar = keyStr.charAt(0);
                     final String val = entry.getValue();
 
-                    if ("STRENGTH_ITEM".equalsIgnoreCase(val) || "STRENGTH_SHARD".equalsIgnoreCase(val)) {
-                        recipe.setIngredient(keyChar, new RecipeChoice.ExactChoice(plugin.getStrengthService().createStrengthItem(1)));
-                    } else {
-                        final Material mat = Material.matchMaterial(val);
-                        if (mat != null) {
-                            recipe.setIngredient(keyChar, mat);
-                        }
+                    final RecipeChoice choice = lunatech.strength.utility.ItemResolver.resolveRecipeChoice(val, plugin.getStrengthService());
+                    if (choice != null) {
+                        recipe.setIngredient(keyChar, choice);
                     }
                 }
             }
@@ -103,13 +99,9 @@ public class RecipeHandler implements Reloadable {
                     final char keyChar = keyStr.charAt(0);
                     final String val = entry.getValue();
 
-                    if ("STRENGTH_ITEM".equalsIgnoreCase(val) || "STRENGTH_SHARD".equalsIgnoreCase(val)) {
-                        recipe.setIngredient(keyChar, new RecipeChoice.ExactChoice(plugin.getStrengthService().createStrengthItem(1)));
-                    } else {
-                        final Material mat = Material.matchMaterial(val);
-                        if (mat != null) {
-                            recipe.setIngredient(keyChar, mat);
-                        }
+                    final RecipeChoice choice = lunatech.strength.utility.ItemResolver.resolveRecipeChoice(val, plugin.getStrengthService());
+                    if (choice != null) {
+                        recipe.setIngredient(keyChar, choice);
                     }
                 }
             }
