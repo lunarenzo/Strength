@@ -56,6 +56,15 @@ public class CrossbowConfig implements VersionedConfig {
     @Comment("Message sent when Crossbow Ultimate is on cooldown")
     public String ultimateCooldownMessage = "<red>Your Ultimate is on cooldown for another <seconds>s!</red>";
 
+    @Comment("Message sent when player is not holding a Crossbow")
+    public String mustHoldCrossbowMessage = "<red>You must be holding a Crossbow to activate your ultimate!</red>";
+
+    @Comment("Message sent when player does not have enough strength")
+    public String notEnoughStrengthMessage = "<red>You do not have enough strength to activate your ultimate! (Required: {req}, Current: {current})</red>";
+
+    @Comment("Message sent when ultimate is not charged yet")
+    public String notChargedMessage = "<red>Your ultimate is not charged yet! (Required: {req}, Current: {current} passive hits)</red>";
+
     @Comment("Message sent to the immobilized player when attempting to move or teleport")
     public String trapEscapeBlockedMessage = "<red>You are immobilized and cannot move or teleport!</red>";
 }
