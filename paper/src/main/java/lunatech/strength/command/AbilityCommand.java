@@ -164,13 +164,13 @@ public final class AbilityCommand extends Command {
 
         // 1. Validate Weapon Held Requirement
         if (player.getInventory().getItemInMainHand().getType() != Material.TRIDENT) {
-            player.sendMessage(ColorParser.of(settings.mustHoldTridentMessage).build());
+            lunatech.strength.utility.MessageUtil.send(player, settings.mustHoldTridentMessage);
             return;
         }
 
         // 2. Validate Ground / Water Requirement (matching Poseidon Mod requirement)
         if (!player.isOnGround() && !player.isInWater()) {
-            player.sendMessage(ColorParser.of(settings.mustBeOnGroundMessage).build());
+            lunatech.strength.utility.MessageUtil.send(player, settings.mustBeOnGroundMessage);
             return;
         }
 
@@ -181,24 +181,20 @@ public final class AbilityCommand extends Command {
         final long cooldownMillis = settings.ultimateCooldownSeconds * 1000L;
         if (now - lastUse < cooldownMillis) {
             final long secondsLeft = (cooldownMillis - (now - lastUse)) / 1000L + 1;
-            player.sendMessage(
-                ColorParser.of(settings.ultimateCooldownMessage
-                    .replace("{seconds}", String.valueOf(secondsLeft)))
-                    .with("seconds", String.valueOf(secondsLeft))
-                    .build()
+            lunatech.strength.utility.MessageUtil.send(
+                player,
+                settings.ultimateCooldownMessage,
+                "seconds", String.valueOf(secondsLeft)
             );
             return;
         }
 
         // 4. Validate Strength Requirement
         if (currentStrength < settings.ultimateStrengthRequired) {
-            player.sendMessage(
-                ColorParser.of(settings.notEnoughStrengthMessage
-                    .replace("{req}", String.valueOf(settings.ultimateStrengthRequired))
-                    .replace("{current}", String.valueOf(currentStrength)))
-                    .with("req", String.valueOf(settings.ultimateStrengthRequired))
-                    .with("current", String.valueOf(currentStrength))
-                    .build()
+            lunatech.strength.utility.MessageUtil.send(
+                player,
+                settings.notEnoughStrengthMessage,
+                Map.of("req", String.valueOf(settings.ultimateStrengthRequired), "current", String.valueOf(currentStrength))
             );
             return;
         }
@@ -206,13 +202,10 @@ public final class AbilityCommand extends Command {
         // 5. Validate Hit Charge Requirement
         final int currentCharge = TridentAbilityListener.ultimateHits.getOrDefault(uuid, 0);
         if (currentCharge < settings.ultimateHitsRequired) {
-            player.sendMessage(
-                ColorParser.of(settings.notChargedMessage
-                    .replace("{req}", String.valueOf(settings.ultimateHitsRequired))
-                    .replace("{current}", String.valueOf(currentCharge)))
-                    .with("req", String.valueOf(settings.ultimateHitsRequired))
-                    .with("current", String.valueOf(currentCharge))
-                    .build()
+            lunatech.strength.utility.MessageUtil.send(
+                player,
+                settings.notChargedMessage,
+                Map.of("req", String.valueOf(settings.ultimateHitsRequired), "current", String.valueOf(currentCharge))
             );
             return;
         }
@@ -225,7 +218,7 @@ public final class AbilityCommand extends Command {
         new TridentUltimateTask(player, settings)
             .runTaskTimer(plugin, 0L, 1L);
 
-        player.sendMessage(ColorParser.of(settings.ultimateActivatedMessage).build());
+        lunatech.strength.utility.MessageUtil.send(player, settings.ultimateActivatedMessage);
     }
 
     private void triggerBowUltimate(Player player, StrengthService strengthService) {
@@ -234,7 +227,7 @@ public final class AbilityCommand extends Command {
 
         // 1. Validate Weapon Held Requirement
         if (player.getInventory().getItemInMainHand().getType() != Material.BOW) {
-            player.sendMessage(ColorParser.of(settings.mustHoldBowMessage).build());
+            lunatech.strength.utility.MessageUtil.send(player, settings.mustHoldBowMessage);
             return;
         }
 
@@ -245,24 +238,20 @@ public final class AbilityCommand extends Command {
         final long cooldownMillis = settings.ultimateCooldownSeconds * 1000L;
         if (now - lastUse < cooldownMillis) {
             final long secondsLeft = (cooldownMillis - (now - lastUse)) / 1000L + 1;
-            player.sendMessage(
-                ColorParser.of(settings.ultimateCooldownMessage
-                    .replace("{seconds}", String.valueOf(secondsLeft)))
-                    .with("seconds", String.valueOf(secondsLeft))
-                    .build()
+            lunatech.strength.utility.MessageUtil.send(
+                player,
+                settings.ultimateCooldownMessage,
+                "seconds", String.valueOf(secondsLeft)
             );
             return;
         }
 
         // 3. Validate Strength Requirement
         if (currentStrength < settings.ultimateStrengthRequired) {
-            player.sendMessage(
-                ColorParser.of(settings.notEnoughStrengthMessage
-                    .replace("{req}", String.valueOf(settings.ultimateStrengthRequired))
-                    .replace("{current}", String.valueOf(currentStrength)))
-                    .with("req", String.valueOf(settings.ultimateStrengthRequired))
-                    .with("current", String.valueOf(currentStrength))
-                    .build()
+            lunatech.strength.utility.MessageUtil.send(
+                player,
+                settings.notEnoughStrengthMessage,
+                Map.of("req", String.valueOf(settings.ultimateStrengthRequired), "current", String.valueOf(currentStrength))
             );
             return;
         }
@@ -270,13 +259,10 @@ public final class AbilityCommand extends Command {
         // 4. Validate Hit Charge Requirement
         final int currentCharge = BowAbilityListener.ultimateHits.getOrDefault(uuid, 0);
         if (currentCharge < settings.ultimateHitsRequired) {
-            player.sendMessage(
-                ColorParser.of(settings.notChargedMessage
-                    .replace("{req}", String.valueOf(settings.ultimateHitsRequired))
-                    .replace("{current}", String.valueOf(currentCharge)))
-                    .with("req", String.valueOf(settings.ultimateHitsRequired))
-                    .with("current", String.valueOf(currentCharge))
-                    .build()
+            lunatech.strength.utility.MessageUtil.send(
+                player,
+                settings.notChargedMessage,
+                Map.of("req", String.valueOf(settings.ultimateHitsRequired), "current", String.valueOf(currentCharge))
             );
             return;
         }
@@ -289,7 +275,7 @@ public final class AbilityCommand extends Command {
         new BowBeamTask(player, settings)
             .runTaskTimer(plugin, 0L, 1L);
 
-        player.sendMessage(ColorParser.of(settings.ultimateActivatedMessage).build());
+        lunatech.strength.utility.MessageUtil.send(player, settings.ultimateActivatedMessage);
     }
 
     private void triggerShieldUltimate(Player player, StrengthService strengthService) {
@@ -299,7 +285,7 @@ public final class AbilityCommand extends Command {
         // 1. Validate Weapon Held Requirement (Main hand or Offhand)
         if (player.getInventory().getItemInMainHand().getType() != Material.SHIELD
             && player.getInventory().getItemInOffHand().getType() != Material.SHIELD) {
-            player.sendMessage(ColorParser.of(settings.mustHoldShieldMessage).build());
+            lunatech.strength.utility.MessageUtil.send(player, settings.mustHoldShieldMessage);
             return;
         }
 
@@ -310,24 +296,20 @@ public final class AbilityCommand extends Command {
         final long cooldownMillis = settings.ultimateCooldownSeconds * 1000L;
         if (now - lastUse < cooldownMillis) {
             final long secondsLeft = (cooldownMillis - (now - lastUse)) / 1000L + 1;
-            player.sendMessage(
-                ColorParser.of(settings.ultimateCooldownMessage
-                    .replace("{seconds}", String.valueOf(secondsLeft)))
-                    .with("seconds", String.valueOf(secondsLeft))
-                    .build()
+            lunatech.strength.utility.MessageUtil.send(
+                player,
+                settings.ultimateCooldownMessage,
+                "seconds", String.valueOf(secondsLeft)
             );
             return;
         }
 
         // 3. Validate Strength Requirement
         if (currentStrength < settings.ultimateStrengthRequired) {
-            player.sendMessage(
-                ColorParser.of(settings.notEnoughStrengthMessage
-                    .replace("{req}", String.valueOf(settings.ultimateStrengthRequired))
-                    .replace("{current}", String.valueOf(currentStrength)))
-                    .with("req", String.valueOf(settings.ultimateStrengthRequired))
-                    .with("current", String.valueOf(currentStrength))
-                    .build()
+            lunatech.strength.utility.MessageUtil.send(
+                player,
+                settings.notEnoughStrengthMessage,
+                Map.of("req", String.valueOf(settings.ultimateStrengthRequired), "current", String.valueOf(currentStrength))
             );
             return;
         }
@@ -335,13 +317,10 @@ public final class AbilityCommand extends Command {
         // 4. Validate Hit Charge Requirement
         final int currentCharge = ShieldAbilityListener.ultimateHits.getOrDefault(uuid, 0);
         if (currentCharge < settings.ultimateHitsRequired) {
-            player.sendMessage(
-                ColorParser.of(settings.notChargedMessage
-                    .replace("{req}", String.valueOf(settings.ultimateHitsRequired))
-                    .replace("{current}", String.valueOf(currentCharge)))
-                    .with("req", String.valueOf(settings.ultimateHitsRequired))
-                    .with("current", String.valueOf(currentCharge))
-                    .build()
+            lunatech.strength.utility.MessageUtil.send(
+                player,
+                settings.notChargedMessage,
+                Map.of("req", String.valueOf(settings.ultimateHitsRequired), "current", String.valueOf(currentCharge))
             );
             return;
         }
@@ -354,7 +333,7 @@ public final class AbilityCommand extends Command {
         new ShieldUltimateTask(player, settings)
             .runTaskTimer(plugin, 0L, 1L);
 
-        player.sendMessage(ColorParser.of(settings.ultimateActivatedMessage).build());
+        lunatech.strength.utility.MessageUtil.send(player, settings.ultimateActivatedMessage);
     }
 
     private void triggerCrossbowUltimate(Player player, StrengthService strengthService) {
@@ -363,19 +342,16 @@ public final class AbilityCommand extends Command {
 
         // 1. Validate Weapon Held Requirement
         if (player.getInventory().getItemInMainHand().getType() != Material.CROSSBOW) {
-            player.sendMessage(ColorParser.of(settings.mustHoldCrossbowMessage).build());
+            lunatech.strength.utility.MessageUtil.send(player, settings.mustHoldCrossbowMessage);
             return;
         }
 
         // 2. Validate Strength Requirement
         if (currentStrength < settings.ultimateStrengthRequired) {
-            player.sendMessage(
-                ColorParser.of(settings.notEnoughStrengthMessage
-                    .replace("{req}", String.valueOf(settings.ultimateStrengthRequired))
-                    .replace("{current}", String.valueOf(currentStrength)))
-                    .with("req", String.valueOf(settings.ultimateStrengthRequired))
-                    .with("current", String.valueOf(currentStrength))
-                    .build()
+            lunatech.strength.utility.MessageUtil.send(
+                player,
+                settings.notEnoughStrengthMessage,
+                Map.of("req", String.valueOf(settings.ultimateStrengthRequired), "current", String.valueOf(currentStrength))
             );
             return;
         }
@@ -388,12 +364,10 @@ public final class AbilityCommand extends Command {
 
         if (now - lastUse < cooldownMillis) {
             final long secondsLeft = (cooldownMillis - (now - lastUse)) / 1000L + 1;
-            player.sendMessage(
-                ColorParser.of(settings.ultimateCooldownMessage
-                    .replace("<seconds>", String.valueOf(secondsLeft))
-                    .replace("{seconds}", String.valueOf(secondsLeft)))
-                    .with("seconds", String.valueOf(secondsLeft))
-                    .build()
+            lunatech.strength.utility.MessageUtil.send(
+                player,
+                settings.ultimateCooldownMessage,
+                "seconds", String.valueOf(secondsLeft)
             );
             return;
         }
@@ -401,13 +375,10 @@ public final class AbilityCommand extends Command {
         // 4. Validate Hit Charge Requirement
         final int currentCharge = CrossbowAbilityListener.ultimateHits.getOrDefault(uuid, 0);
         if (currentCharge < settings.ultimateHitsRequired) {
-            player.sendMessage(
-                ColorParser.of(settings.notChargedMessage
-                    .replace("{req}", String.valueOf(settings.ultimateHitsRequired))
-                    .replace("{current}", String.valueOf(currentCharge)))
-                    .with("req", String.valueOf(settings.ultimateHitsRequired))
-                    .with("current", String.valueOf(currentCharge))
-                    .build()
+            lunatech.strength.utility.MessageUtil.send(
+                player,
+                settings.notChargedMessage,
+                Map.of("req", String.valueOf(settings.ultimateHitsRequired), "current", String.valueOf(currentCharge))
             );
             return;
         }
@@ -419,7 +390,7 @@ public final class AbilityCommand extends Command {
 
         // Feedbacks
         player.playSound(player.getLocation(), Sound.ITEM_CROSSBOW_LOADING_END, 1.0f, 1.0f);
-        player.sendMessage(ColorParser.of(settings.ultimateActivatedMessage).build());
+        lunatech.strength.utility.MessageUtil.send(player, settings.ultimateActivatedMessage);
     }
 
     private void triggerSwordUltimate(Player player, StrengthService strengthService) {
@@ -427,13 +398,10 @@ public final class AbilityCommand extends Command {
         final int currentStrength = strengthService.getStrength(player);
 
         if (currentStrength < settings.ultimateStrengthRequired) {
-            player.sendMessage(
-                ColorParser.of(settings.notEnoughStrengthMessage
-                    .replace("{req}", String.valueOf(settings.ultimateStrengthRequired))
-                    .replace("{current}", String.valueOf(currentStrength)))
-                    .with("req", String.valueOf(settings.ultimateStrengthRequired))
-                    .with("current", String.valueOf(currentStrength))
-                    .build()
+            lunatech.strength.utility.MessageUtil.send(
+                player,
+                settings.notEnoughStrengthMessage,
+                Map.of("req", String.valueOf(settings.ultimateStrengthRequired), "current", String.valueOf(currentStrength))
             );
             return;
         }
@@ -447,32 +415,27 @@ public final class AbilityCommand extends Command {
 
         if (now - lastUse < cooldownMillis) {
             final long secondsLeft = (cooldownMillis - (now - lastUse)) / 1000L + 1;
-            player.sendMessage(
-                ColorParser.of(settings.ultimateCooldownMessage
-                    .replace("<seconds>", String.valueOf(secondsLeft))
-                    .replace("{seconds}", String.valueOf(secondsLeft)))
-                    .with("seconds", String.valueOf(secondsLeft))
-                    .build()
+            lunatech.strength.utility.MessageUtil.send(
+                player,
+                settings.ultimateCooldownMessage,
+                "seconds", String.valueOf(secondsLeft)
             );
             return;
         }
 
         final int currentCharge = SwordAbilityListener.ultimateHits.getOrDefault(uuid, 0);
         if (currentCharge < settings.ultimateHitsRequired) {
-            player.sendMessage(
-                ColorParser.of(settings.notChargedMessage
-                    .replace("{req}", String.valueOf(settings.ultimateHitsRequired))
-                    .replace("{current}", String.valueOf(currentCharge)))
-                    .with("req", String.valueOf(settings.ultimateHitsRequired))
-                    .with("current", String.valueOf(currentCharge))
-                    .build()
+            lunatech.strength.utility.MessageUtil.send(
+                player,
+                settings.notChargedMessage,
+                Map.of("req", String.valueOf(settings.ultimateHitsRequired), "current", String.valueOf(currentCharge))
             );
             return;
         }
 
         final ItemStack mainHand = player.getInventory().getItemInMainHand();
         if (mainHand == null || !Tag.ITEMS_SWORDS.isTagged(mainHand.getType())) {
-            player.sendMessage(ColorParser.of(settings.mustHoldSwordMessage).build());
+            lunatech.strength.utility.MessageUtil.send(player, settings.mustHoldSwordMessage);
             return;
         }
 
@@ -504,6 +467,6 @@ public final class AbilityCommand extends Command {
         new SwordUltimateTask(player, plugin, settings.ultimateDurationSeconds).runTaskTimer(plugin, 0L, 1L);
 
         player.playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_IRON, 1.0f, 1.2f);
-        player.sendMessage(ColorParser.of(settings.ultimateActivatedMessage).build());
+        lunatech.strength.utility.MessageUtil.send(player, settings.ultimateActivatedMessage);
     }
 }
