@@ -350,8 +350,23 @@ public class PluginConfig implements VersionedConfig {
         @Comment("Message sent when consuming a physical Strength Shard")
         public String consumeShardMessage = "<green>You consumed a Strength Shard and gained +<amount> Strength!</green>";
 
-        @Comment("Message sent when checking own strength (/strength)")
-        public String strengthCheckMessage = "<white>Your current strength level is: <gold><strength></gold>.</white>";
+        @Comment("Message sent when checking own strength (/strength or /strength info)")
+        public String strengthCheckMessage = "<light_purple>Your current Strength is <gold><strength></gold> and your assigned weapon is <gold><weapon></gold>.</light_purple>";
+
+        @Comment("Fallback string for weapon placeholder when player has no weapon assigned")
+        public String unassignedWeaponMessage = "None";
+
+        @Comment("Message sent to sender when giving physical strength item(s)")
+        public String giveStrengthItemSuccessSenderMessage = "<green>Gave <amount>x Strength Item(s) (Strength value: <value>) to <target>.</green>";
+
+        @Comment("Message sent to target when receiving physical strength item(s)")
+        public String giveStrengthItemSuccessTargetMessage = "<green>You received <amount>x Strength Item(s) (Strength value: <value>).</green>";
+
+        @Comment("Message sent to sender when giving reroll item(s)")
+        public String giveRollItemSuccessSenderMessage = "<green>Gave <amount>x Reroll Book(s) to <target>.</green>";
+
+        @Comment("Message sent to target when receiving reroll item(s)")
+        public String giveRollItemSuccessTargetMessage = "<green>You received <amount>x Reroll Book(s).</green>";
 
         @Comment("Message sent when failing to withdraw strength due to low balance")
         public String withdrawNotEnoughMessage = "<red>You do not have enough strength to withdraw <amount>! (Minimum required to keep: <min>, Current: <current>)</red>";
