@@ -161,7 +161,11 @@ public final class AxeUltimateTask extends BukkitRunnable {
         ItemDisplay display = skullDisplays.get(targetUuid);
         if (display == null || !display.isValid()) {
             final Location spawnLoc = target.getLocation().add(0, target.getHeight() + yTranslation, 0);
+            spawnLoc.setPitch(0.0f);
+            spawnLoc.setYaw(0.0f);
+
             display = target.getWorld().spawn(spawnLoc, ItemDisplay.class, entity -> {
+                entity.setRotation(0.0f, 0.0f);
                 entity.setItemStack(customSkullItem != null ? customSkullItem : new ItemStack(Material.PLAYER_HEAD));
                 entity.setTransformation(new Transformation(
                     new Vector3f(0, yTranslation, 0),
@@ -177,7 +181,8 @@ public final class AxeUltimateTask extends BukkitRunnable {
             target.addPassenger(display);
             skullDisplays.put(targetUuid, display);
         } else {
-            // Ensure passenger mounting is maintained (client locks position with 100% 60fps/144fps smooth tracking)
+            // Ensure passenger mounting is maintained and rotation remains level (0 pitch/yaw)
+            display.setRotation(0.0f, 0.0f);
             if (!target.getPassengers().contains(display)) {
                 target.addPassenger(display);
             }
