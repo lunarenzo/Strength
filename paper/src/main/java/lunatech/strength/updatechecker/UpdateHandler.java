@@ -10,7 +10,6 @@ import io.github.milkdrinkers.javasemver.Version;
 import io.github.milkdrinkers.javasemver.exception.VersionParseException;
 import io.github.milkdrinkers.versionwatch.Platform;
 import io.github.milkdrinkers.versionwatch.VersionWatcher;
-import io.github.milkdrinkers.wordweaver.Translation;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -52,13 +51,13 @@ public class UpdateHandler implements Reloadable {
 
             if (watcher.isLatest()) {
                 Logger.get().info(
-                    ColorParser.of(Translation.of("update-checker.running-latest"))
+                    ColorParser.of("<green>You are running the latest version of <plugin_name>!</green>")
                         .with("plugin_name", plugin.getName())
                         .build()
                 );
             } else {
                 Logger.get().info(
-                    ColorParser.of(Translation.of("update-checker.update-found-console"))
+                    ColorParser.of("<yellow>A new version of <plugin_name> is available! (<version_current> -> <version_latest>)</yellow>")
                         .with("plugin_name", plugin.getName())
                         .with("version_current", watcher.getCurrentVersion().getVersionFull())
                         .with("version_latest", version.getVersionFull())
@@ -68,7 +67,7 @@ public class UpdateHandler implements Reloadable {
             }
         }).exceptionally(throwable -> {
             if (shouldLog)
-                Logger.get().warn(ColorParser.of(Translation.of("update-checker.update-failed")).with("error", throwable.getMessage()).build());
+                Logger.get().warn(ColorParser.of("<red>Failed to check for updates: <error></red>").with("error", throwable.getMessage()).build());
             return null;
         });
 
@@ -92,7 +91,7 @@ public class UpdateHandler implements Reloadable {
                     return;
 
                 p.sendMessage(
-                    ColorParser.of(Translation.of("update-checker.update-found-player"))
+                    ColorParser.of("<yellow>A new version of <plugin_name> is available! (<version_current> -> <version_latest>)</yellow>")
                         .with("plugin_name", plugin.getName())
                         .with("version_current", watcher.getCurrentVersion().getVersionFull())
                         .with("version_latest", watcher.getLatestVersion().getVersionFull())

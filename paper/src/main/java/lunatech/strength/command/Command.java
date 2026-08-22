@@ -4,7 +4,6 @@ import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.CommandAPIPaper;
 import dev.jorel.commandapi.exceptions.WrapperCommandSyntaxException;
 import io.github.milkdrinkers.colorparser.paper.ColorParser;
-import io.github.milkdrinkers.wordweaver.Translation;
 import net.kyori.adventure.text.ComponentLike;
 
 import java.io.Serial;
@@ -22,8 +21,8 @@ public abstract class Command {
             return new CommandException(message);
         }
 
-        static CommandException fail(String translationKey) {
-            return new CommandException(ColorParser.of(Translation.of(translationKey)).build());
+        static CommandException fail(String message) {
+            return new CommandException(ColorParser.of(message).build());
         }
 
         static Result exception(ComponentLike message) throws CommandException {

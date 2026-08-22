@@ -36,7 +36,6 @@ final class StrengthCommand extends Command {
             .withHelp("Base command.", "Base command.")
             .withPermission(BASE_PERM)
             .withSubcommands(
-                new TranslationCommand().command(),
                 new DumpCommand().command(),
                 new CommandAPICommand("withdraw")
                     .withHelp("Withdraw strength into a physical item.", "Withdraw strength into a physical item.")
@@ -193,9 +192,8 @@ final class StrengthCommand extends Command {
 
     private void executorReload(CommandSender sender, CommandArguments args) {
         plugin.getConfigHandler().onLoad(plugin);
-        io.github.milkdrinkers.wordweaver.Translation.reload();
         sender.sendMessage(
-            ColorParser.of("<green>Successfully reloaded plugin configuration and translations!</green>")
+            ColorParser.of("<green>Successfully reloaded plugin configuration!</green>")
                 .build()
         );
     }
