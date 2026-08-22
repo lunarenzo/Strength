@@ -1,6 +1,5 @@
 package lunatech.strength;
 
-import com.google.gson.Gson;
 import io.papermc.paper.plugin.loader.PluginClasspathBuilder;
 import io.papermc.paper.plugin.loader.PluginLoader;
 import io.papermc.paper.plugin.loader.library.impl.MavenLibraryResolver;
@@ -43,17 +42,44 @@ public class StrengthPluginLoader implements PluginLoader {
         try (
             final InputStream is = getClass().getResourceAsStream("/paper-libraries.json")
         ) {
-            if (is == null)
-                throw new RuntimeException("InputStream of \"/paper-libraries.json\" is null");
+            if (is == null) {
+                return new PluginLibraries(java.util.Map.of(), java.util.List.of());
+            }
 
             try (
                 final InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
                 final BufferedReader br = new BufferedReader(isr)
             ) {
-                return new Gson().fromJson(br, PluginLibraries.class);
+                final StringBuilder sb = new StringBuilder();
+                String line;
+                while ((line = br.readLine()) != null) {
+                    sb.append(line);
+                }
+                return parseJson(sb.toString());
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private PluginLibraries parseJson(String json) {
+        try {
+            return new com.google.gson.Gson().fromJson(json, PluginLibraries.class);
+        } catch (Throwable t) {
+            final java.util.Map<String, String> repos = new java.util.HashMap<>();
+            final java.util.List<String> deps = new java.util.ArrayList<>();
+
+            final java.util.regex.Matcher repoMatcher = java.util.regex.Pattern.compile("\"([^\"]+)\"\\s*:\\s*\"(https?://[^\"]+)\"").matcher(json);
+            while (repoMatcher.find()) {
+                repos.put(repoMatcher.group(1), repoMatcher.group(2));
+            }
+
+            final java.util.regex.Matcher depMatcher = java.util.regex.Pattern.compile("\"([a-zA-Z0-9_.-]+:[a-zA-Z0-9_.-]+:[a-zA-Z0-9_.-]+)\"").matcher(json);
+            while (depMatcher.find()) {
+                deps.add(depMatcher.group(1));
+            }
+
+            return new PluginLibraries(repos, deps);
         }
     }
 

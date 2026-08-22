@@ -77,9 +77,6 @@ tasks {
         reloc("org.yaml", "yaml")
         reloc("org.spongepowered", "spongepowered")
 
-        reloc("com.google.errorprone", "google")
-        reloc("com.google.gson", "google")
-
         mergeServiceFiles()
     }
 
