@@ -18,10 +18,12 @@ import java.util.Map;
  * Listener that awards strength to killers and deducts strength from victims.
  */
 public final class PlayerKillListener implements Listener {
+    private final Strength plugin;
     private final StrengthService strengthService;
     private final ConfigHandler configHandler;
 
-    public PlayerKillListener(@NotNull StrengthService strengthService, @NotNull ConfigHandler configHandler) {
+    public PlayerKillListener(@NotNull Strength plugin, @NotNull StrengthService strengthService, @NotNull ConfigHandler configHandler) {
+        this.plugin = plugin;
         this.strengthService = strengthService;
         this.configHandler = configHandler;
     }
@@ -36,7 +38,7 @@ public final class PlayerKillListener implements Listener {
         final boolean isPvp = killer != null && !killer.getUniqueId().equals(victim.getUniqueId());
 
         // WorldGuard region check: if strength loss is disabled in this region, bypass death processing
-        if (isPvp && !lunatech.strength.integration.WorldGuardHook.isPvPLossAllowed(configHandler.getPlugin(), victim, victim.getLocation())) {
+        if (isPvp && !lunatech.strength.integration.WorldGuardHook.isPvPLossAllowed(plugin, victim, victim.getLocation())) {
             return;
         }
 
