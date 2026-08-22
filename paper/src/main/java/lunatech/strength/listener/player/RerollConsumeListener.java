@@ -66,8 +66,14 @@ public final class RerollConsumeListener implements Listener {
         item.setAmount(item.getAmount() - 1);
 
         // Visual and audio feedback
-        player.playSound(player.getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 1.0f, 1.0f);
-        player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 0.8f, 1.2f);
+        final var weaponSettings = plugin.getConfigHandler().getConfig().weapons;
+        if (weaponSettings.consumeSound != null && !weaponSettings.consumeSound.isEmpty() && !weaponSettings.consumeSound.equalsIgnoreCase("NONE")) {
+            try {
+                player.playSound(player.getLocation(), Sound.valueOf(weaponSettings.consumeSound.toUpperCase()), weaponSettings.consumeSoundVolume, weaponSettings.consumeSoundPitch);
+            } catch (Exception ignored) {
+                player.playSound(player.getLocation(), weaponSettings.consumeSound.toLowerCase(), weaponSettings.consumeSoundVolume, weaponSettings.consumeSoundPitch);
+            }
+        }
         player.spawnParticle(Particle.ENCHANT, player.getLocation().add(0, 1.0, 0), 20, 0.5, 0.5, 0.5, 0.2);
 
         // Send consumed message if configured
