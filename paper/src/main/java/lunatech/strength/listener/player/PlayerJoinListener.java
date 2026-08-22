@@ -39,6 +39,18 @@ public final class PlayerJoinListener implements Listener {
         // Check if player has an assigned weapon, if not trigger the rolling process
         final String assignedWeapon = strengthService.getAssignedWeapon(player);
         if (assignedWeapon == null) {
+            // Check if AuthMe integration is enabled and player is not authenticated yet
+            final boolean authmeEnabled = plugin.getConfigHandler().getConfig().authme.enabled;
+            if (authmeEnabled && plugin.getServer().getPluginManager().isPluginEnabled("AuthMe")) {
+                try {
+                    if (!fr.xephi.authme.api.v3.AuthMeApi.getInstance().isAuthenticated(player)) {
+                        // Defer weapon roll until AuthMe LoginEvent or RegisterEvent fires
+                        return;
+                    }
+                } catch (Throwable ignored) {
+                }
+            }
+
             final List<String> available = plugin.getConfigHandler().getConfig().weapons.availableWeapons;
             if (available != null && !available.isEmpty()) {
                 final int delaySeconds = plugin.getConfigHandler().getConfig().weapons.rollDelaySeconds;
@@ -48,7 +60,7 @@ public final class PlayerJoinListener implements Listener {
                     if (player.isOnline()) {
                         new WeaponRollTask(plugin, player).start();
                     }
-                }, delaySeconds * 20L);
+                }, Math.max(0L, delaySeconds * 20L));
             }
         }
     }
