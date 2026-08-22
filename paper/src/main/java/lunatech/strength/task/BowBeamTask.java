@@ -49,7 +49,7 @@ public final class BowBeamTask extends BukkitRunnable {
 
         // 1. Charge Phase (Ticks 0 - 19)
         if (beamTick == 0) {
-            player.getWorld().playSound(player.getLocation(), Sound.ENTITY_WARDEN_SONIC_CHARGE, 1.0f, 1.0f);
+            playSound(player.getLocation(), settings.ultimateChargeSound, 1.0f, 1.0f);
         }
 
         if (beamTick < 20) {
@@ -63,7 +63,7 @@ public final class BowBeamTask extends BukkitRunnable {
 
         // 2. Fire Phase (Tick 20)
         else if (beamTick == 20) {
-            player.getWorld().playSound(player.getLocation(), Sound.ENTITY_WARDEN_SONIC_BOOM, 1.0f, 1.0f);
+            playSound(player.getLocation(), settings.ultimateFireSound, 1.0f, 1.0f);
 
             // Calculate center spawn location for the main beam (Z scale mid-point)
             final Location center = player.getEyeLocation().add(player.getEyeLocation().getDirection().multiply(settings.ultimateRange / 2.0 + 1.5));
@@ -192,6 +192,16 @@ public final class BowBeamTask extends BukkitRunnable {
         if (currentSpiralEntity != null) {
             currentSpiralEntity.remove();
             currentSpiralEntity = null;
+        }
+    }
+
+    private void playSound(@NotNull Location loc, @NotNull String soundKey, float volume, float pitch) {
+        if (soundKey == null || soundKey.isBlank()) return;
+        try {
+            final Sound sound = Sound.valueOf(soundKey.toUpperCase());
+            loc.getWorld().playSound(loc, sound, volume, pitch);
+        } catch (IllegalArgumentException e) {
+            loc.getWorld().playSound(loc, soundKey, volume, pitch);
         }
     }
 }
