@@ -60,7 +60,7 @@ public class RecipeHandler implements Reloadable {
 
             Bukkit.addRecipe(recipe);
         } catch (Exception e) {
-            Logger.warn("Failed to register Strength Item crafting recipe: " + e.getMessage());
+            Logger.get().warn("Failed to register Strength Item crafting recipe: {}", e.getMessage());
         }
     }
 
