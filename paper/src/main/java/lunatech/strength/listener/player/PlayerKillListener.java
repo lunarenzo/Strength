@@ -29,39 +29,57 @@ public final class PlayerKillListener implements Listener {
         final Player killer = victim.getKiller();
         final StrengthSettings settings = configHandler.getConfig().strength;
 
-        // Apply death loss if configured
-        if (settings.deathLoss > 0) {
+        final boolean isPvp = killer != null && !killer.getUniqueId().equals(victim.getUniqueId());
+        final boolean shouldProcessDeathLoss = settings.deathLoss > 0 && (isPvp || settings.loseStrengthOnNaturalDeath);
+
+        int actualLoss = 0;
+
+        // Apply death loss if configured and allowed by cause
+        if (shouldProcessDeathLoss) {
             final int victimOldStrength = strengthService.getStrength(victim);
             final int victimNewStrength = Math.max(settings.minStrength, victimOldStrength - settings.deathLoss);
-            final int actualLoss = victimOldStrength - victimNewStrength;
-            strengthService.setStrength(victim, victimNewStrength);
-            
-            // Drop strength item on death if enabled and actual loss > 0
-            if (settings.dropItemOnDeath && actualLoss > 0) {
-                event.getDrops().add(strengthService.createStrengthItem(actualLoss));
-            }
+            actualLoss = victimOldStrength - victimNewStrength;
 
-            victim.sendMessage(
-                ColorParser.of("<red>You lost <loss> Strength on death. (New Strength: <strength>)")
-                    .with("loss", String.valueOf(actualLoss))
-                    .with("strength", String.valueOf(victimNewStrength))
-                    .build()
-            );
+            if (actualLoss > 0) {
+                strengthService.setStrength(victim, victimNewStrength);
+
+                // Drop strength item on death if enabled and actual loss > 0
+                if (settings.dropItemOnDeath) {
+                    event.getDrops().add(strengthService.createStrengthItem(actualLoss));
+                }
+
+                victim.sendMessage(
+                    ColorParser.of("<red>You lost <loss> Strength on death. (New Strength: <strength>)")
+                        .with("loss", String.valueOf(actualLoss))
+                        .with("strength", String.valueOf(victimNewStrength))
+                        .build()
+                );
+            }
         }
 
-        // Award kill reward to the killer
-        if (killer != null && !killer.getUniqueId().equals(victim.getUniqueId())) {
-            final int killerOldStrength = strengthService.getStrength(killer);
-            final int killerNewStrength = Math.min(settings.maxStrength, killerOldStrength + settings.killReward);
-            strengthService.setStrength(killer, killerNewStrength);
+        // Award kill reward to the killer in PvP
+        if (isPvp) {
+            final boolean allowReward = !settings.requireVictimStrengthForReward || actualLoss > 0;
 
-            killer.sendMessage(
-                ColorParser.of("<green>You gained +<reward> Strength for killing <victim>! (New Strength: <strength>)")
-                    .with("reward", String.valueOf(settings.killReward))
-                    .with("victim", victim.getName())
-                    .with("strength", String.valueOf(killerNewStrength))
-                    .build()
-            );
+            if (allowReward) {
+                final int killerOldStrength = strengthService.getStrength(killer);
+                final int killerNewStrength = Math.min(settings.maxStrength, killerOldStrength + settings.killReward);
+                strengthService.setStrength(killer, killerNewStrength);
+
+                killer.sendMessage(
+                    ColorParser.of("<green>You gained +<reward> Strength for killing <victim>! (New Strength: <strength>)")
+                        .with("reward", String.valueOf(settings.killReward))
+                        .with("victim", victim.getName())
+                        .with("strength", String.valueOf(killerNewStrength))
+                        .build()
+                );
+            } else {
+                killer.sendMessage(
+                    ColorParser.of("<yellow><victim> had no Strength to lose, so no Strength was gained!</yellow>")
+                        .with("victim", victim.getName())
+                        .build()
+                );
+            }
         }
     }
 }

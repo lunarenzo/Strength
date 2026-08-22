@@ -64,6 +64,12 @@ public class PluginConfig implements VersionedConfig {
         @Comment("Should the strength lost on death be dropped as a physical strength item?")
         public boolean dropItemOnDeath = false;
 
+        @Comment("Should killer only gain strength if the killed victim actually had strength to lose?")
+        public boolean requireVictimStrengthForReward = true;
+
+        @Comment("Should players lose strength (and drop strength items if enabled) on natural/non-PvP deaths (e.g. mobs, lava, fall)?")
+        public boolean loseStrengthOnNaturalDeath = true;
+
         @Comment("Minimum strength value a player can have")
         public int minStrength = 0;
 
