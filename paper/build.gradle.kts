@@ -35,7 +35,9 @@ dependencies {
         exclude("me.clip.placeholderapi.libs", "kyori")
     }
     compileOnly(libs.pvpmanager)
-    compileOnly(libs.worldguard)
+    compileOnly(libs.worldguard) {
+        exclude(group = "com.google.guava")
+    }
     // Testing - Core
     testImplementation(libs.annotations)
     testImplementation(platform(libs.junit.bom))
