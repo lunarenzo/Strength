@@ -44,6 +44,10 @@ public class ListenerHandler implements Reloadable {
             listeners.add(new lunatech.strength.listener.plugin.AuthMeListener(this.plugin));
         }
 
+        if (plugin.getServer().getPluginManager().isPluginEnabled("PvPManager")) {
+            listeners.add(new lunatech.strength.listener.plugin.PvPManagerListener(this.plugin));
+        }
+
         // Register listeners here
         for (Listener listener : listeners) {
             plugin.getServer().getPluginManager().registerEvents(listener, plugin);

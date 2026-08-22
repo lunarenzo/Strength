@@ -34,6 +34,7 @@ dependencies {
     compileOnly(libs.authme) {
         exclude("me.clip.placeholderapi.libs", "kyori")
     }
+    compileOnly(libs.pvpmanager)
     // Testing - Core
     testImplementation(libs.annotations)
     testImplementation(platform(libs.junit.bom))
@@ -113,7 +114,7 @@ bukkit { // Options: https://docs.eldoria.de/pluginyml/bukkit/
     // Misc properties
     load = net.minecrell.pluginyml.bukkit.BukkitPluginDescription.PluginLoadOrder.POSTWORLD // STARTUP or POSTWORLD
     depend = listOf()
-    softDepend = listOf("Vault", "PlaceholderAPI", "AuthMe")
+    softDepend = listOf("Vault", "PlaceholderAPI", "AuthMe", "PvPManager")
     loadBefore = listOf()
     provides = listOf()
 }
@@ -147,6 +148,10 @@ paper { // Options: https://docs.eldoria.de/pluginyml/paper/
             required = false
         }
         register("AuthMe") {
+            load = PaperPluginDescription.RelativeLoadOrder.BEFORE
+            required = false
+        }
+        register("PvPManager") {
             load = PaperPluginDescription.RelativeLoadOrder.BEFORE
             required = false
         }
