@@ -169,6 +169,27 @@ public class PluginConfig implements VersionedConfig {
         );
     }
 
+    @Comment("Confirmation dialog settings when consuming a Weapon Reroll Book")
+    public RerollDialogSettings rerollDialog = new RerollDialogSettings();
+
+    @ConfigSerializable
+    public static class RerollDialogSettings {
+        @Comment("Should a confirmation dialog pop up when a player tries to consume a Weapon Reroll Book?")
+        public boolean enabled = true;
+
+        @Comment("Title of the confirmation dialog")
+        public String title = "<light_purple><bold>Confirm Weapon Reroll</bold></light_purple>";
+
+        @Comment("Message body inside the confirmation dialog")
+        public String message = "<gray>Are you sure you want to consume 1 Weapon Reroll Book to reroll your assigned weapon?</gray>";
+
+        @Comment("Text for the Confirm / Yes button")
+        public String confirmButton = "<green><bold>YES</bold></green>";
+
+        @Comment("Text for the Cancel / No button")
+        public String cancelButton = "<red><bold>NO</bold></red>";
+    }
+
     @Comment("Weapon Rolling and Passive/Ultimate Ability settings")
     public WeaponSettings weapons = new WeaponSettings();
 
