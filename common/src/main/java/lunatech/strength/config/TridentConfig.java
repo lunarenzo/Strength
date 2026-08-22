@@ -22,6 +22,9 @@ public class TridentConfig implements VersionedConfig {
     @Comment("Extra lightning bonus damage dealt on hit (Passive)")
     public double passiveLightningDamage = 3.0;
 
+    @Comment("Particle type spawned on Trident passive hit (e.g. ELECTRIC_SPARK, DUST)")
+    public String passiveParticleType = "ELECTRIC_SPARK";
+
     @Comment("Strength required to activate Ultimate")
     public int ultimateStrengthRequired = 5;
 
