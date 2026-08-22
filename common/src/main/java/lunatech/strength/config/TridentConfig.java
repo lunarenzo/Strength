@@ -37,8 +37,11 @@ public class TridentConfig implements VersionedConfig {
     @Comment("Duration in ticks for Thunderous Barrage sequence (40 ticks = 2 seconds)")
     public int ultimateDurationTicks = 40;
 
-    @Comment("Radius/cone length in blocks for Thunderous Barrage strike area")
+    @Comment("Forward reach length in blocks for Thunderous Barrage strike area")
     public double ultimateRadius = 4.0;
+
+    @Comment("Maximum lateral width in blocks for Thunderous Barrage strike area (e.g. 2.0 = 1 block left, 1 block right)")
+    public double ultimateWidthBlocks = 2.0;
 
     @Comment("Damage dealt per thrust strike during Thunderous Barrage (9 strikes total)")
     public double ultimateDamage = 5.0;

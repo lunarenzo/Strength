@@ -124,23 +124,44 @@ public final class TridentUltimateTask extends BukkitRunnable {
         if (elapsedTicks >= 8 && (elapsedTicks - 8) % interval == 0 && executedHits < settings.maxBarrageHits) {
             executedHits++;
             final Location eyeLoc = player.getEyeLocation();
-            final org.bukkit.util.Vector lookDir = eyeLoc.getDirection().normalize();
-            final double coneRadius = settings.ultimateRadius;
+            final double reachLength = settings.ultimateRadius;
+            final double halfWidth = settings.ultimateWidthBlocks / 2.0;
 
-            // Real-time damage cone raycast following live camera direction
-            for (LivingEntity target : player.getWorld().getNearbyLivingEntities(eyeLoc, coneRadius)) {
+            // Horizontal forward look vector (ignoring pitch skew for strict box projection)
+            final org.bukkit.util.Vector forwardDir = player.getLocation().getDirection().setY(0);
+            if (forwardDir.lengthSquared() < 1e-6) {
+                forwardDir.setX(1).setY(0).setZ(0);
+            } else {
+                forwardDir.normalize();
+            }
+
+            // Perpendicular horizontal right vector (90 deg to right of forward look)
+            final org.bukkit.util.Vector rightDir = new org.bukkit.util.Vector(-forwardDir.getZ(), 0, forwardDir.getX()).normalize();
+
+            // Real-time damage box raycast following player camera direction
+            for (LivingEntity target : player.getWorld().getNearbyLivingEntities(player.getLocation(), reachLength + 1.0)) {
                 if (target.equals(player) || target instanceof ArmorStand || !target.isValid() || target.isDead()) {
                     continue;
                 }
 
-                final org.bukkit.util.Vector toTarget = target.getEyeLocation().toVector().subtract(eyeLoc.toVector());
-                final double distance = toTarget.length();
-                if (distance > coneRadius || distance < 0.1) {
+                // Vector from player feet to target feet
+                final org.bukkit.util.Vector toTarget = target.getLocation().toVector().subtract(player.getLocation().toVector());
+
+                // 1. Forward projection length check (must be strictly in front of player between 0.1 and reachLength)
+                final double forwardDist = toTarget.dot(forwardDir);
+                if (forwardDist < 0.1 || forwardDist > reachLength) {
                     continue;
                 }
 
-                // Check forward camera cone alignment (dot product >= 0.4 for ~66-degree forward cone)
-                if (lookDir.dot(toTarget.normalize()) < 0.4) {
+                // 2. Lateral width check (must be within halfWidth to the left or right of center line)
+                final double lateralDist = Math.abs(toTarget.dot(rightDir));
+                if (lateralDist > halfWidth) {
+                    continue;
+                }
+
+                // 3. Vertical height check (+/- 2.5 blocks)
+                final double verticalDist = Math.abs(target.getLocation().getY() - player.getLocation().getY());
+                if (verticalDist > 2.5) {
                     continue;
                 }
 
