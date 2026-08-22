@@ -162,7 +162,7 @@ public class PluginConfig implements VersionedConfig {
             "SSS"
         );
 
-        @Comment("Ingredients mapping for recipe shape characters (use STRENGTH_ITEM for custom strength item, or Bukkit Material name)")
+        @Comment("Ingredients mapping for recipe shape characters. Supported formats:\n- STRENGTH_ITEM / STRENGTH_SHARD (Custom Strength Shard with CustomModelData 12345 & PDC)\n- cmd:12345:MATERIAL (CustomModelData format)\n- itemsadder:namespace:item_id\n- nexo:item_id\n- oraxen:item_id\n- Standard Bukkit Material (e.g. BOOK, DIAMOND_BLOCK)")
         public Map<String, String> ingredients = Map.of(
             "S", "STRENGTH_ITEM",
             "B", "BOOK"
