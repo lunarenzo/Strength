@@ -36,8 +36,7 @@ dependencies {
     }
     compileOnly(libs.pvpmanager)
     compileOnly(libs.worldguard) {
-        exclude(group = "com.google.guava")
-        exclude(group = "com.google.code.gson")
+        isTransitive = false
     }
     // Testing - Core
     testImplementation(libs.annotations)
