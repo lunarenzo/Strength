@@ -274,6 +274,24 @@ public class PluginConfig implements VersionedConfig {
         public boolean preventWithdrawInCombat = true;
     }
 
+    @Comment("WorldGuard integration settings")
+    public WorldGuardSettings worldguard = new WorldGuardSettings();
+
+    @ConfigSerializable
+    public static class WorldGuardSettings {
+        @Comment("Enable WorldGuard integration")
+        public boolean enabled = true;
+
+        @Comment("Disable weapon abilities in regions where PvP is DENY or strength-weapon-abilities is DENY")
+        public boolean preventAbilitiesInSafezone = true;
+
+        @Comment("Prevent strength loss on death in regions where strength-pvp-loss is DENY")
+        public boolean preventStrengthLossInSafezone = true;
+
+        @Comment("Prevent weapon rerolling in regions where strength-reroll is DENY")
+        public boolean preventRerollInSafezone = true;
+    }
+
     @Comment("Weapon Rolling and Passive/Ultimate Ability settings")
     public WeaponSettings weapons = new WeaponSettings();
 
@@ -436,5 +454,11 @@ public class PluginConfig implements VersionedConfig {
 
         @Comment("Message sent when combat logging causes strength loss penalty")
         public String combatLogPenaltyMessage = "<red>You combat logged during PvP and lost <loss> Strength!</red>";
+
+        @Comment("Message sent when attempting to use weapon ability in a WorldGuard protected region")
+        public String cannotUseAbilityInRegionMessage = "<red>Weapon abilities are disabled in this region!</red>";
+
+        @Comment("Message sent when attempting to reroll weapons in a WorldGuard protected region")
+        public String cannotRerollInRegionMessage = "<red>Rerolling weapons is disabled in this region!</red>";
     }
 }

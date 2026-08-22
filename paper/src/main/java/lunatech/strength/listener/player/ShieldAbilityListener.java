@@ -90,6 +90,11 @@ public final class ShieldAbilityListener implements Listener {
             return;
         }
 
+        // WorldGuard region check for weapon ability
+        if (!lunatech.strength.integration.WorldGuardHook.isAbilityAllowed(plugin, victim, victim.getLocation())) {
+            return;
+        }
+
         final long now = System.currentTimeMillis();
         final long expiry = passiveProtectionExpiry.getOrDefault(uuid, 0L);
 

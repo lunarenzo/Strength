@@ -72,6 +72,11 @@ public final class BowAbilityListener implements Listener {
             return;
         }
 
+        // WorldGuard region check for weapon ability
+        if (!lunatech.strength.integration.WorldGuardHook.isAbilityAllowed(plugin, shooter, shooter.getLocation())) {
+            return;
+        }
+
         // Tag projectile with persistent data to prevent weapon swap exploits
         arrow.getPersistentDataContainer().set(BOW_ARROW_KEY, PersistentDataType.BYTE, (byte) 1);
 
