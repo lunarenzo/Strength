@@ -55,4 +55,11 @@ public interface StrengthService {
      * @param weapon the assigned weapon name
      */
     void setAssignedWeapon(@NotNull Player player, @Nullable String weapon);
+
+    /**
+     * Creates a physical weapon reroll book item.
+     *
+     * @return the created ItemStack
+     */
+    @NotNull org.bukkit.inventory.ItemStack createRerollItem();
 }

@@ -116,4 +116,31 @@ public final class DefaultStrengthService implements StrengthService {
 
         return item;
     }
+
+    @Override
+    public @NotNull ItemStack createRerollItem() {
+        final lunatech.strength.config.PluginConfig.RerollItemSettings itemSettings = configHandler.getConfig().rerollItem;
+
+        Material material = Material.matchMaterial(itemSettings.material);
+        if (material == null) {
+            material = Material.BOOK;
+        }
+
+        final ItemStack item = new ItemStack(material);
+        item.editMeta(meta -> {
+            meta.displayName(MiniMessage.miniMessage().deserialize(itemSettings.displayName));
+
+            final List<Component> loreComponents = new ArrayList<>();
+            for (String line : itemSettings.lore) {
+                loreComponents.add(MiniMessage.miniMessage().deserialize(line));
+            }
+            meta.lore(loreComponents);
+
+            meta.setCustomModelData(itemSettings.customModelData);
+
+            meta.getPersistentDataContainer().set(PDCKeys.ITEM_REROLL, PersistentDataType.INTEGER, 1);
+        });
+
+        return item;
+    }
 }

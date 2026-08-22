@@ -127,6 +127,48 @@ public class PluginConfig implements VersionedConfig {
         );
     }
 
+    @Comment("Physical item settings for weapon reroll item")
+    public RerollItemSettings rerollItem = new RerollItemSettings();
+
+    @ConfigSerializable
+    public static class RerollItemSettings {
+        @Comment("The material of the physical weapon reroll item")
+        public String material = "BOOK";
+
+        @Comment("The custom model data of the physical weapon reroll item")
+        public int customModelData = 12346;
+
+        @Comment("The display name of the reroll item (MiniMessage format)")
+        public String displayName = "<light_purple><bold>Weapon Reroll Book</bold></light_purple>";
+
+        @Comment("The lore of the reroll item (MiniMessage format)")
+        public List<String> lore = List.of(
+            "<gray>Right-click to reroll your assigned weapon.</gray>"
+        );
+    }
+
+    @Comment("Craftable Weapon Reroll Book Recipe settings")
+    public RerollRecipeSettings rerollRecipe = new RerollRecipeSettings();
+
+    @ConfigSerializable
+    public static class RerollRecipeSettings {
+        @Comment("Should crafting the weapon reroll item be enabled?")
+        public boolean enabled = true;
+
+        @Comment("Crafting grid shape (3 lines of 3 characters each)")
+        public List<String> shape = List.of(
+            "SSS",
+            "SBS",
+            "SSS"
+        );
+
+        @Comment("Ingredients mapping for recipe shape characters (use STRENGTH_ITEM for custom strength item, or Bukkit Material name)")
+        public Map<String, String> ingredients = Map.of(
+            "S", "STRENGTH_ITEM",
+            "B", "BOOK"
+        );
+    }
+
     @Comment("Weapon Rolling and Passive/Ultimate Ability settings")
     public WeaponSettings weapons = new WeaponSettings();
 
@@ -204,5 +246,8 @@ public class PluginConfig implements VersionedConfig {
 
         @Comment("Message sent when assigned weapon does not have an ultimate ability implemented")
         public String weaponNoUltimateMessage = "<red>Your assigned weapon (<weapon>) does not have an ultimate ability implemented.</red>";
+
+        @Comment("Message sent when consuming a Weapon Reroll Book")
+        public String consumedRerollBookMessage = "<green>You consumed a Weapon Reroll Book!</green>";
     }
 }
