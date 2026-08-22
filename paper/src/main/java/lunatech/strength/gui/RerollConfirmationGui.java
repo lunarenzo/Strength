@@ -109,7 +109,13 @@ public final class RerollConfirmationGui {
         if (fillerItem == null) {
             fillerItem = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
         }
-        fillerItem.editMeta(meta -> meta.displayName(Component.empty()));
+        fillerItem.editMeta(meta -> {
+            if (guiSettings.fillerDisplayName != null && !guiSettings.fillerDisplayName.isEmpty()) {
+                meta.displayName(mm.deserialize(guiSettings.fillerDisplayName));
+            } else {
+                meta.displayName(Component.empty());
+            }
+        });
 
         for (int i = 0; i < totalSlots; i++) {
             inv.setItem(i, fillerItem.clone());
@@ -121,8 +127,17 @@ public final class RerollConfirmationGui {
             confirmItem = new ItemStack(Material.LIME_CONCRETE);
         }
         confirmItem.editMeta(meta -> {
-            meta.displayName(mm.deserialize(dialogSettings.confirmButton));
-            meta.lore(List.of(mm.deserialize("<gray>Click to confirm and consume reroll book.</gray>")));
+            final String nameStr = (guiSettings.confirmDisplayName != null && !guiSettings.confirmDisplayName.isEmpty())
+                ? guiSettings.confirmDisplayName : dialogSettings.confirmButton;
+            meta.displayName(mm.deserialize(nameStr));
+
+            if (guiSettings.confirmLore != null && !guiSettings.confirmLore.isEmpty()) {
+                final List<Component> loreList = new java.util.ArrayList<>();
+                for (String line : guiSettings.confirmLore) {
+                    loreList.add(mm.deserialize(line));
+                }
+                meta.lore(loreList);
+            }
         });
 
         if (guiSettings.confirmSlot >= 0 && guiSettings.confirmSlot < totalSlots) {
@@ -132,8 +147,19 @@ public final class RerollConfirmationGui {
         // 3. Info / Preview Item
         final ItemStack previewItem = plugin.getStrengthService().createRerollItem();
         previewItem.editMeta(meta -> {
-            meta.displayName(mm.deserialize(dialogSettings.title));
-            meta.lore(List.of(mm.deserialize(dialogSettings.message)));
+            final String previewName = (guiSettings.previewDisplayName != null && !guiSettings.previewDisplayName.isEmpty())
+                ? guiSettings.previewDisplayName : dialogSettings.title;
+            meta.displayName(mm.deserialize(previewName));
+
+            if (guiSettings.previewLore != null && !guiSettings.previewLore.isEmpty()) {
+                final List<Component> loreList = new java.util.ArrayList<>();
+                for (String line : guiSettings.previewLore) {
+                    loreList.add(mm.deserialize(line));
+                }
+                meta.lore(loreList);
+            } else {
+                meta.lore(List.of(mm.deserialize(dialogSettings.message)));
+            }
         });
 
         if (guiSettings.previewSlot >= 0 && guiSettings.previewSlot < totalSlots) {
@@ -146,8 +172,17 @@ public final class RerollConfirmationGui {
             cancelItem = new ItemStack(Material.RED_CONCRETE);
         }
         cancelItem.editMeta(meta -> {
-            meta.displayName(mm.deserialize(dialogSettings.cancelButton));
-            meta.lore(List.of(mm.deserialize("<gray>Click to cancel.</gray>")));
+            final String nameStr = (guiSettings.cancelDisplayName != null && !guiSettings.cancelDisplayName.isEmpty())
+                ? guiSettings.cancelDisplayName : dialogSettings.cancelButton;
+            meta.displayName(mm.deserialize(nameStr));
+
+            if (guiSettings.cancelLore != null && !guiSettings.cancelLore.isEmpty()) {
+                final List<Component> loreList = new java.util.ArrayList<>();
+                for (String line : guiSettings.cancelLore) {
+                    loreList.add(mm.deserialize(line));
+                }
+                meta.lore(loreList);
+            }
         });
 
         if (guiSettings.cancelSlot >= 0 && guiSettings.cancelSlot < totalSlots) {

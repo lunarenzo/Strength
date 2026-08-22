@@ -213,17 +213,38 @@ public class PluginConfig implements VersionedConfig {
         @Comment("Material for the Confirm button item")
         public String confirmMaterial = "LIME_CONCRETE";
 
+        @Comment("Display name for the Confirm button item (MiniMessage format)")
+        public String confirmDisplayName = "<green><bold>YES</bold></green>";
+
+        @Comment("Lore lines for the Confirm button item (MiniMessage format)")
+        public List<String> confirmLore = List.of("<gray>Click to confirm and consume reroll book.</gray>");
+
         @Comment("Slot for the Cancel (NO) button (0-indexed)")
         public int cancelSlot = 15;
 
         @Comment("Material for the Cancel button item")
         public String cancelMaterial = "RED_CONCRETE";
 
+        @Comment("Display name for the Cancel button item (MiniMessage format)")
+        public String cancelDisplayName = "<red><bold>NO</bold></red>";
+
+        @Comment("Lore lines for the Cancel button item (MiniMessage format)")
+        public List<String> cancelLore = List.of("<gray>Click to cancel.</gray>");
+
         @Comment("Slot for the Preview item (0-indexed)")
         public int previewSlot = 13;
 
+        @Comment("Display name override for the Preview item (Leave blank to use dialog title)")
+        public String previewDisplayName = "";
+
+        @Comment("Lore lines override for the Preview item (Leave empty to use dialog message)")
+        public List<String> previewLore = List.of();
+
         @Comment("Material for filler background items")
         public String fillerMaterial = "GRAY_STAINED_GLASS_PANE";
+
+        @Comment("Display name for filler items")
+        public String fillerDisplayName = "";
     }
 
     @Comment("Weapon Rolling and Passive/Ultimate Ability settings")
