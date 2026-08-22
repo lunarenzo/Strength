@@ -97,4 +97,16 @@ public class AxeConfig implements VersionedConfig {
 
     @Comment("Message sent when Axe Ultimate is on cooldown")
     public String ultimateCooldownMessage = "<red>Your Ultimate is on cooldown for another <seconds>s!</red>";
+
+    @Comment("Message sent when player is not holding an Axe")
+    public String mustHoldAxeMessage = "<red>You must be holding an Axe in your main hand to activate this ultimate!</red>";
+
+    @Comment("Message sent when player does not have enough strength")
+    public String notEnoughStrengthMessage = "<red>You do not have enough strength to activate your ultimate! (Required: {req}, Current: {current})</red>";
+
+    @Comment("Message sent when ultimate is not charged yet")
+    public String notChargedMessage = "<red>Your ultimate is not charged yet! (Required: {req}, Current: {current} critical hits)</red>";
+
+    @Comment("Message sent when Axe ultimate is already active")
+    public String alreadyActiveMessage = "<red>Your Axe ultimate is already active!</red>";
 }

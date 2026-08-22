@@ -84,7 +84,14 @@ public final class AbilityCommand extends Command {
         final int currentStrength = strengthService.getStrength(player);
 
         if (currentStrength < settings.ultimateStrengthRequired) {
-            player.sendMessage(ColorParser.of("<red>You do not have enough strength to activate your ultimate! (Required: " + settings.ultimateStrengthRequired + ", Current: " + currentStrength + ")</red>").build());
+            player.sendMessage(
+                ColorParser.of(settings.notEnoughStrengthMessage
+                    .replace("{req}", String.valueOf(settings.ultimateStrengthRequired))
+                    .replace("{current}", String.valueOf(currentStrength)))
+                    .with("req", String.valueOf(settings.ultimateStrengthRequired))
+                    .with("current", String.valueOf(currentStrength))
+                    .build()
+            );
             return;
         }
 
@@ -109,18 +116,25 @@ public final class AbilityCommand extends Command {
 
         final int currentCharge = lunatech.strength.listener.player.AxeAbilityListener.ultimateHitsMap.getOrDefault(uuid, 0);
         if (currentCharge < settings.ultimateCritsRequired) {
-            player.sendMessage(ColorParser.of("<red>Your ultimate is not charged yet! (Required: " + settings.ultimateCritsRequired + ", Current: " + currentCharge + " critical hits)</red>").build());
+            player.sendMessage(
+                ColorParser.of(settings.notChargedMessage
+                    .replace("{req}", String.valueOf(settings.ultimateCritsRequired))
+                    .replace("{current}", String.valueOf(currentCharge)))
+                    .with("req", String.valueOf(settings.ultimateCritsRequired))
+                    .with("current", String.valueOf(currentCharge))
+                    .build()
+            );
             return;
         }
 
         final org.bukkit.inventory.ItemStack mainhand = player.getInventory().getItemInMainHand();
         if (mainhand == null || !org.bukkit.Tag.ITEMS_AXES.isTagged(mainhand.getType())) {
-            player.sendMessage(ColorParser.of("<red>You must be holding an Axe in your main hand to activate this ultimate!</red>").build());
+            player.sendMessage(ColorParser.of(settings.mustHoldAxeMessage).build());
             return;
         }
 
         if (lunatech.strength.listener.player.AxeAbilityListener.activeUltimateAttackers.getOrDefault(uuid, false)) {
-            player.sendMessage(ColorParser.of("<red>Your Axe ultimate is already active!</red>").build());
+            player.sendMessage(ColorParser.of(settings.alreadyActiveMessage).build());
             return;
         }
 
