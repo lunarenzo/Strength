@@ -7,6 +7,7 @@ import dev.jorel.commandapi.arguments.IntegerArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
 import dev.jorel.commandapi.executors.CommandArguments;
 import lunatech.strength.AbstractStrength;
+import lunatech.strength.config.PluginConfig;
 import lunatech.strength.service.StrengthService;
 import io.github.milkdrinkers.colorparser.paper.ColorParser;
 import org.bukkit.command.CommandSender;
@@ -14,6 +15,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
+import java.util.Map;
 
 import static lunatech.strength.command.CommandHandler.BASE_PERM;
 
@@ -33,13 +35,44 @@ final class StrengthCommand extends Command {
     @Override
     public CommandAPICommand command() {
         return new CommandAPICommand("strength")
-            .withHelp("Base command.", "Base command.")
+            .withHelp("Base strength command.", "Base strength command.")
             .withPermission(BASE_PERM)
             .withSubcommands(
+                new CommandAPICommand("info")
+                    .withHelp("Check your current strength and assigned weapon.", "Check your current strength and assigned weapon.")
+                    .withPermission(BASE_PERM)
+                    .executes(this::executorStrength),
                 new CommandAPICommand("withdraw")
                     .withHelp("Withdraw strength into a physical item.", "Withdraw strength into a physical item.")
                     .withArguments(new IntegerArgument("amount", 1))
                     .executesPlayer(this::executorWithdraw),
+                new CommandAPICommand("give")
+                    .withHelp("Give strength items or reroll items to players.", "Give strength items or reroll items to players.")
+                    .withPermission(BASE_PERM + ".give")
+                    .withSubcommands(
+                        new CommandAPICommand("strengthitem")
+                            .withHelp("Give physical strength item to a player.", "Give physical strength item to a player.")
+                            .withArguments(
+                                new EntitySelectorArgument.OnePlayer("target"),
+                                new IntegerArgument("amount", 1),
+                                new IntegerArgument("strength_amount", 1)
+                            )
+                            .executes(this::executorGiveStrengthItem),
+                        new CommandAPICommand("rollitem")
+                            .withHelp("Give reroll item to a player.", "Give reroll item to a player.")
+                            .withArguments(
+                                new EntitySelectorArgument.OnePlayer("target"),
+                                new IntegerArgument("amount", 1)
+                            )
+                            .executes(this::executorGiveRollItem),
+                        new CommandAPICommand("rerollitem")
+                            .withHelp("Give reroll item to a player.", "Give reroll item to a player.")
+                            .withArguments(
+                                new EntitySelectorArgument.OnePlayer("target"),
+                                new IntegerArgument("amount", 1)
+                            )
+                            .executes(this::executorGiveRollItem)
+                    ),
                 new CommandAPICommand("changeweapon")
                     .withHelp("Change a target player's assigned weapon.", "Change a target player's assigned weapon.")
                     .withPermission(BASE_PERM + ".changeweapon")
@@ -73,14 +106,27 @@ final class StrengthCommand extends Command {
 
     private void executorStrength(CommandSender sender, CommandArguments args) {
         final StrengthService strengthService = plugin.getStrengthService();
-        final lunatech.strength.config.PluginConfig.MessagesConfig messages = plugin.getConfigHandler().getConfig().messages;
+        final PluginConfig config = plugin.getConfigHandler().getConfig();
+        final PluginConfig.MessagesConfig messages = config.messages;
 
         if (sender instanceof Player player) {
             final int strength = strengthService.getStrength(player);
+            final String assignedRaw = strengthService.getAssignedWeapon(player);
+
+            String weaponDisplay = messages.unassignedWeaponMessage;
+            if (assignedRaw != null && !assignedRaw.isEmpty()) {
+                final Map<String, String> customMap = config.weapons.weaponCustomMessages;
+                if (customMap != null && customMap.containsKey(assignedRaw)) {
+                    weaponDisplay = customMap.get(assignedRaw);
+                } else {
+                    weaponDisplay = assignedRaw.toUpperCase();
+                }
+            }
+
             lunatech.strength.utility.MessageUtil.send(
                 player,
                 messages.strengthCheckMessage,
-                "strength", String.valueOf(strength)
+                Map.of("strength", String.valueOf(strength), "weapon", weaponDisplay)
             );
         } else {
             sender.sendMessage(
@@ -91,18 +137,99 @@ final class StrengthCommand extends Command {
         }
     }
 
+    private void executorGiveStrengthItem(CommandSender sender, CommandArguments args) {
+        final Player target = (Player) args.get("target");
+        final int amount = (int) args.get("amount");
+        final int strengthAmount = (int) args.get("strength_amount");
+        final PluginConfig.MessagesConfig messages = plugin.getConfigHandler().getConfig().messages;
+
+        if (target == null) {
+            lunatech.strength.utility.MessageUtil.send(sender, messages.targetNotFoundMessage);
+            return;
+        }
+
+        final ItemStack item = plugin.getStrengthService().createStrengthItem(strengthAmount);
+        item.setAmount(amount);
+
+        final Map<Integer, ItemStack> leftover = target.getInventory().addItem(item);
+        if (!leftover.isEmpty()) {
+            for (ItemStack drop : leftover.values()) {
+                target.getWorld().dropItemNaturally(target.getLocation(), drop);
+            }
+        }
+
+        lunatech.strength.utility.MessageUtil.send(
+            sender,
+            messages.giveStrengthItemSuccessSenderMessage,
+            Map.of(
+                "target", target.getName(),
+                "amount", String.valueOf(amount),
+                "value", String.valueOf(strengthAmount)
+            )
+        );
+
+        if (!target.equals(sender)) {
+            lunatech.strength.utility.MessageUtil.send(
+                target,
+                messages.giveStrengthItemSuccessTargetMessage,
+                Map.of(
+                    "amount", String.valueOf(amount),
+                    "value", String.valueOf(strengthAmount)
+                )
+            );
+        }
+    }
+
+    private void executorGiveRollItem(CommandSender sender, CommandArguments args) {
+        final Player target = (Player) args.get("target");
+        final int amount = (int) args.get("amount");
+        final PluginConfig.MessagesConfig messages = plugin.getConfigHandler().getConfig().messages;
+
+        if (target == null) {
+            lunatech.strength.utility.MessageUtil.send(sender, messages.targetNotFoundMessage);
+            return;
+        }
+
+        final ItemStack item = plugin.getStrengthService().createRerollItem();
+        item.setAmount(amount);
+
+        final Map<Integer, ItemStack> leftover = target.getInventory().addItem(item);
+        if (!leftover.isEmpty()) {
+            for (ItemStack drop : leftover.values()) {
+                target.getWorld().dropItemNaturally(target.getLocation(), drop);
+            }
+        }
+
+        lunatech.strength.utility.MessageUtil.send(
+            sender,
+            messages.giveRollItemSuccessSenderMessage,
+            Map.of(
+                "target", target.getName(),
+                "amount", String.valueOf(amount)
+            )
+        );
+
+        if (!target.equals(sender)) {
+            lunatech.strength.utility.MessageUtil.send(
+                target,
+                messages.giveRollItemSuccessTargetMessage,
+                "amount", String.valueOf(amount)
+            );
+        }
+    }
+
     private void executorWithdraw(Player player, CommandArguments args) {
         final int amount = (int) args.get("amount");
         final StrengthService strengthService = plugin.getStrengthService();
         final int currentStrength = strengthService.getStrength(player);
         final int minStrength = plugin.getConfigHandler().getConfig().strength.minStrength;
-        final lunatech.strength.config.PluginConfig.MessagesConfig messages = plugin.getConfigHandler().getConfig().messages;
+        final PluginConfig.MessagesConfig messages = plugin.getConfigHandler().getConfig().messages;
 
         if (currentStrength - amount < minStrength) {
             lunatech.strength.utility.MessageUtil.send(
                 player,
                 messages.withdrawNotEnoughMessage,
-                java.util.Map.of("amount", String.valueOf(amount), "min", String.valueOf(minStrength), "current", String.valueOf(currentStrength))
+                Map.of("amount", String.valueOf(amount), "min", String.valueOf(minStrength), "current", String.valueOf(currentStrength))
             );
             return;
         }
@@ -136,7 +263,7 @@ final class StrengthCommand extends Command {
             .stream()
             .map(String::toLowerCase)
             .toList();
-        final lunatech.strength.config.PluginConfig.MessagesConfig messages = plugin.getConfigHandler().getConfig().messages;
+        final PluginConfig.MessagesConfig messages = plugin.getConfigHandler().getConfig().messages;
 
         if (target == null) {
             lunatech.strength.utility.MessageUtil.send(sender, messages.targetNotFoundMessage);
@@ -158,7 +285,7 @@ final class StrengthCommand extends Command {
         lunatech.strength.utility.MessageUtil.send(
             sender,
             messages.changeWeaponSuccessSenderMessage,
-            java.util.Map.of("target", target.getName(), "weapon", weapon.toUpperCase())
+            Map.of("target", target.getName(), "weapon", weapon.toUpperCase())
         );
 
         lunatech.strength.utility.MessageUtil.send(
@@ -171,7 +298,7 @@ final class StrengthCommand extends Command {
     private void executorSetStrength(CommandSender sender, CommandArguments args) {
         final Player target = (Player) args.get("target");
         final int amount = (int) args.get("amount");
-        final lunatech.strength.config.PluginConfig.MessagesConfig messages = plugin.getConfigHandler().getConfig().messages;
+        final PluginConfig.MessagesConfig messages = plugin.getConfigHandler().getConfig().messages;
 
         if (target == null) {
             lunatech.strength.utility.MessageUtil.send(sender, messages.targetNotFoundMessage);
@@ -185,7 +312,7 @@ final class StrengthCommand extends Command {
         lunatech.strength.utility.MessageUtil.send(
             sender,
             messages.setStrengthSuccessMessage,
-            java.util.Map.of("target", target.getName(), "old", String.valueOf(oldStrength), "amount", String.valueOf(amount))
+            Map.of("target", target.getName(), "old", String.valueOf(oldStrength), "amount", String.valueOf(amount))
         );
     }
 
