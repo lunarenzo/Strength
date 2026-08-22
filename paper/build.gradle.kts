@@ -38,6 +38,9 @@ dependencies {
     compileOnly(libs.worldguard) {
         isTransitive = false
     }
+    compileOnly(libs.worldguard.core) {
+        isTransitive = false
+    }
     compileOnly(libs.worldedit) {
         isTransitive = false
     }
