@@ -34,9 +34,14 @@ public final class BowBeamTask extends BukkitRunnable {
     private ItemDisplay currentBeamEntity = null;
     private ItemDisplay currentSpiralEntity = null;
 
-    public BowBeamTask(@NotNull Player player, @NotNull BowConfig settings) {
+    public BowBeamTask(@NotNull Player player, @NotNull BowConfig settings, ItemDisplay existingSpiral) {
         this.player = player;
         this.settings = settings;
+        this.currentSpiralEntity = existingSpiral;
+    }
+
+    public BowBeamTask(@NotNull Player player, @NotNull BowConfig settings) {
+        this(player, settings, null);
     }
 
     @Override
@@ -47,34 +52,14 @@ public final class BowBeamTask extends BukkitRunnable {
             return;
         }
 
-        // 1. Charge Phase (Ticks 0 - 19)
+        // 1. Fire Phase (Tick 0 - Immediately upon release)
         if (beamTick == 0) {
-            playSound(player.getLocation(), settings.ultimateChargeSound, 1.0f, 1.0f);
-            playSound(player.getLocation(), settings.ultimateCustomChargeSound, 1.0f, 1.0f);
-        }
-
-        if (beamTick < 20) {
-            final Location start = player.getEyeLocation().add(player.getEyeLocation().getDirection().multiply(1.0));
-            final Vector dir = player.getEyeLocation().getDirection().normalize();
-            for (double d = 0.0; d < settings.ultimateRange; d += 0.5) {
-                final Location p = start.clone().add(dir.clone().multiply(d));
-                p.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, p, 1, 0.0, 0.0, 0.0, 0.0);
-            }
-        }
-
-        // 2. Fire Phase (Tick 20)
-        else if (beamTick == 20) {
             playSound(player.getLocation(), settings.ultimateFireSound, 1.0f, 1.0f);
 
             // Calculate center spawn location for the main beam (Z scale mid-point)
             final Location center = player.getEyeLocation().add(player.getEyeLocation().getDirection().multiply(settings.ultimateRange / 2.0 + 1.5));
             center.setYaw(player.getEyeLocation().getYaw());
             center.setPitch(player.getEyeLocation().getPitch());
-
-            // Calculate spawn location for the face spiral ring (1.0 meter in front of face)
-            final Location spiralLoc = player.getEyeLocation().add(player.getEyeLocation().getDirection().multiply(1.0));
-            spiralLoc.setYaw(player.getEyeLocation().getYaw());
-            spiralLoc.setPitch(player.getEyeLocation().getPitch());
 
             try {
                 final Material mat = Material.valueOf(settings.beamMaterial);
@@ -96,24 +81,29 @@ public final class BowBeamTask extends BukkitRunnable {
                     ));
                 });
 
-                // Spawn face spiral Display
-                currentSpiralEntity = player.getWorld().spawn(spiralLoc, ItemDisplay.class, display -> {
-                    final ItemStack item = new ItemStack(mat, 1);
-                    final ItemMeta meta = item.getItemMeta();
-                    if (meta != null) {
-                        meta.setCustomModelData(settings.beamSpiralCustomModelData);
-                        item.setItemMeta(meta);
-                    }
-                    display.setItemStack(item);
-                    display.setTransformation(new Transformation(
-                        new Vector3f(0),
-                        new Quaternionf(),
-                        new Vector3f((float) settings.ultimateWidth * 2.0f, (float) settings.ultimateWidth * 2.0f, 0.01f),
-                        new Quaternionf()
-                    ));
-                });
+                // Spawn face spiral Display if not passed from aiming phase
+                if (currentSpiralEntity == null || !currentSpiralEntity.isValid()) {
+                    final Location spiralLoc = player.getEyeLocation().add(player.getEyeLocation().getDirection().multiply(1.0));
+                    spiralLoc.setYaw(player.getEyeLocation().getYaw());
+                    spiralLoc.setPitch(player.getEyeLocation().getPitch());
+
+                    currentSpiralEntity = player.getWorld().spawn(spiralLoc, ItemDisplay.class, display -> {
+                        final ItemStack item = new ItemStack(mat, 1);
+                        final ItemMeta meta = item.getItemMeta();
+                        if (meta != null) {
+                            meta.setCustomModelData(settings.beamSpiralCustomModelData);
+                            item.setItemMeta(meta);
+                        }
+                        display.setItemStack(item);
+                        display.setTransformation(new Transformation(
+                            new Vector3f(0),
+                            new Quaternionf(),
+                            new Vector3f((float) settings.ultimateWidth * 2.0f, (float) settings.ultimateWidth * 2.0f, 0.01f),
+                            new Quaternionf()
+                        ));
+                    });
+                }
             } catch (Exception e) {
-                // Fallback to paper item display if material parsing fails
                 currentBeamEntity = player.getWorld().spawn(center, ItemDisplay.class, display -> {
                     display.setItemStack(new ItemStack(Material.PAPER, 1));
                 });
@@ -136,16 +126,15 @@ public final class BowBeamTask extends BukkitRunnable {
             }
         }
 
-        // 3. Animation Phase (Ticks 21 - 39)
-        else if (beamTick > 20 && beamTick < 40) {
-            final int animTick = beamTick - 20;
-            final float angle = animTick * 12.0f;
+        // 2. Animation & Tapering Phase (Ticks 1 - 19)
+        else if (beamTick > 0 && beamTick < 20) {
+            final float angle = beamTick * 18.0f;
             final Quaternionf rot = new Quaternionf().rotateZ((float) Math.toRadians(angle));
 
             // Pulsing/Tapering scale (shrink to 0 in the last 10 ticks)
             float scale = (float) settings.ultimateWidth;
-            if (animTick > 10) {
-                scale = (float) settings.ultimateWidth * (1.0f - (animTick - 10) / 10.0f);
+            if (beamTick > 10) {
+                scale = (float) settings.ultimateWidth * (1.0f - (beamTick - 10) / 10.0f);
             }
 
             if (currentBeamEntity != null && currentBeamEntity.isValid()) {
@@ -171,8 +160,8 @@ public final class BowBeamTask extends BukkitRunnable {
             }
         }
 
-        // 4. Beam Termination (Tick 39)
-        if (beamTick == 39) {
+        // 3. Beam Termination (Tick 20) - Both beam and spiral despawn TOGETHER
+        if (beamTick >= 20) {
             cleanup();
             cancel();
         }
