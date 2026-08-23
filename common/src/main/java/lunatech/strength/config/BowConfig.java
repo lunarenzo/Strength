@@ -55,14 +55,14 @@ public class BowConfig implements VersionedConfig {
     @Comment("Number of beams shot per ultimate activation")
     public int ultimateBeams = 3;
 
-    @Comment("Sound played during ultimate charge phase (vanilla sound enum or custom sound key like strength:beam_fire)")
+    @Comment("Sound played during ultimate charge phase (vanilla sound enum, custom sound key like strength:beam.charge, or NONE)")
     public String ultimateChargeSound = "ENTITY_WARDEN_SONIC_CHARGE";
 
-    @Comment("Secondary custom sound played alongside ultimateChargeSound during charge phase (e.g. strength:beam_charge)")
-    public String ultimateCustomChargeSound = "strength:beam_charge";
+    @Comment("Secondary custom sound played alongside ultimateChargeSound during charge phase (e.g. strength:beam.charge, or NONE)")
+    public String ultimateCustomChargeSound = "strength:beam.charge";
 
-    @Comment("Sound played when ultimate beam fires (vanilla sound enum or custom sound key like strength:beam_fire)")
-    public String ultimateFireSound = "strength:beam_fire";
+    @Comment("Sound played when ultimate beam fires (vanilla sound enum or custom sound key like strength:beam.fire, or NONE)")
+    public String ultimateFireSound = "strength:beam.fire";
 
     // Messages
     @Comment("Message sent to shooter when bow passive is triggered")
