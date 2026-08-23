@@ -268,13 +268,13 @@ public final class AbilityCommand extends Command {
             return;
         }
 
-        // 5. Clear Ultimate Charge and record cooldown timestamp
+        // 5. Clear Ultimate Charge, set remaining shots, and record cooldown timestamp
         BowAbilityListener.ultimateHits.put(uuid, 0);
         BowAbilityListener.ultimateCooldowns.put(uuid, now);
+        BowAbilityListener.remainingUltShots.put(uuid, settings.ultimateBeams);
 
-        // 6. Trigger Ability Task (Sonic Charge & Beam firing sequence)
-        new BowBeamTask(player, settings)
-            .runTaskTimer(plugin, 0L, 1L);
+        // Sound cue for arming ultimate
+        player.playSound(player.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 1.0f, 1.2f);
 
         lunatech.strength.utility.MessageUtil.send(player, settings.ultimateActivatedMessage);
     }
