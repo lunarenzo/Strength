@@ -50,6 +50,7 @@ public final class BowBeamTask extends BukkitRunnable {
         // 1. Charge Phase (Ticks 0 - 19)
         if (beamTick == 0) {
             playSound(player.getLocation(), settings.ultimateChargeSound, 1.0f, 1.0f);
+            playSound(player.getLocation(), settings.ultimateCustomChargeSound, 1.0f, 1.0f);
         }
 
         if (beamTick < 20) {

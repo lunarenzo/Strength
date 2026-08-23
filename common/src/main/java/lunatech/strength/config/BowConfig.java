@@ -58,6 +58,9 @@ public class BowConfig implements VersionedConfig {
     @Comment("Sound played during ultimate charge phase (vanilla sound enum or custom sound key like strength:beam_fire)")
     public String ultimateChargeSound = "ENTITY_WARDEN_SONIC_CHARGE";
 
+    @Comment("Secondary custom sound played alongside ultimateChargeSound during charge phase (e.g. strength:beam_charge)")
+    public String ultimateCustomChargeSound = "strength:beam_charge";
+
     @Comment("Sound played when ultimate beam fires (vanilla sound enum or custom sound key like strength:beam_fire)")
     public String ultimateFireSound = "strength:beam_fire";
 
