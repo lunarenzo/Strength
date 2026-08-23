@@ -47,6 +47,8 @@ public final class BowAbilityListener implements Listener {
     public static final Map<UUID, Boolean> bowPassiveReady = new ConcurrentHashMap<>();
     public static final Map<UUID, Long> ultimateCooldowns = new ConcurrentHashMap<>();
     public static final Map<UUID, Integer> remainingUltShots = new ConcurrentHashMap<>();
+    public static final Map<UUID, ItemDisplay> activeAimSpirals = new ConcurrentHashMap<>();
+    public static final Map<UUID, Boolean> chargeSoundPlayed = new ConcurrentHashMap<>();
 
     // Edge Case 3: Active temporary cobwebs and their original block data for server shutdown restoration
     public static final Map<Location, BlockData> activeCobwebs = new ConcurrentHashMap<>();
@@ -55,7 +57,7 @@ public final class BowAbilityListener implements Listener {
         this.plugin = plugin;
         this.strengthService = strengthService;
 
-        // Real-time Aiming Laser Guide Task for players with armed Bow Ultimate holding right-click
+        // Real-time Aiming Laser Guide & Face Spiral Charge Task
         Bukkit.getScheduler().runTaskTimer(plugin, () -> {
             if (remainingUltShots.isEmpty()) return;
 
@@ -64,18 +66,62 @@ public final class BowAbilityListener implements Listener {
                 final Player player = Bukkit.getPlayer(entry.getKey());
                 if (player == null || !player.isOnline()) continue;
 
-                if (player.isHandRaised() && player.getInventory().getItemInMainHand().getType() == Material.BOW) {
-                    final BowConfig settings = plugin.getConfigHandler().getBowConfig();
-                    final Location start = player.getEyeLocation().add(player.getEyeLocation().getDirection().multiply(1.0));
-                    final org.bukkit.util.Vector dir = player.getEyeLocation().getDirection().normalize();
+                final UUID uuid = player.getUniqueId();
+                final boolean isDrawing = player.isHandRaised() && player.getInventory().getItemInMainHand().getType() == Material.BOW;
 
+                if (isDrawing) {
+                    final BowConfig settings = plugin.getConfigHandler().getBowConfig();
+
+                    // Play charge sounds ONCE upon entering full draw
+                    if (!chargeSoundPlayed.getOrDefault(uuid, false)) {
+                        chargeSoundPlayed.put(uuid, true);
+                        playSound(player.getLocation(), settings.ultimateChargeSound, 1.0f, 1.0f);
+                        playSound(player.getLocation(), settings.ultimateCustomChargeSound, 1.0f, 1.0f);
+                    }
+
+                    // Spawn or update face spiral entity (1m in front of eyes)
+                    final Location spiralLoc = player.getEyeLocation().add(player.getEyeLocation().getDirection().multiply(1.0));
+                    spiralLoc.setYaw(player.getEyeLocation().getYaw());
+                    spiralLoc.setPitch(player.getEyeLocation().getPitch());
+
+                    ItemDisplay spiral = activeAimSpirals.get(uuid);
+                    if (spiral == null || !spiral.isValid()) {
+                        try {
+                            final Material mat = Material.valueOf(settings.beamMaterial);
+                            spiral = player.getWorld().spawn(spiralLoc, ItemDisplay.class, display -> {
+                                final ItemStack item = new ItemStack(mat, 1);
+                                final ItemMeta meta = item.getItemMeta();
+                                if (meta != null) {
+                                    meta.setCustomModelData(settings.beamSpiralCustomModelData);
+                                    item.setItemMeta(meta);
+                                }
+                                display.setItemStack(item);
+                                display.setTransformation(new Transformation(
+                                    new Vector3f(0),
+                                    new Quaternionf(),
+                                    new Vector3f((float) settings.ultimateWidth * 2.0f, (float) settings.ultimateWidth * 2.0f, 0.01f),
+                                    new Quaternionf()
+                                ));
+                            });
+                            activeAimSpirals.put(uuid, spiral);
+                        } catch (Exception ignored) {}
+                    } else {
+                        spiral.teleport(spiralLoc);
+                    }
+
+                    // Aiming Laser Guide particles
+                    final Location start = player.getEyeLocation().add(player.getEyeLocation().getDirection().multiply(1.0));
+                    final Vector dir = player.getEyeLocation().getDirection().normalize();
                     for (double d = 0.0; d < settings.ultimateRange; d += 0.5) {
                         final Location p = start.clone().add(dir.clone().multiply(d));
                         p.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, p, 1, 0.0, 0.0, 0.0, 0.0);
                     }
-
                     final Location end = start.clone().add(dir.clone().multiply(settings.ultimateRange));
                     end.getWorld().spawnParticle(Particle.END_ROD, end, 2, 0.1, 0.1, 0.1, 0.01);
+                } else {
+                    final ItemDisplay spiral = activeAimSpirals.remove(uuid);
+                    if (spiral != null) spiral.remove();
+                    chargeSoundPlayed.remove(uuid);
                 }
             }
         }, 1L, 1L);
@@ -104,14 +150,17 @@ public final class BowAbilityListener implements Listener {
         // Cancel arrow launch and item consumption
         event.setCancelled(true);
 
+        final ItemDisplay activeSpiral = activeAimSpirals.remove(uuid);
+        chargeSoundPlayed.remove(uuid);
+
         final BowConfig settings = plugin.getConfigHandler().getBowConfig();
         final int left = remainingUltShots.merge(uuid, -1, Integer::sum);
         if (left <= 0) {
             remainingUltShots.remove(uuid);
         }
 
-        // Trigger 1 Bow Beam shot task
-        new lunatech.strength.task.BowBeamTask(shooter, settings)
+        // Trigger 1 Bow Beam shot task, passing active spiral entity so it continues animating alongside main beam display
+        new lunatech.strength.task.BowBeamTask(shooter, settings, activeSpiral)
             .runTaskTimer(plugin, 0L, 1L);
 
         shooter.sendMessage(ColorParser.of(
@@ -301,6 +350,19 @@ public final class BowAbilityListener implements Listener {
         bowPassiveReady.remove(uuid);
         ultimateCooldowns.remove(uuid);
         remainingUltShots.remove(uuid);
+        final ItemDisplay spiral = activeAimSpirals.remove(uuid);
+        if (spiral != null) spiral.remove();
+        chargeSoundPlayed.remove(uuid);
+    }
+
+    private static void playSound(@NotNull Location loc, @NotNull String soundKey, float volume, float pitch) {
+        if (soundKey == null || soundKey.isBlank() || "NONE".equalsIgnoreCase(soundKey)) return;
+        try {
+            final Sound sound = Sound.valueOf(soundKey.toUpperCase());
+            loc.getWorld().playSound(loc, sound, volume, pitch);
+        } catch (Throwable t) {
+            loc.getWorld().playSound(loc, soundKey, volume, pitch);
+        }
     }
 
     // Edge Case 1 Safety Check: Prevent deleting tile entities (chests, shulker boxes, furnaces) or non-replaceable blocks
@@ -329,5 +391,11 @@ public final class BowAbilityListener implements Listener {
             }
         }
         activeCobwebs.clear();
+
+        for (ItemDisplay spiral : activeAimSpirals.values()) {
+            if (spiral != null && spiral.isValid()) spiral.remove();
+        }
+        activeAimSpirals.clear();
+        chargeSoundPlayed.clear();
     }
 }
