@@ -75,11 +75,12 @@ public final class BowAbilityListener implements Listener {
 
                 final UUID uuid = player.getUniqueId();
                 final boolean isDrawing = player.isHandRaised() && player.getInventory().getItemInMainHand().getType() == Material.BOW;
+                final boolean isFullDraw = isDrawing && player.getActiveItemUsedTime() >= 18;
 
-                if (isDrawing) {
+                if (isFullDraw) {
                     final BowConfig settings = plugin.getConfigHandler().getBowConfig();
 
-                    // Play charge sounds ONCE upon entering full draw
+                    // Play charge sounds ONCE upon reaching full draw (>= 18 ticks of continuous right-click)
                     if (!chargeSoundPlayed.getOrDefault(uuid, false)) {
                         chargeSoundPlayed.put(uuid, true);
                         playSound(player.getLocation(), settings.ultimateChargeSound, 1.0f, 1.0f);
