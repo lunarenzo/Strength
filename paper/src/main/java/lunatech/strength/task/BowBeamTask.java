@@ -47,23 +47,8 @@ public final class BowBeamTask extends BukkitRunnable {
             return;
         }
 
-        // 1. Charge Phase (Ticks 0 - 19)
+        // 1. Fire Phase (Tick 0 - Immediately upon release)
         if (beamTick == 0) {
-            playSound(player.getLocation(), settings.ultimateChargeSound, 1.0f, 1.0f);
-            playSound(player.getLocation(), settings.ultimateCustomChargeSound, 1.0f, 1.0f);
-        }
-
-        if (beamTick < 20) {
-            final Location start = player.getEyeLocation().add(player.getEyeLocation().getDirection().multiply(1.0));
-            final Vector dir = player.getEyeLocation().getDirection().normalize();
-            for (double d = 0.0; d < settings.ultimateRange; d += 0.5) {
-                final Location p = start.clone().add(dir.clone().multiply(d));
-                p.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, p, 1, 0.0, 0.0, 0.0, 0.0);
-            }
-        }
-
-        // 2. Fire Phase (Tick 20)
-        else if (beamTick == 20) {
             playSound(player.getLocation(), settings.ultimateFireSound, 1.0f, 1.0f);
 
             // Calculate center spawn location for the main beam (Z scale mid-point)
@@ -113,7 +98,6 @@ public final class BowBeamTask extends BukkitRunnable {
                     ));
                 });
             } catch (Exception e) {
-                // Fallback to paper item display if material parsing fails
                 currentBeamEntity = player.getWorld().spawn(center, ItemDisplay.class, display -> {
                     display.setItemStack(new ItemStack(Material.PAPER, 1));
                 });
@@ -136,16 +120,15 @@ public final class BowBeamTask extends BukkitRunnable {
             }
         }
 
-        // 3. Animation Phase (Ticks 21 - 39)
-        else if (beamTick > 20 && beamTick < 40) {
-            final int animTick = beamTick - 20;
-            final float angle = animTick * 12.0f;
+        // 2. Animation Phase (Ticks 1 - 19)
+        else if (beamTick > 0 && beamTick < 20) {
+            final float angle = beamTick * 18.0f;
             final Quaternionf rot = new Quaternionf().rotateZ((float) Math.toRadians(angle));
 
             // Pulsing/Tapering scale (shrink to 0 in the last 10 ticks)
             float scale = (float) settings.ultimateWidth;
-            if (animTick > 10) {
-                scale = (float) settings.ultimateWidth * (1.0f - (animTick - 10) / 10.0f);
+            if (beamTick > 10) {
+                scale = (float) settings.ultimateWidth * (1.0f - (beamTick - 10) / 10.0f);
             }
 
             if (currentBeamEntity != null && currentBeamEntity.isValid()) {
@@ -171,8 +154,8 @@ public final class BowBeamTask extends BukkitRunnable {
             }
         }
 
-        // 4. Beam Termination (Tick 39)
-        if (beamTick == 39) {
+        // 3. Beam Termination (Tick 20)
+        if (beamTick >= 20) {
             cleanup();
             cancel();
         }
