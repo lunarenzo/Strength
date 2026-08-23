@@ -171,15 +171,10 @@ public final class BowBeamTask extends BukkitRunnable {
             }
         }
 
-        // 4. Beam Termination & Loop Advance (Tick 39)
+        // 4. Beam Termination (Tick 39)
         if (beamTick == 39) {
             cleanup();
-
-            beamTick = -1; // Reset to 0 next tick
-            currentBeamIndex++;
-            if (currentBeamIndex >= settings.ultimateBeams) {
-                cancel();
-            }
+            cancel();
         }
 
         beamTick++;

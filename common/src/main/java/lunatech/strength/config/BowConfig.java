@@ -81,7 +81,7 @@ public class BowConfig implements VersionedConfig {
     public String ultimateChargeProgressMessage = "<gray>Ultimate Charge: <gold><charge>/<target></gold></gray>";
 
     @Comment("Message sent when bow ultimate is activated")
-    public String ultimateActivatedMessage = "<gold><bold>BOW ULTIMATE ACTIVATED!</bold> Preparing Sonic Blast Beams...</gold>";
+    public String ultimateActivatedMessage = "<gold><bold>BOW ULTIMATE ARMED!</bold> Draw your bow and release to fire a laser beam shot!</gold>";
 
     @Comment("Message sent when bow ultimate is on cooldown")
     public String ultimateCooldownMessage = "<red>Your Ultimate is on cooldown for another <seconds>s!</red>";

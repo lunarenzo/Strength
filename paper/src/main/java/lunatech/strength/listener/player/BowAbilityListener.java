@@ -46,6 +46,7 @@ public final class BowAbilityListener implements Listener {
     public static final Map<UUID, Integer> ultimateHits = new ConcurrentHashMap<>();
     public static final Map<UUID, Boolean> bowPassiveReady = new ConcurrentHashMap<>();
     public static final Map<UUID, Long> ultimateCooldowns = new ConcurrentHashMap<>();
+    public static final Map<UUID, Integer> remainingUltShots = new ConcurrentHashMap<>();
 
     // Edge Case 3: Active temporary cobwebs and their original block data for server shutdown restoration
     public static final Map<Location, BlockData> activeCobwebs = new ConcurrentHashMap<>();
@@ -53,6 +54,69 @@ public final class BowAbilityListener implements Listener {
     public BowAbilityListener(@NotNull Strength plugin, @NotNull StrengthService strengthService) {
         this.plugin = plugin;
         this.strengthService = strengthService;
+
+        // Real-time Aiming Laser Guide Task for players with armed Bow Ultimate holding right-click
+        Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+            if (remainingUltShots.isEmpty()) return;
+
+            for (Map.Entry<UUID, Integer> entry : remainingUltShots.entrySet()) {
+                if (entry.getValue() <= 0) continue;
+                final Player player = Bukkit.getPlayer(entry.getKey());
+                if (player == null || !player.isOnline()) continue;
+
+                if (player.isHandRaised() && player.getInventory().getItemInMainHand().getType() == Material.BOW) {
+                    final BowConfig settings = plugin.getConfigHandler().getBowConfig();
+                    final Location start = player.getEyeLocation().add(player.getEyeLocation().getDirection().multiply(1.0));
+                    final org.bukkit.util.Vector dir = player.getEyeLocation().getDirection().normalize();
+
+                    for (double d = 0.0; d < settings.ultimateRange; d += 0.5) {
+                        final Location p = start.clone().add(dir.clone().multiply(d));
+                        p.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, p, 1, 0.0, 0.0, 0.0, 0.0);
+                    }
+
+                    final Location end = start.clone().add(dir.clone().multiply(settings.ultimateRange));
+                    end.getWorld().spawnParticle(Particle.END_ROD, end, 2, 0.1, 0.1, 0.1, 0.01);
+                }
+            }
+        }, 1L, 1L);
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = false)
+    public void onEntityShootBowUltimate(@NotNull EntityShootBowEvent event) {
+        if (!(event.getEntity() instanceof Player shooter)) {
+            return;
+        }
+
+        final UUID uuid = shooter.getUniqueId();
+        final int remaining = remainingUltShots.getOrDefault(uuid, 0);
+        if (remaining <= 0) {
+            return;
+        }
+
+        if (event.getBow() == null || event.getBow().getType() != Material.BOW) {
+            return;
+        }
+
+        if (event.getForce() < 0.8f) {
+            return;
+        }
+
+        // Cancel arrow launch and item consumption
+        event.setCancelled(true);
+
+        final BowConfig settings = plugin.getConfigHandler().getBowConfig();
+        final int left = remainingUltShots.merge(uuid, -1, Integer::sum);
+        if (left <= 0) {
+            remainingUltShots.remove(uuid);
+        }
+
+        // Trigger 1 Bow Beam shot task
+        new lunatech.strength.task.BowBeamTask(shooter, settings)
+            .runTaskTimer(plugin, 0L, 1L);
+
+        shooter.sendMessage(ColorParser.of(
+            "<gold><bold>Fired Bow Beam!</bold> (" + Math.max(0, left) + "/" + settings.ultimateBeams + " shots remaining)</gold>"
+        ).build());
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -236,6 +300,7 @@ public final class BowAbilityListener implements Listener {
         ultimateHits.remove(uuid);
         bowPassiveReady.remove(uuid);
         ultimateCooldowns.remove(uuid);
+        remainingUltShots.remove(uuid);
     }
 
     // Edge Case 1 Safety Check: Prevent deleting tile entities (chests, shulker boxes, furnaces) or non-replaceable blocks
