@@ -197,12 +197,27 @@ public final class BowBeamTask extends BukkitRunnable {
     }
 
     private void playSound(@NotNull Location loc, @NotNull String soundKey, float volume, float pitch) {
-        if (soundKey == null || soundKey.isBlank()) return;
+        if (soundKey == null || soundKey.isBlank() || "NONE".equalsIgnoreCase(soundKey)) return;
         try {
             final Sound sound = Sound.valueOf(soundKey.toUpperCase());
             loc.getWorld().playSound(loc, sound, volume, pitch);
         } catch (IllegalArgumentException e) {
-            loc.getWorld().playSound(loc, soundKey, volume, pitch);
+            try {
+                final net.kyori.adventure.key.Key key = soundKey.contains(":")
+                    ? net.kyori.adventure.key.Key.key(soundKey.toLowerCase(java.util.Locale.ROOT))
+                    : net.kyori.adventure.key.Key.key("strength", soundKey.toLowerCase(java.util.Locale.ROOT));
+
+                final net.kyori.adventure.sound.Sound advSound = net.kyori.adventure.sound.Sound.sound(
+                    key,
+                    net.kyori.adventure.sound.Sound.Source.MASTER,
+                    volume,
+                    pitch
+                );
+
+                loc.getWorld().playSound(advSound, loc.getX(), loc.getY(), loc.getZ());
+            } catch (Throwable t) {
+                loc.getWorld().playSound(loc, soundKey, volume, pitch);
+            }
         }
     }
 }
