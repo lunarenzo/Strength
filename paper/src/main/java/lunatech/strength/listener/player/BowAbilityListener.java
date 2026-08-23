@@ -112,6 +112,22 @@ public final class BowAbilityListener implements Listener {
                                 ));
                             });
                             activeAimSpirals.put(uuid, spiral);
+
+                            final ItemDisplay spawnedSpiral = spiral;
+                            // After 10 ticks (5 intro frames * 2 ticks per frame), swap CustomModelData to 12350 (Looping frames 2, 3, 4)
+                            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                                if (spawnedSpiral != null && spawnedSpiral.isValid()) {
+                                    final ItemStack stack = spawnedSpiral.getItemStack();
+                                    if (stack != null) {
+                                        final ItemMeta meta = stack.getItemMeta();
+                                        if (meta != null) {
+                                            meta.setCustomModelData(12350);
+                                            stack.setItemMeta(meta);
+                                            spawnedSpiral.setItemStack(stack);
+                                        }
+                                    }
+                                }
+                            }, 10L);
                         } catch (Exception ignored) {}
                     } else {
                         spiral.teleport(spiralLoc);
