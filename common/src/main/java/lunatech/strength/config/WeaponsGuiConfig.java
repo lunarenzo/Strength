@@ -130,11 +130,11 @@ public class WeaponsGuiConfig implements VersionedConfig {
             "<red><bold>⚔️ SWORD OF ARES</bold></red>",
             List.of(
                 "<yellow><bold>Passive Ability:</bold></yellow> <white>Auto-Crit Combo</white>",
-                "<gray>Every <gold>3 hits</gold> within 3s triggers guaranteed <red>1.5x Auto-Crit</red> damage.</gray>",
+                "<gray>Every <gold>3 hits</gold> within 3s triggers a guaranteed <red>1.5x Auto-Crit</red> strike.</gray>",
                 "",
                 "<yellow><bold>Ultimate Ability:</bold></yellow> <gold>Dual Wielding (Berserker Stance)</gold>",
-                "<gray>Req: Strength <red>5</red> | Charges: <gold>5 hits</gold> | Cooldown: <green>18s</green></gray>",
-                "<gray>Clones sword into off-hand for <gold>10s</gold>, granting +100% attack speed & dual strikes.</gray>",
+                "<gray>Activation: <yellow>/ability</yellow> | Req: Strength <red>5</red> | Charges: <gold>5 hits</gold> | CD: <green>18s</green></gray>",
+                "<gray>Clones sword into off-hand for <gold>10s</gold>, granting +100% attack speed & dual-hand strikes.</gray>",
                 "",
                 "<dark_gray>Status: {status}</dark_gray>"
             )
