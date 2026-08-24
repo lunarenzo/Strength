@@ -147,11 +147,11 @@ public class WeaponsGuiConfig implements VersionedConfig {
             "<dark_red><bold>🪓 AXE OF HEPHAESTUS</bold></dark_red>",
             List.of(
                 "<yellow><bold>Passive Ability:</bold></yellow> <white>Seismic Stun</white>",
-                "<gray>Every <gold>3 critical hits</gold> completely freezes & stuns target for <gold>2s</gold>.</gray>",
+                "<gray>Every <gold>4 critical hits</gold> completely freezes & stuns target for <gold>3s</gold>.</gray>",
                 "",
                 "<yellow><bold>Ultimate Ability:</bold></yellow> <gold>Executioner's Mark</gold>",
                 "<gray>Activation: <yellow>/ability</yellow> | Req: Strength <red>5</red> | Charges: <gold>5 crits</gold> | CD: <green>25s</green></gray>",
-                "<gray>Marks target for <gold>5s</gold>, storing 100% damage & detonating for <red>150% burst</red>.</gray>",
+                "<gray>Marks target for <gold>10s</gold>, storing 100% damage & detonating for <red>150% burst</red>.</gray>",
                 "",
                 "<dark_gray>Status: {status}</dark_gray>"
             )
