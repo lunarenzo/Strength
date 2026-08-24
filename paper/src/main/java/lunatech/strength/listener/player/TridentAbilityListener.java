@@ -59,6 +59,10 @@ public final class TridentAbilityListener implements Listener {
             return;
         }
 
+        if (!lunatech.strength.hook.betterteams.BetterTeamsHook.canDamage(damager, damagee)) {
+            return;
+        }
+
         final TridentConfig settings = plugin.getConfigHandler().getTridentConfig();
 
         // 1. Passive Trigger: Every N hits, summon visual lightning bolt and apply configured passive damage

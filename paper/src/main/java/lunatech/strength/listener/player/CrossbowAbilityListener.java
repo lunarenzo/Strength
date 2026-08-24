@@ -113,6 +113,10 @@ public final class CrossbowAbilityListener implements Listener {
             return;
         }
 
+        if (!lunatech.strength.hook.betterteams.BetterTeamsHook.canDamage(shooter, victim)) {
+            return;
+        }
+
         final UUID shooterUuid = shooter.getUniqueId();
         final CrossbowConfig settings = plugin.getConfigHandler().getCrossbowConfig();
 

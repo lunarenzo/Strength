@@ -165,6 +165,10 @@ public final class TridentUltimateTask extends BukkitRunnable {
                     continue;
                 }
 
+                if (target instanceof Player targetPlayer && !lunatech.strength.hook.betterteams.BetterTeamsHook.canDamage(player, targetPlayer)) {
+                    continue;
+                }
+
                 // Save velocity before damage to prevent knockback (1:1 MythicMobs pkb=true)
                 final org.bukkit.util.Vector preVel = target.getVelocity().clone();
 

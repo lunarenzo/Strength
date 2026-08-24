@@ -117,6 +117,9 @@ public final class BowBeamTask extends BukkitRunnable {
                 final Location point = eyeLoc.clone().add(beamDir.clone().multiply(d));
                 for (Entity entity : point.getWorld().getNearbyEntities(point, settings.ultimateWidth + 1.0, settings.ultimateWidth + 1.0, settings.ultimateWidth + 1.0)) {
                     if (entity instanceof LivingEntity living && living != player && !(living instanceof ItemDisplay)) {
+                        if (living instanceof Player target && !lunatech.strength.hook.betterteams.BetterTeamsHook.canDamage(player, target)) {
+                            continue;
+                        }
                         if (damaged.add(living)) {
                             living.damage(settings.ultimateDamage, player);
                             living.getWorld().playSound(living.getLocation(), Sound.ENTITY_GENERIC_HURT, 1.0f, 1.0f);

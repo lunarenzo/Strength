@@ -315,6 +315,9 @@ public final class SwordAbilityListener implements Listener {
 
             for (org.bukkit.entity.Entity nearby : target.getWorld().getNearbyEntities(target.getBoundingBox().expand(1.0, 0.25, 1.0))) {
                 if (nearby instanceof LivingEntity living && !nearby.equals(player) && !nearby.equals(target)) {
+                    if (living instanceof Player nearbyPlayer && !lunatech.strength.hook.betterteams.BetterTeamsHook.canDamage(player, nearbyPlayer)) {
+                        continue;
+                    }
                     living.damage(sweepDmg, player);
                 }
             }
