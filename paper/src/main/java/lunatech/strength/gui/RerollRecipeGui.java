@@ -43,6 +43,7 @@ public final class RerollRecipeGui {
         inv.setItem(0, rerollResult);
 
         // 2. Crafting Grid slots (slots 1 to 9 in 3x3 matrix)
+        final RerollRecipeSettings recipe = plugin.getConfigHandler().getConfig().rerollRecipe;
         if (recipe != null) {
             final List<String> shape = recipe.shape;
             final Map<String, String> ingredients = recipe.ingredients;
