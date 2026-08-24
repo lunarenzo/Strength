@@ -38,6 +38,7 @@ public final class StrengthRecipeGui {
         );
         holder.setInventory(inv);
 
+        final RecipeSettings recipe = plugin.getConfigHandler().getConfig().recipe;
         final int amount = recipe != null ? recipe.resultStrengthAmount : 1;
 
         // 1. Result slot (slot 0) = Strength Item output item
