@@ -65,8 +65,8 @@ public class WeaponsGuiConfig implements VersionedConfig {
                 "<gray>Every <gold>3 hits</gold> summons lightning dealing <red>2.0x</red> damage + <red>3.0</red> bonus damage.</gray>",
                 "",
                 "<yellow><bold>Ultimate Ability:</bold></yellow> <gold>Thunderous Barrage</gold>",
-                "<gray>Req: Strength <red>5</red> | Charges: <gold>8 hits</gold> | Cooldown: <green>16s</green></gray>",
-                "<gray>Unleashes 9 thrust strikes with particle surges in a 4-block zone.</gray>",
+                "<gray>Activation: <yellow>/ability</yellow> | Req: Strength <red>5</red> | Charges: <gold>8 hits</gold> | CD: <green>16s</green></gray>",
+                "<gray>Unleashes 9 thrust strikes (5.0 dmg) with particle surges in a 4-block zone.</gray>",
                 "",
                 "<dark_gray>Status: {status}</dark_gray>"
             )
