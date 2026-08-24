@@ -96,11 +96,11 @@ public class WeaponsGuiConfig implements VersionedConfig {
             "<blue><bold>🛡️ SHIELD OF ATHENA</bold></blue>",
             List.of(
                 "<yellow><bold>Passive Ability:</bold></yellow> <white>Disable Safeguard</white>",
-                "<gray>Disables/breaks grant temporary damage reduction safeguard.</gray>",
+                "<gray>Shield disable/break grants <green>20% damage reduction</green> for <gold>5s</gold>.</gray>",
                 "",
                 "<yellow><bold>Ultimate Ability:</bold></yellow> <gold>Aegis Barrier (God Mode)</gold>",
-                "<gray>Req: Strength <red>5</red> | Charges: <gold>8 blocks</gold> | Cooldown: <green>30s</green></gray>",
-                "<gray>Sneak + Right Click shield grants 100% invulnerability for <gold>5s</gold>.</gray>",
+                "<gray>Activation: <yellow>/ability</yellow> | Req: Strength <red>5</red> | Charges: <gold>10 blocks</gold> | CD: <green>60s</green></gray>",
+                "<gray>Spawns bubble barrier granting <gold>100% invulnerability</gold> for <gold>15s</gold>.</gray>",
                 "",
                 "<dark_gray>Status: {status}</dark_gray>"
             )
