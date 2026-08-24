@@ -20,7 +20,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * Manager responsible for opening the Strength Weapons Chest GUI (/strength weapons).
@@ -43,9 +42,8 @@ public final class WeaponsGui {
         final Inventory inv = Bukkit.createInventory(holder, totalSlots, title);
         holder.setInventory(inv);
 
-        final UUID uuid = player.getUniqueId();
-        final int playerStrength = plugin.getStrengthService().getStrength(uuid);
-        final String assignedWeapon = plugin.getStrengthService().getAssignedWeapon(uuid);
+        final int playerStrength = plugin.getStrengthService().getStrength(player);
+        final String assignedWeapon = plugin.getStrengthService().getAssignedWeapon(player);
         final String formattedWeapon = assignedWeapon != null && !assignedWeapon.trim().isEmpty() ? assignedWeapon.toUpperCase() : "NONE";
 
         // 1. Fill background items
