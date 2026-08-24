@@ -60,7 +60,8 @@ public class WeaponsGuiConfig implements VersionedConfig {
             "<gray>Right-click in hand to consume & gain strength.</gray>",
             "",
             "<yellow>Click to view crafting recipe!</yellow>"
-        )
+        ),
+        "<dark_purple><bold>Recipe: Strength Shard</bold></dark_purple>"
     );
 
     @Comment("Reroll Book display item settings in the Weapons GUI")
@@ -74,7 +75,8 @@ public class WeaponsGuiConfig implements VersionedConfig {
             "<gray>Consume in hand to open reroll menu.</gray>",
             "",
             "<yellow>Click to view crafting recipe!</yellow>"
-        )
+        ),
+        "<light_purple><bold>Recipe: Weapon Reroll Book</bold></light_purple>"
     );
 
     @Comment("Weapons display items in the GUI mapped by weapon key (trident, bow, shield, crossbow, sword, axe)")
@@ -194,14 +196,20 @@ public class WeaponsGuiConfig implements VersionedConfig {
         public int customModelData = 0;
         public String displayName = "<gray>";
         public List<String> lore = new ArrayList<>();
+        public boolean enchanted = false;
 
         public GuiItemConfig() {}
 
         public GuiItemConfig(String material, int customModelData, String displayName, List<String> lore) {
+            this(material, customModelData, displayName, lore, false);
+        }
+
+        public GuiItemConfig(String material, int customModelData, String displayName, List<String> lore, boolean enchanted) {
             this.material = material;
             this.customModelData = customModelData;
             this.displayName = displayName;
             this.lore = lore;
+            this.enchanted = enchanted;
         }
     }
 
@@ -212,15 +220,29 @@ public class WeaponsGuiConfig implements VersionedConfig {
         public int customModelData = 0;
         public String displayName = "";
         public List<String> lore = new ArrayList<>();
+        @Comment("Title of the virtual workbench GUI when clicked to preview recipe (MiniMessage format)")
+        public String recipeGuiTitle = "";
+        @Comment("Whether the item should have an enchantment glow effect in the GUI")
+        public boolean enchanted = false;
 
         public GuiSlotItemConfig() {}
 
         public GuiSlotItemConfig(int slot, String material, int customModelData, String displayName, List<String> lore) {
+            this(slot, material, customModelData, displayName, lore, "", false);
+        }
+
+        public GuiSlotItemConfig(int slot, String material, int customModelData, String displayName, List<String> lore, String recipeGuiTitle) {
+            this(slot, material, customModelData, displayName, lore, recipeGuiTitle, false);
+        }
+
+        public GuiSlotItemConfig(int slot, String material, int customModelData, String displayName, List<String> lore, String recipeGuiTitle, boolean enchanted) {
             this.slot = slot;
             this.material = material;
             this.customModelData = customModelData;
             this.displayName = displayName;
             this.lore = lore;
+            this.recipeGuiTitle = recipeGuiTitle;
+            this.enchanted = enchanted;
         }
     }
 }

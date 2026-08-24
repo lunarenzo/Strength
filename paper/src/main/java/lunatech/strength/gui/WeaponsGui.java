@@ -57,6 +57,10 @@ public final class WeaponsGui {
             if (fillerConfig.customModelData > 0) {
                 meta.setCustomModelData(fillerConfig.customModelData);
             }
+            if (fillerConfig.enchanted) {
+                meta.addEnchant(Enchantment.UNBREAKING, 1, true);
+                meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            }
             if (fillerConfig.displayName != null && !fillerConfig.displayName.isEmpty()) {
                 meta.displayName(mm.deserialize(fillerConfig.displayName).decoration(TextDecoration.ITALIC, false));
             } else {
@@ -82,6 +86,10 @@ public final class WeaponsGui {
                 }
                 if (skullConfig.customModelData > 0) {
                     meta.setCustomModelData(skullConfig.customModelData);
+                }
+                if (skullConfig.enchanted) {
+                    meta.addEnchant(Enchantment.UNBREAKING, 1, true);
+                    meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
                 }
 
                 final String rawName = replacePlaceholders(skullConfig.displayName, player.getName(), playerStrength, formattedWeapon, "");
@@ -124,7 +132,7 @@ public final class WeaponsGui {
                     meta.setCustomModelData(weaponCfg.customModelData);
                 }
 
-                if (isAssigned) {
+                if (weaponCfg.enchanted || isAssigned) {
                     meta.addEnchant(Enchantment.UNBREAKING, 1, true);
                     meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
                 }
@@ -157,6 +165,10 @@ public final class WeaponsGui {
                 if (strengthConfig.customModelData > 0) {
                     meta.setCustomModelData(strengthConfig.customModelData);
                 }
+                if (strengthConfig.enchanted) {
+                    meta.addEnchant(Enchantment.UNBREAKING, 1, true);
+                    meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+                }
 
                 final String rawName = replacePlaceholders(strengthConfig.displayName, player.getName(), playerStrength, formattedWeapon, "");
                 meta.displayName(mm.deserialize(rawName).decoration(TextDecoration.ITALIC, false));
@@ -185,6 +197,10 @@ public final class WeaponsGui {
             rerollItem.editMeta(meta -> {
                 if (rerollConfig.customModelData > 0) {
                     meta.setCustomModelData(rerollConfig.customModelData);
+                }
+                if (rerollConfig.enchanted) {
+                    meta.addEnchant(Enchantment.UNBREAKING, 1, true);
+                    meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
                 }
 
                 final String rawName = replacePlaceholders(rerollConfig.displayName, player.getName(), playerStrength, formattedWeapon, "");
