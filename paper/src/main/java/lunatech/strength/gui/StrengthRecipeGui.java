@@ -26,9 +26,9 @@ public final class StrengthRecipeGui {
 
     public static void open(@NotNull Strength plugin, @NotNull Player player) {
         final StrengthRecipeGuiHolder holder = new StrengthRecipeGuiHolder();
-        final RecipeSettings recipe = plugin.getConfigHandler().getConfig().recipe;
-        final String rawTitle = (recipe != null && recipe.guiTitle != null && !recipe.guiTitle.trim().isEmpty())
-            ? recipe.guiTitle
+        final lunatech.strength.config.WeaponsGuiConfig.GuiSlotItemConfig strengthCfg = plugin.getConfigHandler().getWeaponsGuiConfig().strengthItem;
+        final String rawTitle = (strengthCfg != null && strengthCfg.recipeGuiTitle != null && !strengthCfg.recipeGuiTitle.trim().isEmpty())
+            ? strengthCfg.recipeGuiTitle
             : "<dark_purple><bold>Recipe: Strength Shard</bold></dark_purple>";
 
         final Inventory inv = Bukkit.createInventory(
@@ -38,7 +38,6 @@ public final class StrengthRecipeGui {
         );
         holder.setInventory(inv);
 
-        final RecipeSettings recipe = plugin.getConfigHandler().getConfig().recipe;
         final int amount = recipe != null ? recipe.resultStrengthAmount : 1;
 
         // 1. Result slot (slot 0) = Strength Item output item

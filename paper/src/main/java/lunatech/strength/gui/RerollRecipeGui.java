@@ -26,9 +26,9 @@ public final class RerollRecipeGui {
 
     public static void open(@NotNull Strength plugin, @NotNull Player player) {
         final RerollRecipeGuiHolder holder = new RerollRecipeGuiHolder();
-        final RerollRecipeSettings recipe = plugin.getConfigHandler().getConfig().rerollRecipe;
-        final String rawTitle = (recipe != null && recipe.guiTitle != null && !recipe.guiTitle.trim().isEmpty())
-            ? recipe.guiTitle
+        final lunatech.strength.config.WeaponsGuiConfig.GuiSlotItemConfig rerollCfg = plugin.getConfigHandler().getWeaponsGuiConfig().rerollItem;
+        final String rawTitle = (rerollCfg != null && rerollCfg.recipeGuiTitle != null && !rerollCfg.recipeGuiTitle.trim().isEmpty())
+            ? rerollCfg.recipeGuiTitle
             : "<light_purple><bold>Recipe: Weapon Reroll Book</bold></light_purple>";
 
         final Inventory inv = Bukkit.createInventory(
@@ -43,7 +43,6 @@ public final class RerollRecipeGui {
         inv.setItem(0, rerollResult);
 
         // 2. Crafting Grid slots (slots 1 to 9 in 3x3 matrix)
-        final RerollRecipeSettings recipe = plugin.getConfigHandler().getConfig().rerollRecipe;
         if (recipe != null) {
             final List<String> shape = recipe.shape;
             final Map<String, String> ingredients = recipe.ingredients;
