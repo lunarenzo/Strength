@@ -47,7 +47,7 @@ public class CommandHandler implements Reloadable {
         new dev.jorel.commandapi.CommandAPICommand("weapons")
             .withHelp("Open the Strength Weapons GUI.", "Open the Strength Weapons GUI.")
             .withPermission(BASE_PERM)
-            .executesPlayer((Player player, dev.jorel.commandapi.executors.CommandArguments args) -> lunatech.strength.gui.WeaponsGui.open(plugin, player))
+            .executesPlayer((Player player, dev.jorel.commandapi.executors.CommandArguments args) -> lunatech.strength.gui.WeaponsGui.open((Strength) plugin, player))
             .register();
 
         new AbilityCommand(plugin)
