@@ -79,11 +79,11 @@ public class WeaponsGuiConfig implements VersionedConfig {
             "<green><bold>🏹 BOW OF ARTEMIS</bold></green>",
             List.of(
                 "<yellow><bold>Passive Ability:</bold></yellow> <white>Cobweb Trap</white>",
-                "<gray>Every <gold>3 hits</gold>, next arrow traps target in cobwebs for <gold>3s</gold> (10s CD).</gray>",
+                "<gray>Every <gold>2 hits</gold>, next arrow traps target in cobwebs for <gold>5s</gold>.</gray>",
                 "",
                 "<yellow><bold>Ultimate Ability:</bold></yellow> <gold>Face Spiral Ring (Beam)</gold>",
-                "<gray>Req: Strength <red>5</red> | Charges: <gold>8 hits</gold> | Cooldown: <green>15s</green></gray>",
-                "<gray>Full bow draw (18+ ticks) fires a 30-block piercing laser beam (4.0 dmg + Slowness/Blindness).</gray>",
+                "<gray>Activation: <yellow>/ability</yellow> | Req: Strength <red>5</red> | Charges: <gold>10 hits</gold> | CD: <green>60s</green></gray>",
+                "<gray>Primes <gold>3 beam shots</gold> (full draw fires a 20-block laser dealing 8.0 dmg).</gray>",
                 "",
                 "<dark_gray>Status: {status}</dark_gray>"
             )
