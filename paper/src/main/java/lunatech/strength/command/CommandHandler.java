@@ -5,6 +5,7 @@ import dev.jorel.commandapi.CommandAPIPaperConfig;
 import lunatech.strength.AbstractStrength;
 import lunatech.strength.Strength;
 import lunatech.strength.Reloadable;
+import org.bukkit.entity.Player;
 
 /**
  * A class to handle registration of commands.
@@ -46,7 +47,7 @@ public class CommandHandler implements Reloadable {
         new dev.jorel.commandapi.CommandAPICommand("weapons")
             .withHelp("Open the Strength Weapons GUI.", "Open the Strength Weapons GUI.")
             .withPermission(BASE_PERM)
-            .executesPlayer((player, args) -> lunatech.strength.gui.WeaponsGui.open(plugin, player))
+            .executesPlayer((Player player, dev.jorel.commandapi.executors.CommandArguments args) -> lunatech.strength.gui.WeaponsGui.open(plugin, player))
             .register();
 
         new AbilityCommand(plugin)
