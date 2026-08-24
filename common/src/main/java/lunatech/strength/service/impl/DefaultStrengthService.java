@@ -98,12 +98,12 @@ public final class DefaultStrengthService implements StrengthService {
         final ItemStack item = new ItemStack(material);
         item.editMeta(meta -> {
             // Set Display Name
-            meta.displayName(MiniMessage.miniMessage().deserialize(itemSettings.displayName));
+            meta.displayName(MiniMessage.miniMessage().deserialize(itemSettings.displayName).decoration(net.kyori.adventure.text.format.TextDecoration.ITALIC, false));
 
             // Set Lore
             final List<Component> loreComponents = new ArrayList<>();
             for (String line : itemSettings.lore) {
-                loreComponents.add(MiniMessage.miniMessage().deserialize(line.replace("<amount>", String.valueOf(amount))));
+                loreComponents.add(MiniMessage.miniMessage().deserialize(line.replace("<amount>", String.valueOf(amount))).decoration(net.kyori.adventure.text.format.TextDecoration.ITALIC, false));
             }
             meta.lore(loreComponents);
 
@@ -128,11 +128,11 @@ public final class DefaultStrengthService implements StrengthService {
 
         final ItemStack item = new ItemStack(material);
         item.editMeta(meta -> {
-            meta.displayName(MiniMessage.miniMessage().deserialize(itemSettings.displayName));
+            meta.displayName(MiniMessage.miniMessage().deserialize(itemSettings.displayName).decoration(net.kyori.adventure.text.format.TextDecoration.ITALIC, false));
 
             final List<Component> loreComponents = new ArrayList<>();
             for (String line : itemSettings.lore) {
-                loreComponents.add(MiniMessage.miniMessage().deserialize(line));
+                loreComponents.add(MiniMessage.miniMessage().deserialize(line).decoration(net.kyori.adventure.text.format.TextDecoration.ITALIC, false));
             }
             meta.lore(loreComponents);
 

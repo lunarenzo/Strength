@@ -111,7 +111,7 @@ public final class RerollConfirmationGui {
         }
         fillerItem.editMeta(meta -> {
             if (guiSettings.fillerDisplayName != null && !guiSettings.fillerDisplayName.isEmpty()) {
-                meta.displayName(mm.deserialize(guiSettings.fillerDisplayName));
+                meta.displayName(mm.deserialize(guiSettings.fillerDisplayName).decoration(net.kyori.adventure.text.format.TextDecoration.ITALIC, false));
             } else {
                 meta.displayName(Component.empty());
             }
@@ -129,12 +129,12 @@ public final class RerollConfirmationGui {
         confirmItem.editMeta(meta -> {
             final String nameStr = (guiSettings.confirmDisplayName != null && !guiSettings.confirmDisplayName.isEmpty())
                 ? guiSettings.confirmDisplayName : dialogSettings.confirmButton;
-            meta.displayName(mm.deserialize(nameStr));
+            meta.displayName(mm.deserialize(nameStr).decoration(net.kyori.adventure.text.format.TextDecoration.ITALIC, false));
 
             if (guiSettings.confirmLore != null && !guiSettings.confirmLore.isEmpty()) {
                 final List<Component> loreList = new java.util.ArrayList<>();
                 for (String line : guiSettings.confirmLore) {
-                    loreList.add(mm.deserialize(line));
+                    loreList.add(mm.deserialize(line).decoration(net.kyori.adventure.text.format.TextDecoration.ITALIC, false));
                 }
                 meta.lore(loreList);
             }
@@ -149,16 +149,16 @@ public final class RerollConfirmationGui {
         previewItem.editMeta(meta -> {
             final String previewName = (guiSettings.previewDisplayName != null && !guiSettings.previewDisplayName.isEmpty())
                 ? guiSettings.previewDisplayName : dialogSettings.title;
-            meta.displayName(mm.deserialize(previewName));
+            meta.displayName(mm.deserialize(previewName).decoration(net.kyori.adventure.text.format.TextDecoration.ITALIC, false));
 
             if (guiSettings.previewLore != null && !guiSettings.previewLore.isEmpty()) {
                 final List<Component> loreList = new java.util.ArrayList<>();
                 for (String line : guiSettings.previewLore) {
-                    loreList.add(mm.deserialize(line));
+                    loreList.add(mm.deserialize(line).decoration(net.kyori.adventure.text.format.TextDecoration.ITALIC, false));
                 }
                 meta.lore(loreList);
             } else {
-                meta.lore(List.of(mm.deserialize(dialogSettings.message)));
+                meta.lore(List.of(mm.deserialize(dialogSettings.message).decoration(net.kyori.adventure.text.format.TextDecoration.ITALIC, false)));
             }
         });
 
@@ -174,12 +174,12 @@ public final class RerollConfirmationGui {
         cancelItem.editMeta(meta -> {
             final String nameStr = (guiSettings.cancelDisplayName != null && !guiSettings.cancelDisplayName.isEmpty())
                 ? guiSettings.cancelDisplayName : dialogSettings.cancelButton;
-            meta.displayName(mm.deserialize(nameStr));
+            meta.displayName(mm.deserialize(nameStr).decoration(net.kyori.adventure.text.format.TextDecoration.ITALIC, false));
 
             if (guiSettings.cancelLore != null && !guiSettings.cancelLore.isEmpty()) {
                 final List<Component> loreList = new java.util.ArrayList<>();
                 for (String line : guiSettings.cancelLore) {
-                    loreList.add(mm.deserialize(line));
+                    loreList.add(mm.deserialize(line).decoration(net.kyori.adventure.text.format.TextDecoration.ITALIC, false));
                 }
                 meta.lore(loreList);
             }

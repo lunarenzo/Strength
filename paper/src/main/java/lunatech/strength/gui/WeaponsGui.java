@@ -6,6 +6,7 @@ import lunatech.strength.config.WeaponsGuiConfig.GuiItemConfig;
 import lunatech.strength.config.WeaponsGuiConfig.GuiSlotItemConfig;
 import lunatech.strength.utility.ItemResolver;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -57,7 +58,7 @@ public final class WeaponsGui {
                 meta.setCustomModelData(fillerConfig.customModelData);
             }
             if (fillerConfig.displayName != null && !fillerConfig.displayName.isEmpty()) {
-                meta.displayName(mm.deserialize(fillerConfig.displayName));
+                meta.displayName(mm.deserialize(fillerConfig.displayName).decoration(TextDecoration.ITALIC, false));
             } else {
                 meta.displayName(Component.empty());
             }
@@ -84,13 +85,13 @@ public final class WeaponsGui {
                 }
 
                 final String rawName = replacePlaceholders(skullConfig.displayName, player.getName(), playerStrength, formattedWeapon, "");
-                meta.displayName(mm.deserialize(rawName));
+                meta.displayName(mm.deserialize(rawName).decoration(TextDecoration.ITALIC, false));
 
                 if (skullConfig.lore != null && !skullConfig.lore.isEmpty()) {
                     final List<Component> loreList = new ArrayList<>(skullConfig.lore.size());
                     for (String line : skullConfig.lore) {
                         final String replaced = replacePlaceholders(line, player.getName(), playerStrength, formattedWeapon, "");
-                        loreList.add(mm.deserialize(replaced));
+                        loreList.add(mm.deserialize(replaced).decoration(TextDecoration.ITALIC, false));
                     }
                     meta.lore(loreList);
                 }
@@ -129,13 +130,13 @@ public final class WeaponsGui {
                 }
 
                 final String rawName = replacePlaceholders(weaponCfg.displayName, player.getName(), playerStrength, formattedWeapon, statusStr);
-                meta.displayName(mm.deserialize(rawName));
+                meta.displayName(mm.deserialize(rawName).decoration(TextDecoration.ITALIC, false));
 
                 if (weaponCfg.lore != null && !weaponCfg.lore.isEmpty()) {
                     final List<Component> loreList = new ArrayList<>(weaponCfg.lore.size());
                     for (String line : weaponCfg.lore) {
                         final String replaced = replacePlaceholders(line, player.getName(), playerStrength, formattedWeapon, statusStr);
-                        loreList.add(mm.deserialize(replaced));
+                        loreList.add(mm.deserialize(replaced).decoration(TextDecoration.ITALIC, false));
                     }
                     meta.lore(loreList);
                 }
@@ -144,7 +145,36 @@ public final class WeaponsGui {
             inv.setItem(weaponCfg.slot, weaponItem);
         }
 
-        // 4. Reroll Book Item
+        // 4. Strength Item
+        final GuiSlotItemConfig strengthConfig = guiConfig.strengthItem;
+        if (strengthConfig != null && strengthConfig.slot >= 0 && strengthConfig.slot < totalSlots) {
+            ItemStack strengthItem = ItemResolver.resolveItemStack(strengthConfig.material, plugin.getStrengthService());
+            if (strengthItem == null) {
+                strengthItem = plugin.getStrengthService().createStrengthItem(1);
+            }
+
+            strengthItem.editMeta(meta -> {
+                if (strengthConfig.customModelData > 0) {
+                    meta.setCustomModelData(strengthConfig.customModelData);
+                }
+
+                final String rawName = replacePlaceholders(strengthConfig.displayName, player.getName(), playerStrength, formattedWeapon, "");
+                meta.displayName(mm.deserialize(rawName).decoration(TextDecoration.ITALIC, false));
+
+                if (strengthConfig.lore != null && !strengthConfig.lore.isEmpty()) {
+                    final List<Component> loreList = new ArrayList<>(strengthConfig.lore.size());
+                    for (String line : strengthConfig.lore) {
+                        final String replaced = replacePlaceholders(line, player.getName(), playerStrength, formattedWeapon, "");
+                        loreList.add(mm.deserialize(replaced).decoration(TextDecoration.ITALIC, false));
+                    }
+                    meta.lore(loreList);
+                }
+            });
+
+            inv.setItem(strengthConfig.slot, strengthItem);
+        }
+
+        // 5. Reroll Book Item
         final GuiSlotItemConfig rerollConfig = guiConfig.rerollItem;
         if (rerollConfig != null && rerollConfig.slot >= 0 && rerollConfig.slot < totalSlots) {
             ItemStack rerollItem = ItemResolver.resolveItemStack(rerollConfig.material, plugin.getStrengthService());
@@ -158,13 +188,13 @@ public final class WeaponsGui {
                 }
 
                 final String rawName = replacePlaceholders(rerollConfig.displayName, player.getName(), playerStrength, formattedWeapon, "");
-                meta.displayName(mm.deserialize(rawName));
+                meta.displayName(mm.deserialize(rawName).decoration(TextDecoration.ITALIC, false));
 
                 if (rerollConfig.lore != null && !rerollConfig.lore.isEmpty()) {
                     final List<Component> loreList = new ArrayList<>(rerollConfig.lore.size());
                     for (String line : rerollConfig.lore) {
                         final String replaced = replacePlaceholders(line, player.getName(), playerStrength, formattedWeapon, "");
-                        loreList.add(mm.deserialize(replaced));
+                        loreList.add(mm.deserialize(replaced).decoration(TextDecoration.ITALIC, false));
                     }
                     meta.lore(loreList);
                 }
