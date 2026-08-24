@@ -3,6 +3,7 @@ package lunatech.strength.hook.betterteams;
 import lunatech.strength.AbstractStrength;
 import lunatech.strength.Strength;
 import lunatech.strength.hook.AbstractHook;
+import lunatech.strength.hook.Hook;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -20,12 +21,17 @@ public final class BetterTeamsHook extends AbstractHook {
     private static Method canDamageMethod;
 
     public BetterTeamsHook(@NotNull Strength plugin) {
-        super(plugin, "BetterTeams");
+        super(plugin);
+    }
+
+    @Override
+    public boolean isHookLoaded() {
+        return isPluginEnabled(Hook.BetterTeams.getPluginName());
     }
 
     @Override
     public void onLoad(@NotNull AbstractStrength plugin) {
-        if (!Bukkit.getPluginManager().isPluginEnabled("BetterTeams")) {
+        if (!isHookLoaded()) {
             return;
         }
 
@@ -33,9 +39,7 @@ public final class BetterTeamsHook extends AbstractHook {
             final Class<?> teamClass = Class.forName("com.booksaw.betterTeams.Team");
             getTeamMethod = teamClass.getMethod("getTeam", Player.class);
             canDamageMethod = teamClass.getMethod("canDamage", Player.class, Player.class);
-            setHookLoaded(true);
-        } catch (Throwable t) {
-            setHookLoaded(false);
+        } catch (Throwable ignored) {
         }
     }
 
