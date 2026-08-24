@@ -1,5 +1,6 @@
 package lunatech.strength.hook;
 
+import lunatech.strength.hook.betterteams.BetterTeamsHook;
 import lunatech.strength.hook.bstats.BStatsHook;
 import lunatech.strength.hook.packetevents.PacketEventsHook;
 import lunatech.strength.hook.placeholderapi.PAPIHook;
@@ -15,7 +16,8 @@ public enum Hook {
     BStats(BStatsHook.class, null, false),
     PAPI(PAPIHook.class, "PlaceholderAPI", true),
     PacketEvents(PacketEventsHook.class, "PacketEvents", true),
-    Vault(VaultHook.class, "Vault", true);
+    Vault(VaultHook.class, "Vault", true),
+    BetterTeams(BetterTeamsHook.class, "BetterTeams", true);
 
     private final @NotNull Class<? extends AbstractHook> hookClass; // The hook class used by this hook
     private final @Nullable String pluginName; // The plugin name used by this hook or null if not applicable
@@ -148,5 +150,15 @@ public enum Hook {
     @NotNull
     public static PacketEventsHook getPacketEventsHook() {
         return (PacketEventsHook) Hook.PacketEvents.get();
+    }
+
+    /**
+     * Gets BetterTeams hook.
+     *
+     * @return the BetterTeams hook
+     */
+    @NotNull
+    public static BetterTeamsHook getBetterTeamsHook() {
+        return (BetterTeamsHook) Hook.BetterTeams.get();
     }
 }

@@ -291,6 +291,10 @@ public final class BowAbilityListener implements Listener {
             return;
         }
 
+        if (!lunatech.strength.hook.betterteams.BetterTeamsHook.canDamage(shooter, victim)) {
+            return;
+        }
+
         final UUID shooterUuid = shooter.getUniqueId();
         final BowConfig settings = plugin.getConfigHandler().getBowConfig();
 

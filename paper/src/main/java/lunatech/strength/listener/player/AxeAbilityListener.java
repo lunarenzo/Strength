@@ -256,6 +256,10 @@ public final class AxeAbilityListener implements Listener {
             return;
         }
 
+        if (!lunatech.strength.hook.betterteams.BetterTeamsHook.canDamage(damager, victim)) {
+            return;
+        }
+
         // 2. Active Ultimate Damage Interception & Storage (ALL attacks: normal & crit)
         if (activeUltimateAttackers.getOrDefault(damagerUuid, false)) {
             final double finalDamage = event.getFinalDamage();
