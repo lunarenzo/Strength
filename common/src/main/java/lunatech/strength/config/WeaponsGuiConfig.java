@@ -112,12 +112,12 @@ public class WeaponsGuiConfig implements VersionedConfig {
             0,
             "<gold><bold>🏹 CROSSBOW OF APOLLO</bold></gold>",
             List.of(
-                "<yellow><bold>Passive Ability:</bold></yellow> <white>Charged Shot Boost</white>",
-                "<gray>Every <gold>3 hits</gold>, next crossbow shot deals bonus damage.</gray>",
+                "<yellow><bold>Passive Ability:</bold></yellow> <white>2x Damage Shot</white>",
+                "<gray>Every <gold>3 hits</gold>, next crossbow shot deals <red>2.0x damage</red>.</gray>",
                 "",
                 "<yellow><bold>Ultimate Ability:</bold></yellow> <gold>Tranquilizer Shot</gold>",
-                "<gray>Req: Strength <red>5</red> | Charges: <gold>8 hits</gold> | Cooldown: <green>20s</green></gray>",
-                "<gray>Sneak + Right Click primes shot that freezes target position & rotation for <gold>3s</gold>.</gray>",
+                "<gray>Activation: <yellow>/ability</yellow> | Req: Strength <red>5</red> | Charges: <gold>3 passives</gold> | CD: <green>60s</green></gray>",
+                "<gray>Primes next arrow to freeze & immobilize target for <gold>5s</gold>.</gray>",
                 "",
                 "<dark_gray>Status: {status}</dark_gray>"
             )
