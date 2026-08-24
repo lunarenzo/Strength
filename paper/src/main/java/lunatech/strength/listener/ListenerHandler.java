@@ -33,7 +33,8 @@ public class ListenerHandler implements Reloadable {
         listeners.add(new lunatech.strength.listener.player.StrengthConsumeListener(this.plugin.getStrengthService(), this.plugin.getConfigHandler()));
         listeners.add(new lunatech.strength.listener.player.RerollConsumeListener(this.plugin));
         listeners.add(new lunatech.strength.listener.player.RerollConfirmationGuiListener(this.plugin));
-        listeners.add(new lunatech.strength.listener.player.WeaponsGuiListener());
+        listeners.add(new lunatech.strength.listener.player.WeaponsGuiListener(this.plugin));
+        listeners.add(new lunatech.strength.listener.player.RerollRecipeGuiListener());
         listeners.add(new lunatech.strength.listener.player.TridentAbilityListener(this.plugin, this.plugin.getStrengthService()));
         listeners.add(new lunatech.strength.listener.player.BowAbilityListener(this.plugin, this.plugin.getStrengthService()));
         listeners.add(new lunatech.strength.listener.player.ShieldAbilityListener(this.plugin, this.plugin.getStrengthService()));

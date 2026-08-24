@@ -49,6 +49,20 @@ public class WeaponsGuiConfig implements VersionedConfig {
         )
     );
 
+    @Comment("Reroll Book display item settings in the Weapons GUI")
+    public GuiSlotItemConfig rerollItem = new GuiSlotItemConfig(
+        22,
+        "BOOK",
+        12347,
+        "<light_purple><bold>📜 WEAPON REROLL BOOK</bold></light_purple>",
+        List.of(
+            "<gray>Used to reroll your assigned weapon.</gray>",
+            "<gray>Consume in hand to open reroll menu.</gray>",
+            "",
+            "<yellow>Click to view crafting recipe!</yellow>"
+        )
+    );
+
     @Comment("Weapons display items in the GUI mapped by weapon key (trident, bow, shield, crossbow, sword, axe)")
     public Map<String, GuiSlotItemConfig> weapons = defaultWeaponsMap();
 

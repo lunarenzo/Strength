@@ -144,6 +144,35 @@ public final class WeaponsGui {
             inv.setItem(weaponCfg.slot, weaponItem);
         }
 
+        // 4. Reroll Book Item
+        final GuiSlotItemConfig rerollConfig = guiConfig.rerollItem;
+        if (rerollConfig != null && rerollConfig.slot >= 0 && rerollConfig.slot < totalSlots) {
+            ItemStack rerollItem = ItemResolver.resolveItemStack(rerollConfig.material, plugin.getStrengthService());
+            if (rerollItem == null) {
+                rerollItem = plugin.getStrengthService().createRerollItem();
+            }
+
+            rerollItem.editMeta(meta -> {
+                if (rerollConfig.customModelData > 0) {
+                    meta.setCustomModelData(rerollConfig.customModelData);
+                }
+
+                final String rawName = replacePlaceholders(rerollConfig.displayName, player.getName(), playerStrength, formattedWeapon, "");
+                meta.displayName(mm.deserialize(rawName));
+
+                if (rerollConfig.lore != null && !rerollConfig.lore.isEmpty()) {
+                    final List<Component> loreList = new ArrayList<>(rerollConfig.lore.size());
+                    for (String line : rerollConfig.lore) {
+                        final String replaced = replacePlaceholders(line, player.getName(), playerStrength, formattedWeapon, "");
+                        loreList.add(mm.deserialize(replaced));
+                    }
+                    meta.lore(loreList);
+                }
+            });
+
+            inv.setItem(rerollConfig.slot, rerollItem);
+        }
+
         player.openInventory(inv);
     }
 
