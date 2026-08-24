@@ -62,10 +62,10 @@ public class WeaponsGuiConfig implements VersionedConfig {
             "<cyan><bold>⚡ TRIDENT OF POSEIDON</bold></cyan>",
             List.of(
                 "<yellow><bold>Passive Ability:</bold></yellow> <white>Lightning Strike</white>",
-                "<gray>Every <gold>3</gold> hits summons lightning & deals <red>2x</red> damage + <red>3.0</red> bonus damage.</gray>",
+                "<gray>Every <gold>3 hits</gold> summons lightning dealing <red>2.0x</red> damage + <red>3.0</red> bonus damage.</gray>",
                 "",
                 "<yellow><bold>Ultimate Ability:</bold></yellow> <gold>Thunderous Barrage</gold>",
-                "<gray>Req: Strength <red>5</red> | Charges: <gold>8</gold> hits | Cooldown: <green>16s</green></gray>",
+                "<gray>Req: Strength <red>5</red> | Charges: <gold>8 hits</gold> | Cooldown: <green>16s</green></gray>",
                 "<gray>Unleashes 9 thrust strikes with particle surges in a 4-block zone.</gray>",
                 "",
                 "<dark_gray>Status: {status}</dark_gray>"
@@ -79,11 +79,11 @@ public class WeaponsGuiConfig implements VersionedConfig {
             "<green><bold>🏹 BOW OF ARTEMIS</bold></green>",
             List.of(
                 "<yellow><bold>Passive Ability:</bold></yellow> <white>Cobweb Trap</white>",
-                "<gray>Shots trap target in cobwebs for <gold>3s</gold> (10s CD).</gray>",
+                "<gray>Every <gold>3 hits</gold>, next arrow traps target in cobwebs for <gold>3s</gold> (10s CD).</gray>",
                 "",
-                "<yellow><bold>Ultimate Ability:</bold></yellow> <gold>Face Spiral Ring</gold>",
-                "<gray>Req: Strength <red>5</red> | Full Bow Draw (18 ticks) | Cooldown: <green>15s</green></gray>",
-                "<gray>Fires a piercing spiral beam de-buffing enemies in its path.</gray>",
+                "<yellow><bold>Ultimate Ability:</bold></yellow> <gold>Face Spiral Ring (Beam)</gold>",
+                "<gray>Req: Strength <red>5</red> | Charges: <gold>8 hits</gold> | Cooldown: <green>15s</green></gray>",
+                "<gray>Full bow draw (18+ ticks) fires a 30-block piercing laser beam (4.0 dmg + Slowness/Blindness).</gray>",
                 "",
                 "<dark_gray>Status: {status}</dark_gray>"
             )
@@ -95,12 +95,12 @@ public class WeaponsGuiConfig implements VersionedConfig {
             0,
             "<blue><bold>🛡️ SHIELD OF ATHENA</bold></blue>",
             List.of(
-                "<yellow><bold>Passive Ability:</bold></yellow> <white>Shield Deflection</white>",
-                "<gray>Blocking reflects <red>30%</red> incoming damage back to attacker.</gray>",
+                "<yellow><bold>Passive Ability:</bold></yellow> <white>Disable Safeguard</white>",
+                "<gray>Disables/breaks grant temporary damage reduction safeguard.</gray>",
                 "",
-                "<yellow><bold>Ultimate Ability:</bold></yellow> <gold>Aegis Barrier</gold>",
-                "<gray>Req: Strength <red>5</red> | Cooldown: <green>30s</green></gray>",
-                "<gray>Grants invulnerability & knockback resistance for <gold>5s</gold>.</gray>",
+                "<yellow><bold>Ultimate Ability:</bold></yellow> <gold>Aegis Barrier (God Mode)</gold>",
+                "<gray>Req: Strength <red>5</red> | Charges: <gold>8 blocks</gold> | Cooldown: <green>30s</green></gray>",
+                "<gray>Sneak + Right Click shield grants 100% invulnerability for <gold>5s</gold>.</gray>",
                 "",
                 "<dark_gray>Status: {status}</dark_gray>"
             )
@@ -112,12 +112,12 @@ public class WeaponsGuiConfig implements VersionedConfig {
             0,
             "<gold><bold>🏹 CROSSBOW OF APOLLO</bold></gold>",
             List.of(
-                "<yellow><bold>Passive Ability:</bold></yellow> <white>Immobilizing Bolt</white>",
-                "<gray>Loaded bolts freeze targets for <gold>2s</gold>.</gray>",
+                "<yellow><bold>Passive Ability:</bold></yellow> <white>Charged Shot Boost</white>",
+                "<gray>Every <gold>3 hits</gold>, next crossbow shot deals bonus damage.</gray>",
                 "",
-                "<yellow><bold>Ultimate Ability:</bold></yellow> <gold>Volley Burst</gold>",
-                "<gray>Req: Strength <red>5</red> | Cooldown: <green>20s</green></gray>",
-                "<gray>Fires a 5-arrow explosive spread shot instantaneously.</gray>",
+                "<yellow><bold>Ultimate Ability:</bold></yellow> <gold>Tranquilizer Shot</gold>",
+                "<gray>Req: Strength <red>5</red> | Charges: <gold>8 hits</gold> | Cooldown: <green>20s</green></gray>",
+                "<gray>Sneak + Right Click primes shot that freezes target position & rotation for <gold>3s</gold>.</gray>",
                 "",
                 "<dark_gray>Status: {status}</dark_gray>"
             )
@@ -129,12 +129,12 @@ public class WeaponsGuiConfig implements VersionedConfig {
             0,
             "<red><bold>⚔️ SWORD OF ARES</bold></red>",
             List.of(
-                "<yellow><bold>Passive Ability:</bold></yellow> <white>Sweeping Blade</white>",
-                "<gray>Sweeps deal <red>50%</red> collateral damage in a 3-block cone.</gray>",
+                "<yellow><bold>Passive Ability:</bold></yellow> <white>Auto-Crit Combo</white>",
+                "<gray>Every <gold>3 hits</gold> within 3s triggers guaranteed <red>1.5x Auto-Crit</red> damage.</gray>",
                 "",
-                "<yellow><bold>Ultimate Ability:</bold></yellow> <gold>Blade Surge</gold>",
-                "<gray>Req: Strength <red>5</red> | Cooldown: <green>18s</green></gray>",
-                "<gray>Dashes forward dealing massive area slash damage.</gray>",
+                "<yellow><bold>Ultimate Ability:</bold></yellow> <gold>Dual Wielding (Berserker Stance)</gold>",
+                "<gray>Req: Strength <red>5</red> | Charges: <gold>5 hits</gold> | Cooldown: <green>18s</green></gray>",
+                "<gray>Clones sword into off-hand for <gold>10s</gold>, granting +100% attack speed & dual strikes.</gray>",
                 "",
                 "<dark_gray>Status: {status}</dark_gray>"
             )
@@ -147,11 +147,11 @@ public class WeaponsGuiConfig implements VersionedConfig {
             "<dark_red><bold>🪓 AXE OF HEPHAESTUS</bold></dark_red>",
             List.of(
                 "<yellow><bold>Passive Ability:</bold></yellow> <white>Seismic Stun</white>",
-                "<gray>Slam attacks stun & slow nearby targets for <gold>2s</gold>.</gray>",
+                "<gray>Every <gold>3 critical hits</gold> stuns target for <gold>2s</gold> (Slowness III + Weakness I).</gray>",
                 "",
                 "<yellow><bold>Ultimate Ability:</bold></yellow> <gold>Executioner's Mark</gold>",
-                "<gray>Req: Strength <red>5</red> | Cooldown: <green>25s</green></gray>",
-                "<gray>Marks enemy for 5s, storing damage & detonating for 150% total burst.</gray>",
+                "<gray>Req: Strength <red>5</red> | Charges: <gold>5 hits</gold> | Cooldown: <green>25s</green></gray>",
+                "<gray>Marks target for <gold>5s</gold>, storing 100% damage & detonating for <red>150% burst</red>.</gray>",
                 "",
                 "<dark_gray>Status: {status}</dark_gray>"
             )
