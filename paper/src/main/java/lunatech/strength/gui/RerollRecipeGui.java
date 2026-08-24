@@ -26,10 +26,15 @@ public final class RerollRecipeGui {
 
     public static void open(@NotNull Strength plugin, @NotNull Player player) {
         final RerollRecipeGuiHolder holder = new RerollRecipeGuiHolder();
+        final RerollRecipeSettings recipe = plugin.getConfigHandler().getConfig().rerollRecipe;
+        final String rawTitle = (recipe != null && recipe.guiTitle != null && !recipe.guiTitle.trim().isEmpty())
+            ? recipe.guiTitle
+            : "<light_purple><bold>Recipe: Weapon Reroll Book</bold></light_purple>";
+
         final Inventory inv = Bukkit.createInventory(
             holder,
             InventoryType.WORKBENCH,
-            MiniMessage.miniMessage().deserialize("<dark_purple><bold>Recipe: Weapon Reroll Book</bold></dark_purple>").decoration(TextDecoration.ITALIC, false)
+            MiniMessage.miniMessage().deserialize(rawTitle).decoration(TextDecoration.ITALIC, false)
         );
         holder.setInventory(inv);
 

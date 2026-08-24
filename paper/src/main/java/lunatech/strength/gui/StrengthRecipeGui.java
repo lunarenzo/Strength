@@ -26,10 +26,15 @@ public final class StrengthRecipeGui {
 
     public static void open(@NotNull Strength plugin, @NotNull Player player) {
         final StrengthRecipeGuiHolder holder = new StrengthRecipeGuiHolder();
+        final RecipeSettings recipe = plugin.getConfigHandler().getConfig().recipe;
+        final String rawTitle = (recipe != null && recipe.guiTitle != null && !recipe.guiTitle.trim().isEmpty())
+            ? recipe.guiTitle
+            : "<dark_purple><bold>Recipe: Strength Shard</bold></dark_purple>";
+
         final Inventory inv = Bukkit.createInventory(
             holder,
             InventoryType.WORKBENCH,
-            MiniMessage.miniMessage().deserialize("<dark_purple><bold>Recipe: Strength Shard</bold></dark_purple>").decoration(TextDecoration.ITALIC, false)
+            MiniMessage.miniMessage().deserialize(rawTitle).decoration(TextDecoration.ITALIC, false)
         );
         holder.setInventory(inv);
 
