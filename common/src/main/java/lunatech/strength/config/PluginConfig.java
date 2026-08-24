@@ -109,6 +109,9 @@ public class PluginConfig implements VersionedConfig {
         @Comment("Should crafting the physical strength item be enabled?")
         public boolean enabled = true;
 
+        @Comment("Virtual workbench GUI title showing the crafting recipe for Strength item (MiniMessage format)")
+        public String guiTitle = "<dark_purple><bold>Recipe: Strength Shard</dark_purple>";
+
         @Comment("Amount of strength stored in the crafted item")
         public int resultStrengthAmount = 1;
 
@@ -154,6 +157,9 @@ public class PluginConfig implements VersionedConfig {
     public static class RerollRecipeSettings {
         @Comment("Should crafting the weapon reroll item be enabled?")
         public boolean enabled = true;
+
+        @Comment("Virtual workbench GUI title showing the crafting recipe for Weapon Reroll Book (MiniMessage format)")
+        public String guiTitle = "<light_purple><bold>Recipe: Weapon Reroll Book</light_purple>";
 
         @Comment("Crafting grid shape (3 lines of 3 characters each)")
         public List<String> shape = List.of(
