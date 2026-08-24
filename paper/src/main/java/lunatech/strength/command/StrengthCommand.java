@@ -7,7 +7,9 @@ import dev.jorel.commandapi.arguments.IntegerArgument;
 import dev.jorel.commandapi.arguments.StringArgument;
 import dev.jorel.commandapi.executors.CommandArguments;
 import lunatech.strength.AbstractStrength;
+import lunatech.strength.Strength;
 import lunatech.strength.config.PluginConfig;
+import lunatech.strength.gui.WeaponsGui;
 import lunatech.strength.service.StrengthService;
 import io.github.milkdrinkers.colorparser.paper.ColorParser;
 import org.bukkit.command.CommandSender;
@@ -38,6 +40,10 @@ final class StrengthCommand extends Command {
             .withHelp("Base strength command.", "Base strength command.")
             .withPermission(BASE_PERM)
             .withSubcommands(
+                new CommandAPICommand("weapons")
+                    .withHelp("Open the Strength Weapons GUI.", "Open the Strength Weapons GUI.")
+                    .withPermission(BASE_PERM)
+                    .executesPlayer(this::executorWeapons),
                 new CommandAPICommand("info")
                     .withHelp("Check your current strength and assigned weapon.", "Check your current strength and assigned weapon.")
                     .withPermission(BASE_PERM)
@@ -102,6 +108,12 @@ final class StrengthCommand extends Command {
                     .executes(this::executorReload)
             )
             .executes(this::executorStrength);
+    }
+
+    private void executorWeapons(Player player, CommandArguments args) {
+        if (plugin instanceof Strength paperPlugin) {
+            WeaponsGui.open(paperPlugin, player);
+        }
     }
 
     private void executorStrength(CommandSender sender, CommandArguments args) {

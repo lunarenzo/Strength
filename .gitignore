@@ -7,6 +7,8 @@
 *~
 run/
 resourcepack/
+.agents/
+graphify-out/
 
 *.bak
 

@@ -22,6 +22,7 @@ public class ConfigHandler implements Reloadable {
     private CrossbowConfig crossbowCfg;
     private SwordConfig swordCfg;
     private AxeConfig axeCfg;
+    private WeaponsGuiConfig weaponsGuiCfg;
 
     /**
      * Instantiates a new Config handler.
@@ -99,6 +100,23 @@ public class ConfigHandler implements Reloadable {
             .withPath(weaponsDir.resolve("axe.yml"))
             .withHeader("Axe Weapon Configuration")
             .build(AxeConfig.class);
+
+        // 8. Load Weapons GUI configuration
+        weaponsGuiCfg = new ConfigLoader()
+            .withLogger(logger)
+            .withDirectory()
+            .withPath(configDir.resolve("weapons-gui.yml"))
+            .withHeader("StrengthSMP Weapons GUI Configuration")
+            .build(WeaponsGuiConfig.class);
+    }
+
+    /**
+     * Gets weapons GUI configuration.
+     *
+     * @return the weapons gui config
+     */
+    public WeaponsGuiConfig getWeaponsGuiConfig() {
+        return weaponsGuiCfg;
     }
 
     /**
