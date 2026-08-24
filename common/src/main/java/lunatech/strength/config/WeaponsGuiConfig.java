@@ -49,6 +49,20 @@ public class WeaponsGuiConfig implements VersionedConfig {
         )
     );
 
+    @Comment("Strength Item display settings in the Weapons GUI")
+    public GuiSlotItemConfig strengthItem = new GuiSlotItemConfig(
+        20,
+        "NAUTILUS_SHELL",
+        12345,
+        "<gold><bold>⚡ STRENGTH SHARD</bold></gold>",
+        List.of(
+            "<gray>Physical shard containing player strength.</gray>",
+            "<gray>Right-click in hand to consume & gain strength.</gray>",
+            "",
+            "<yellow>Click to view crafting recipe!</yellow>"
+        )
+    );
+
     @Comment("Reroll Book display item settings in the Weapons GUI")
     public GuiSlotItemConfig rerollItem = new GuiSlotItemConfig(
         22,

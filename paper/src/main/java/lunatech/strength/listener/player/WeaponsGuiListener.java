@@ -28,10 +28,13 @@ public final class WeaponsGuiListener implements Listener {
             event.setCancelled(true);
 
             final WeaponsGuiConfig config = plugin.getConfigHandler().getWeaponsGuiConfig();
-            if (config != null && config.rerollItem != null) {
-                if (event.getSlot() == config.rerollItem.slot && event.getWhoClicked() instanceof Player player) {
+            if (config != null && event.getWhoClicked() instanceof Player player) {
+                if (config.rerollItem != null && event.getSlot() == config.rerollItem.slot) {
                     player.closeInventory();
                     RerollRecipeGui.open(plugin, player);
+                } else if (config.strengthItem != null && event.getSlot() == config.strengthItem.slot) {
+                    player.closeInventory();
+                    lunatech.strength.gui.StrengthRecipeGui.open(plugin, player);
                 }
             }
         }

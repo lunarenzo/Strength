@@ -1,7 +1,7 @@
 package lunatech.strength.gui;
 
 import lunatech.strength.Strength;
-import lunatech.strength.config.PluginConfig.RerollRecipeSettings;
+import lunatech.strength.config.PluginConfig.RecipeSettings;
 import lunatech.strength.utility.ItemResolver;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -16,29 +16,31 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Manager responsible for opening the immutable Virtual Workbench Crafting GUI showing the Reroll Book recipe.
+ * Manager responsible for opening the immutable Virtual Workbench Crafting GUI showing the Strength Item recipe.
  */
-public final class RerollRecipeGui {
+public final class StrengthRecipeGui {
 
-    private RerollRecipeGui() {
+    private StrengthRecipeGui() {
         throw new UnsupportedOperationException("Utility class");
     }
 
     public static void open(@NotNull Strength plugin, @NotNull Player player) {
-        final RerollRecipeGuiHolder holder = new RerollRecipeGuiHolder();
+        final StrengthRecipeGuiHolder holder = new StrengthRecipeGuiHolder();
         final Inventory inv = Bukkit.createInventory(
             holder,
             InventoryType.WORKBENCH,
-            MiniMessage.miniMessage().deserialize("<dark_purple><bold>Recipe: Weapon Reroll Book</bold></dark_purple>").decoration(TextDecoration.ITALIC, false)
+            MiniMessage.miniMessage().deserialize("<dark_purple><bold>Recipe: Strength Shard</bold></dark_purple>").decoration(TextDecoration.ITALIC, false)
         );
         holder.setInventory(inv);
 
-        // 1. Result slot (slot 0) = Reroll Book output item
-        final ItemStack rerollResult = plugin.getStrengthService().createRerollItem();
-        inv.setItem(0, rerollResult);
+        final RecipeSettings recipe = plugin.getConfigHandler().getConfig().recipe;
+        final int amount = recipe != null ? recipe.resultStrengthAmount : 1;
+
+        // 1. Result slot (slot 0) = Strength Item output item
+        final ItemStack strengthResult = plugin.getStrengthService().createStrengthItem(amount);
+        inv.setItem(0, strengthResult);
 
         // 2. Crafting Grid slots (slots 1 to 9 in 3x3 matrix)
-        final RerollRecipeSettings recipe = plugin.getConfigHandler().getConfig().rerollRecipe;
         if (recipe != null) {
             final List<String> shape = recipe.shape;
             final Map<String, String> ingredients = recipe.ingredients;
