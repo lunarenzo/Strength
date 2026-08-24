@@ -130,6 +130,16 @@ public final class BowAbilityListener implements Listener {
                             }, 10L);
                         } catch (Exception ignored) {}
                     } else {
+                        final float angle = (player.getActiveItemUsedTime() % 360) * 12.0f;
+                        final Quaternionf rot = new Quaternionf().rotateZ((float) Math.toRadians(angle));
+                        spiral.setInterpolationDuration(1);
+                        spiral.setInterpolationDelay(0);
+                        spiral.setTransformation(new Transformation(
+                            new Vector3f(0),
+                            rot,
+                            new Vector3f((float) settings.ultimateWidth * 2.0f, (float) settings.ultimateWidth * 2.0f, 0.01f),
+                            new Quaternionf()
+                        ));
                         spiral.teleport(spiralLoc);
                     }
 
