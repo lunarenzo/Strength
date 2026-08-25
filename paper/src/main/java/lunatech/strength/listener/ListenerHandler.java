@@ -43,6 +43,7 @@ public class ListenerHandler implements Reloadable {
         listeners.add(new lunatech.strength.listener.player.SwordAbilityListener(this.plugin, this.plugin.getStrengthService()));
         listeners.add(new lunatech.strength.listener.player.AxeAbilityListener(this.plugin, this.plugin.getStrengthService()));
         listeners.add(new lunatech.strength.listener.player.MaceListener(this.plugin));
+        listeners.add(new lunatech.strength.listener.player.PotionListener(this.plugin));
 
         if (plugin.getServer().getPluginManager().isPluginEnabled("AuthMe")) {
             listeners.add(new lunatech.strength.listener.plugin.AuthMeListener(this.plugin));
