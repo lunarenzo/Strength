@@ -144,9 +144,12 @@ public final class PotionListener implements Listener {
             return;
         }
 
-        final ItemStack ingredient = event.getIngredient();
         if (event.getBlock().getState() instanceof BrewingStand stand) {
             final var inv = stand.getInventory();
+            final ItemStack ingredient = inv.getIngredient();
+            if (ingredient == null || ingredient.getType() == Material.AIR) {
+                return;
+            }
             for (int i = 0; i < 3; i++) {
                 final ItemStack potion = inv.getItem(i);
                 if (isBrewingRestricted(ingredient, potion, config)) {
@@ -164,8 +167,11 @@ public final class PotionListener implements Listener {
             return;
         }
 
-        final ItemStack ingredient = event.getIngredient();
         final var inv = event.getContents();
+        final ItemStack ingredient = inv.getIngredient();
+        if (ingredient == null || ingredient.getType() == Material.AIR) {
+            return;
+        }
         for (int i = 0; i < 3; i++) {
             final ItemStack potion = inv.getItem(i);
             if (isBrewingRestricted(ingredient, potion, config)) {
