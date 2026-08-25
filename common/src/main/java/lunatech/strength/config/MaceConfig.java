@@ -79,8 +79,33 @@ public class MaceConfig implements VersionedConfig {
         @Comment("Mode engine for enchantment restrictions: WHITELIST or BLACKLIST.")
         public String mode = "BLACKLIST";
 
-        @Comment("List of enchantment keys (e.g. 'minecraft:density', 'minecraft:breach', 'minecraft:wind_burst', 'minecraft:mending', etc.)")
-        public List<String> enchantments = List.of();
+        @Comment("""
+            ================================================================================
+             MACE ENCHANTMENT RESTRICTION FORMAT GUIDE
+            ================================================================================
+             Configure list of enchantment names or namespaced keys to blacklist or whitelist.
+             Supported Format Examples:
+               - 'minecraft:density'
+               - 'minecraft:breach'
+               - 'minecraft:wind_burst'
+               - 'minecraft:mending'
+               - 'minecraft:unbreaking'
+               - 'minecraft:sharpness'
+               - 'minecraft:smite'
+               - 'minecraft:bane_of_arthropods'
+               - 'minecraft:fire_aspect'
+               - 'minecraft:looting'
+               - 'minecraft:knockback'
+               - 'minecraft:curse_of_vanishing'
+               - 'minecraft:curse_of_binding'
+             You may enter either full namespaced keys (e.g. 'minecraft:density') or short names (e.g. 'density').
+            ================================================================================
+            """)
+        public List<String> enchantments = List.of(
+            "minecraft:density",
+            "minecraft:breach",
+            "minecraft:wind_burst"
+        );
     }
 
     @ConfigSerializable
@@ -94,11 +119,19 @@ public class MaceConfig implements VersionedConfig {
         @Comment("Mode engine for container restrictions: BLACKLIST or WHITELIST.")
         public String mode = "BLACKLIST";
 
-        @Comment("List of container materials or inventory types (e.g. 'CHEST', 'TRAPPED_CHEST', 'ENDER_CHEST', 'SHULKER_BOX', 'BARREL', 'FURNACE', 'BLAST_FURNACE', 'SMOKER', 'HOPPER', 'DROPPER', 'DISPENSER', 'BREWING_STAND', 'BUNDLE', etc.)")
+        @Comment("""
+            Comprehensive default blacklist of all tile entities, storage items, container blocks, and transport storage entities.
+            Covers: Chests, Trapped Chests, Ender Chests, Shulker Boxes (all 16 colors), Barrels, Furnaces, Blast Furnaces,
+            Smokers, Hoppers, Droppers, Dispensers, Brewing Stands, Beacons, Crafters, Chiseled Bookshelves, Decorated Pots,
+            Jukeboxes, Lecterns, Anvils, Bundles (all 16 colors), Storage Minecarts, Storage Boats, Rafts, Grindstones, Looms,
+            Cartography Tables, Smithing Tables, Stonecutters, Workbenches, Composters, and Campfires.
+            """)
         public List<String> containers = List.of(
-            "CHEST", "TRAPPED_CHEST", "ENDER_CHEST", "SHULKER_BOX", "BARREL",
+            "CHEST", "TRAPPED_CHEST", "ENDER_CHEST", "SHULKER", "BARREL",
             "FURNACE", "BLAST_FURNACE", "SMOKER", "HOPPER", "DROPPER", "DISPENSER",
-            "BREWING_STAND", "BUNDLE"
+            "BREWING", "BEACON", "CRAFTER", "BOOKSHELF", "DECORATED_POT", "JUKEBOX",
+            "LECTERN", "ANVIL", "BUNDLE", "MINECART", "BOAT", "RAFT", "GRINDSTONE",
+            "LOOM", "CARTOGRAPHY", "SMITHING", "STONECUTTER", "WORKBENCH", "COMPOSTER", "CAMPFIRE"
         );
     }
 }
