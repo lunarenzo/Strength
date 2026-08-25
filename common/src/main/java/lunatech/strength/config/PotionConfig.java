@@ -44,6 +44,9 @@ public class PotionConfig implements VersionedConfig {
     @Comment("Should drinking/consuming blacklisted potion items be completely blocked?")
     public boolean blockConsumption = true;
 
+    @Comment("Should brewing blacklisted potions or potion effects in brewing stands be completely blocked?")
+    public boolean blockBrewing = true;
+
     @Comment("""
         ================================================================================
          POTION & POTION EFFECT RESTRICTION FORMAT GUIDE
