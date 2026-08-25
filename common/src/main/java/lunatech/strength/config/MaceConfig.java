@@ -73,8 +73,11 @@ public class MaceConfig implements VersionedConfig {
         @Comment("Enable or disable mace enchanting submodule.")
         public boolean enabled = true;
 
-        @Comment("Allow maces to be enchanted at all? If false, putting maces in enchanting tables/anvils or enchanting them is completely disabled.")
+        @Comment("Allow maces to be enchanted at all? If false, enchanting maces in enchanting tables or applying enchantments via anvils is disabled.")
         public boolean allowEnchanting = false;
+
+        @Comment("Allow renaming maces in an anvil even when allowEnchanting is set to false?")
+        public boolean allowRenaming = true;
 
         @Comment("Mode engine for enchantment restrictions: WHITELIST or BLACKLIST.")
         public String mode = "BLACKLIST";

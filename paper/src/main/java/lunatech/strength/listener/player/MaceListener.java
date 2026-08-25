@@ -316,8 +316,23 @@ public final class MaceListener implements Listener {
             return;
         }
 
-        if (!config.enchant.allowEnchanting) {
-            event.setResult(null);
+        final boolean allowEnchanting = config.enchant.allowEnchanting;
+        final boolean allowRenaming = config.enchant.allowRenaming;
+
+        if (!allowEnchanting) {
+            final boolean secondHasEnchants = second != null && second.getType() != Material.AIR
+                    && (!second.getEnchantments().isEmpty() || second.getType() == Material.ENCHANTED_BOOK);
+
+            final boolean isAddingOrUpgradingEnchants = hasNewOrUpgradedEnchantments(first, result) || secondHasEnchants;
+
+            if (isAddingOrUpgradingEnchants) {
+                event.setResult(null);
+                return;
+            }
+
+            if (!allowRenaming) {
+                event.setResult(null);
+            }
             return;
         }
 
@@ -355,9 +370,19 @@ public final class MaceListener implements Listener {
         final Inventory topInv = event.getView().getTopInventory();
         final InventoryType topType = topInv.getType();
 
-        // Anvil & Enchanting Table slot placement guard when enchanting is forbidden
-        if (config.enchant.enabled && !config.enchant.allowEnchanting) {
-            if (topType == InventoryType.ANVIL || topType == InventoryType.ENCHANTING) {
+        // Enchanting Table & Anvil slot placement guards
+        if (config.enchant.enabled) {
+            if (topType == InventoryType.ENCHANTING && !config.enchant.allowEnchanting) {
+                final boolean isTopSlot = event.getClickedInventory() == topInv;
+                final boolean isShiftClickingMace = event.isShiftClick() && currentItem != null && currentItem.getType() == Material.MACE;
+                final boolean isPlacingMaceInTop = isTopSlot && ((cursorItem != null && cursorItem.getType() == Material.MACE) || (currentItem != null && currentItem.getType() == Material.MACE));
+
+                if (isShiftClickingMace || isPlacingMaceInTop) {
+                    event.setCancelled(true);
+                    MessageUtil.send(player, getMessages().maceEnchantForbiddenMessage);
+                    return;
+                }
+            } else if (topType == InventoryType.ANVIL && !config.enchant.allowEnchanting && !config.enchant.allowRenaming) {
                 final boolean isTopSlot = event.getClickedInventory() == topInv;
                 final boolean isShiftClickingMace = event.isShiftClick() && currentItem != null && currentItem.getType() == Material.MACE;
                 final boolean isPlacingMaceInTop = isTopSlot && ((cursorItem != null && cursorItem.getType() == Material.MACE) || (currentItem != null && currentItem.getType() == Material.MACE));
@@ -521,6 +546,25 @@ public final class MaceListener implements Listener {
                 return true;
             }
             if (!isBlacklist && !matched) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean hasNewOrUpgradedEnchantments(@Nullable ItemStack original, @Nullable ItemStack result) {
+        if (result == null) {
+            return false;
+        }
+        final Map<Enchantment, Integer> originalEnchants = (original != null) ? original.getEnchantments() : Map.of();
+        final Map<Enchantment, Integer> resultEnchants = result.getEnchantments();
+
+        for (Map.Entry<Enchantment, Integer> entry : resultEnchants.entrySet()) {
+            final Enchantment enchant = entry.getKey();
+            final int resultLevel = entry.getValue();
+            final int originalLevel = originalEnchants.getOrDefault(enchant, 0);
+
+            if (resultLevel > originalLevel) {
                 return true;
             }
         }
