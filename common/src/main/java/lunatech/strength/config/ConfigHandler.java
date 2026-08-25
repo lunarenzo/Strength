@@ -23,6 +23,7 @@ public class ConfigHandler implements Reloadable {
     private SwordConfig swordCfg;
     private AxeConfig axeCfg;
     private MaceConfig maceCfg;
+    private PotionConfig potionCfg;
     private WeaponsGuiConfig weaponsGuiCfg;
 
     /**
@@ -110,7 +111,15 @@ public class ConfigHandler implements Reloadable {
             .withHeader("Mace Weapon & Feature Configuration")
             .build(MaceConfig.class);
 
-        // 9. Load Weapons GUI configuration
+        // 9. Load decoupled Potion Restriction configuration
+        potionCfg = new ConfigLoader()
+            .withLogger(logger)
+            .withDirectory()
+            .withPath(configDir.resolve("potion-restrictions.yml"))
+            .withHeader("Potion & Potion Effect Restriction Configuration")
+            .build(PotionConfig.class);
+
+        // 10. Load Weapons GUI configuration
         weaponsGuiCfg = new ConfigLoader()
             .withLogger(logger)
             .withDirectory()
@@ -198,5 +207,14 @@ public class ConfigHandler implements Reloadable {
      */
     public MaceConfig getMaceConfig() {
         return maceCfg;
+    }
+
+    /**
+     * Gets potion restriction configuration.
+     *
+     * @return the potion config
+     */
+    public PotionConfig getPotionConfig() {
+        return potionCfg;
     }
 }
