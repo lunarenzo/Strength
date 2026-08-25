@@ -153,7 +153,7 @@ public final class PotionListener implements Listener {
             for (int i = 0; i < 3; i++) {
                 final ItemStack potion = inv.getItem(i);
                 if (isBrewingRestricted(ingredient, potion, config)) {
-                    event.setCancelled(true);
+                    event.setBrewingTime(0);
                     return;
                 }
             }
