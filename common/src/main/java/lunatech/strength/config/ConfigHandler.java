@@ -22,6 +22,7 @@ public class ConfigHandler implements Reloadable {
     private CrossbowConfig crossbowCfg;
     private SwordConfig swordCfg;
     private AxeConfig axeCfg;
+    private MaceConfig maceCfg;
     private WeaponsGuiConfig weaponsGuiCfg;
 
     /**
@@ -101,7 +102,15 @@ public class ConfigHandler implements Reloadable {
             .withHeader("Axe Weapon Configuration")
             .build(AxeConfig.class);
 
-        // 8. Load Weapons GUI configuration
+        // 8. Load decoupled Mace configuration
+        maceCfg = new ConfigLoader()
+            .withLogger(logger)
+            .withDirectory()
+            .withPath(weaponsDir.resolve("mace.yml"))
+            .withHeader("Mace Weapon & Feature Configuration")
+            .build(MaceConfig.class);
+
+        // 9. Load Weapons GUI configuration
         weaponsGuiCfg = new ConfigLoader()
             .withLogger(logger)
             .withDirectory()
@@ -180,5 +189,14 @@ public class ConfigHandler implements Reloadable {
      */
     public AxeConfig getAxeConfig() {
         return axeCfg;
+    }
+
+    /**
+     * Gets mace weapon configuration.
+     *
+     * @return the mace config
+     */
+    public MaceConfig getMaceConfig() {
+        return maceCfg;
     }
 }

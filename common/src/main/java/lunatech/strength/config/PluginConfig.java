@@ -460,5 +460,20 @@ public class PluginConfig implements VersionedConfig {
 
         @Comment("Message sent when attempting to reroll weapons in a WorldGuard protected region")
         public String cannotRerollInRegionMessage = "<red>Rerolling weapons is disabled in this region!</red>";
+
+        @Comment("Message sent when crafting a mace is blocked because server mace limit has been reached")
+        public String maceLimitCraftBlockedMessage = "<red>Crafting a Mace is disabled because the server limit (<limit>) has been reached!</red>";
+
+        @Comment("Message sent when player attempts to use an illegal mace or maces are disabled")
+        public String maceDisabledMessage = "<red>Maces are currently disabled on this server!</red>";
+
+        @Comment("Message sent when mace smash attack is on cooldown")
+        public String maceCooldownMessage = "<red>Mace Smash Attack is on cooldown for another <seconds>s!</red>";
+
+        @Comment("Message sent when mace enchanting is forbidden")
+        public String maceEnchantForbiddenMessage = "<red>Enchanting Maces is forbidden on this server!</red>";
+
+        @Comment("Message sent when placing mace in a container is forbidden")
+        public String maceContainerForbiddenMessage = "<red>Storing Maces inside containers is forbidden on this server!</red>";
     }
 }
