@@ -485,8 +485,22 @@ public final class MaceListener implements Listener {
         return material.name().contains("BUNDLE");
     }
 
+    private boolean isWorkstationInventory(@NotNull InventoryType type) {
+        return type == InventoryType.PLAYER
+                || type == InventoryType.CRAFTING
+                || type == InventoryType.CREATIVE
+                || type == InventoryType.ANVIL
+                || type == InventoryType.ENCHANTING
+                || type == InventoryType.WORKBENCH
+                || type == InventoryType.SMITHING
+                || type == InventoryType.GRINDSTONE
+                || type == InventoryType.CARTOGRAPHY
+                || type == InventoryType.LOOM
+                || type == InventoryType.STONECUTTER;
+    }
+
     private boolean isContainerRestricted(@NotNull Inventory inventory, @NotNull MaceConfig.ContainerConfig config) {
-        if (inventory.getType() == InventoryType.PLAYER || inventory.getType() == InventoryType.CRAFTING || inventory.getType() == InventoryType.CREATIVE) {
+        if (isWorkstationInventory(inventory.getType())) {
             return false;
         }
 

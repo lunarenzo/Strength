@@ -126,15 +126,14 @@ public class MaceConfig implements VersionedConfig {
             Comprehensive default blacklist of all tile entities, storage items, container blocks, and transport storage entities.
             Covers: Chests, Trapped Chests, Ender Chests, Shulker Boxes (all 16 colors), Barrels, Furnaces, Blast Furnaces,
             Smokers, Hoppers, Droppers, Dispensers, Brewing Stands, Beacons, Crafters, Chiseled Bookshelves, Decorated Pots,
-            Jukeboxes, Lecterns, Anvils, Bundles (all 16 colors), Storage Minecarts, Storage Boats, Rafts, Grindstones, Looms,
-            Cartography Tables, Smithing Tables, Stonecutters, Workbenches, Composters, and Campfires.
+            Jukeboxes, Lecterns, Bundles (all 16 colors), Storage Minecarts, Storage Boats, Rafts, Composters, and Campfires.
+            Note: Anvils and Enchanting Tables are governed separately by the 'enchant' submodule.
             """)
         public List<String> containers = List.of(
             "CHEST", "TRAPPED_CHEST", "ENDER_CHEST", "SHULKER", "BARREL",
             "FURNACE", "BLAST_FURNACE", "SMOKER", "HOPPER", "DROPPER", "DISPENSER",
             "BREWING", "BEACON", "CRAFTER", "BOOKSHELF", "DECORATED_POT", "JUKEBOX",
-            "LECTERN", "ANVIL", "BUNDLE", "MINECART", "BOAT", "RAFT", "GRINDSTONE",
-            "LOOM", "CARTOGRAPHY", "SMITHING", "STONECUTTER", "WORKBENCH", "COMPOSTER", "CAMPFIRE"
+            "LECTERN", "BUNDLE", "MINECART", "BOAT", "RAFT", "COMPOSTER", "CAMPFIRE"
         );
     }
 }
