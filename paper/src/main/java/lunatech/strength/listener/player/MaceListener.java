@@ -466,12 +466,14 @@ public final class MaceListener implements Listener {
 
         if (!config.allowStorage) {
             final String invTypeName = inventory.getType().name().toUpperCase();
-            String blockTypeName = "";
+            String blockOrEntityName = "";
             if (inventory.getHolder() instanceof BlockState blockState) {
-                blockTypeName = blockState.getType().name().toUpperCase();
+                blockOrEntityName = blockState.getType().name().toUpperCase();
+            } else if (inventory.getHolder() instanceof org.bukkit.entity.Entity entity) {
+                blockOrEntityName = entity.getType().name().toUpperCase();
             }
 
-            final boolean matchesList = matchesContainerList(invTypeName, config.containers) || matchesContainerList(blockTypeName, config.containers);
+            final boolean matchesList = matchesContainerList(invTypeName, config.containers) || matchesContainerList(blockOrEntityName, config.containers);
             final boolean isBlacklist = "BLACKLIST".equalsIgnoreCase(config.mode);
 
             if (isBlacklist) {
