@@ -479,6 +479,9 @@ public class PluginConfig implements VersionedConfig {
         @Comment("Message sent when consuming a blacklisted potion is blocked")
         public String potionBlockedMessage = "<red>Consuming Strength potions is disabled on this server!</red>";
 
+        @Comment("Message sent when brewing a blacklisted potion is blocked")
+        public String potionBrewingBlockedMessage = "<red>Brewing Strength potions is forbidden on this server!</red>";
+
         @Comment("Message sent when a blacklisted potion effect is blocked or removed")
         public String potionEffectRemovedMessage = "<red>The <effect> potion effect is restricted on this server!</red>";
     }
