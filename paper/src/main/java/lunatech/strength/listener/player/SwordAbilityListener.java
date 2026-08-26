@@ -144,8 +144,10 @@ public final class SwordAbilityListener implements Listener {
         }
 
         // WorldGuard region check for weapon ability
-        if (!lunatech.strength.integration.WorldGuardHook.isAbilityAllowed(plugin, damager, victim.getLocation())) {
-            return;
+        if (plugin.getServer().getPluginManager().isPluginEnabled("WorldGuard")) {
+            if (!lunatech.strength.integration.WorldGuardHook.isAbilityAllowed(plugin, damager, victim.getLocation())) {
+                return;
+            }
         }
 
         final double modifiedDmg = processSwordHitCombo(damager, victim, event.getDamage());

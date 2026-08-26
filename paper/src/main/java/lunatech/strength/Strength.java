@@ -42,9 +42,11 @@ public class Strength extends AbstractStrength {
 
         configHandler = new ConfigHandler(this);
 
-        try {
-            lunatech.strength.integration.WorldGuardHook.registerFlags();
-        } catch (Throwable ignored) {
+        if (getServer().getPluginManager().isPluginEnabled("WorldGuard")) {
+            try {
+                lunatech.strength.integration.WorldGuardHook.registerFlags();
+            } catch (Throwable ignored) {
+            }
         }
 
         // Initialize Strength Service

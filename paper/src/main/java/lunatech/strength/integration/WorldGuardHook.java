@@ -45,12 +45,14 @@ public final class WorldGuardHook {
             StateFlag flag = new StateFlag(name, defaultValue);
             registry.register(flag);
             return flag;
-        } catch (FlagConflictException e) {
-            com.sk89q.worldguard.protection.flags.Flag<?> existing = registry.get(name);
-            if (existing instanceof StateFlag stateFlag) {
-                return stateFlag;
+        } catch (Throwable e) {
+            try {
+                com.sk89q.worldguard.protection.flags.Flag<?> existing = registry.get(name);
+                if (existing instanceof StateFlag stateFlag) {
+                    return stateFlag;
+                }
+            } catch (Throwable ignored) {
             }
-        } catch (Throwable ignored) {
         }
         return null;
     }

@@ -252,8 +252,10 @@ public final class AxeAbilityListener implements Listener {
         }
 
         // WorldGuard region check for weapon ability
-        if (!lunatech.strength.integration.WorldGuardHook.isAbilityAllowed(plugin, damager, victim.getLocation())) {
-            return;
+        if (plugin.getServer().getPluginManager().isPluginEnabled("WorldGuard")) {
+            if (!lunatech.strength.integration.WorldGuardHook.isAbilityAllowed(plugin, damager, victim.getLocation())) {
+                return;
+            }
         }
 
         if (!lunatech.strength.hook.betterteams.BetterTeamsHook.canDamage(damager, victim)) {

@@ -71,9 +71,11 @@ public final class RerollConsumeListener implements Listener {
         }
 
         // Check WorldGuard region restrictions
-        if (!lunatech.strength.integration.WorldGuardHook.isRerollAllowed(plugin, player, player.getLocation())) {
-            MessageUtil.send(player, plugin.getConfigHandler().getConfig().messages.cannotRerollInRegionMessage);
-            return;
+        if (plugin.getServer().getPluginManager().isPluginEnabled("WorldGuard")) {
+            if (!lunatech.strength.integration.WorldGuardHook.isRerollAllowed(plugin, player, player.getLocation())) {
+                MessageUtil.send(player, plugin.getConfigHandler().getConfig().messages.cannotRerollInRegionMessage);
+                return;
+            }
         }
 
         // If confirmation dialog is enabled in config, pop up dialog GUI for confirmation

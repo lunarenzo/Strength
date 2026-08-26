@@ -73,8 +73,10 @@ public final class CrossbowAbilityListener implements Listener {
         }
 
         // WorldGuard region check for weapon ability
-        if (!lunatech.strength.integration.WorldGuardHook.isAbilityAllowed(plugin, player, player.getLocation())) {
-            return;
+        if (plugin.getServer().getPluginManager().isPluginEnabled("WorldGuard")) {
+            if (!lunatech.strength.integration.WorldGuardHook.isAbilityAllowed(plugin, player, player.getLocation())) {
+                return;
+            }
         }
 
         final UUID uuid = player.getUniqueId();

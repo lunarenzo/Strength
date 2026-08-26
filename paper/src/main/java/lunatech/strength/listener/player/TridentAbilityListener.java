@@ -54,9 +54,11 @@ public final class TridentAbilityListener implements Listener {
         }
 
         // WorldGuard region check for weapon ability
-        if (!lunatech.strength.integration.WorldGuardHook.isAbilityAllowed(plugin, damager, damagee.getLocation())) {
-            lunatech.strength.utility.MessageUtil.send(damager, plugin.getConfigHandler().getConfig().messages.cannotUseAbilityInRegionMessage);
-            return;
+        if (plugin.getServer().getPluginManager().isPluginEnabled("WorldGuard")) {
+            if (!lunatech.strength.integration.WorldGuardHook.isAbilityAllowed(plugin, damager, damagee.getLocation())) {
+                lunatech.strength.utility.MessageUtil.send(damager, plugin.getConfigHandler().getConfig().messages.cannotUseAbilityInRegionMessage);
+                return;
+            }
         }
 
         if (!lunatech.strength.hook.betterteams.BetterTeamsHook.canDamage(damager, damagee)) {
