@@ -46,11 +46,21 @@ public class ListenerHandler implements Reloadable {
         listeners.add(new lunatech.strength.listener.player.PotionListener(this.plugin));
 
         if (plugin.getServer().getPluginManager().isPluginEnabled("AuthMe")) {
-            listeners.add(new lunatech.strength.listener.plugin.AuthMeListener(this.plugin));
+            try {
+                final Class<?> clazz = Class.forName("lunatech.strength.listener.plugin.AuthMeListener");
+                final Listener listener = (Listener) clazz.getDeclaredConstructor(Strength.class).newInstance(this.plugin);
+                listeners.add(listener);
+            } catch (Throwable ignored) {
+            }
         }
 
         if (plugin.getServer().getPluginManager().isPluginEnabled("PvPManager")) {
-            listeners.add(new lunatech.strength.listener.plugin.PvPManagerListener(this.plugin));
+            try {
+                final Class<?> clazz = Class.forName("lunatech.strength.listener.plugin.PvPManagerListener");
+                final Listener listener = (Listener) clazz.getDeclaredConstructor(Strength.class).newInstance(this.plugin);
+                listeners.add(listener);
+            } catch (Throwable ignored) {
+            }
         }
 
         // Register listeners here

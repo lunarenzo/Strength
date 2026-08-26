@@ -57,16 +57,10 @@ public final class RerollConsumeListener implements Listener {
         final Player player = event.getPlayer();
 
         // Check if PvPManager is active and player is in combat
-        if (plugin.getConfigHandler().getConfig().pvpmanager.enabled && plugin.getConfigHandler().getConfig().pvpmanager.preventRerollInCombat) {
-            if (plugin.getServer().getPluginManager().isPluginEnabled("PvPManager")) {
-                try {
-                    final me.chancesd.pvpmanager.player.CombatPlayer pvpPlayer = me.chancesd.pvpmanager.PvPManager.getInstance().getPlayerManager().get(player);
-                    if (pvpPlayer != null && pvpPlayer.isInCombat()) {
-                        MessageUtil.send(player, plugin.getConfigHandler().getConfig().messages.cannotRerollInCombatMessage);
-                        return;
-                    }
-                } catch (Throwable ignored) {
-                }
+        if (plugin.getServer().getPluginManager().isPluginEnabled("PvPManager")) {
+            if (lunatech.strength.integration.PvPManagerHook.isInCombat(plugin, player)) {
+                MessageUtil.send(player, plugin.getConfigHandler().getConfig().messages.cannotRerollInCombatMessage);
+                return;
             }
         }
 
