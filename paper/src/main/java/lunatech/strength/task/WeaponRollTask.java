@@ -73,8 +73,11 @@ public final class WeaponRollTask {
             }
             final String weaponDisplay = getWeaponDisplayString(weaponKey);
 
-            final Component mainTitle = mm.deserialize(settings.rollStartTitle);
-            final Component subtitle = mm.deserialize(settings.rollSubtitle.replace("<weapon>", weaponDisplay));
+            final String rawTitle = getTitleText(false, currentStep, weaponDisplay);
+            final String rawSubtitle = getSubtitleText(false, currentStep, weaponDisplay);
+
+            final Component mainTitle = mm.deserialize(rawTitle);
+            final Component subtitle = mm.deserialize(rawSubtitle);
 
             // Calculate current step delay in ticks
             long currentDelay = calculateStepDelay(currentStep);
@@ -96,20 +99,35 @@ public final class WeaponRollTask {
             long nextDelay = calculateStepDelay(currentStep);
             Bukkit.getScheduler().runTaskLater(plugin, this::runNextFrame, Math.max(1L, nextDelay));
         } else {
-            // Final weapon assignment frame - uses selectedWeapon!
-            final String finalWeaponDisplay = getWeaponDisplayString(selectedWeapon);
-
+            // Final weapon assignment phase - uses selectedWeapon!
             strengthService.setAssignedWeapon(player, selectedWeapon);
 
-            final Component mainTitle = mm.deserialize(settings.assignedTitle.replace("<weapon>", finalWeaponDisplay));
-            final Component subtitle = mm.deserialize(settings.assignedSubtitle.replace("<weapon>", finalWeaponDisplay));
+            final List<String> titleFrames = settings.assignedTitleFrames;
+            final List<String> subtitleFrames = settings.assignedSubtitleFrames;
 
-            final Title title = Title.title(
-                mainTitle,
-                subtitle,
-                Title.Times.times(Duration.ofMillis(200), Duration.ofMillis(3000), Duration.ofMillis(500))
-            );
-            player.showTitle(title);
+            final boolean hasAnimatedAssigned = (titleFrames != null && titleFrames.size() > 1) 
+                    || (subtitleFrames != null && subtitleFrames.size() > 1);
+
+            final String finalWeaponDisplay = getWeaponDisplayString(selectedWeapon);
+
+            if (hasAnimatedAssigned) {
+                final int delayTicks = Math.max(1, settings.assignedAnimationFrameDelayTicks);
+                final int maxFrames = Math.max(1, 60 / delayTicks);
+                runAssignedTitleAnimation(0, maxFrames, finalWeaponDisplay);
+            } else {
+                final String rawTitle = getTitleText(true, 0, finalWeaponDisplay);
+                final String rawSubtitle = getSubtitleText(true, 0, finalWeaponDisplay);
+
+                final Component mainTitle = mm.deserialize(rawTitle);
+                final Component subtitle = mm.deserialize(rawSubtitle);
+
+                final Title title = Title.title(
+                    mainTitle,
+                    subtitle,
+                    Title.Times.times(Duration.ofMillis(200), Duration.ofMillis(3000), Duration.ofMillis(500))
+                );
+                player.showTitle(title);
+            }
 
             // Play completion sound (synced or delayed if configured)
             if (settings.completionSoundDelayTicks > 0) {
@@ -122,6 +140,71 @@ public final class WeaponRollTask {
                 playConfiguredSound(player, settings.completionSound, settings.completionSoundVolume, settings.completionSoundPitch);
             }
         }
+    }
+
+    private void runAssignedTitleAnimation(int frame, int maxFrames, String weaponDisplay) {
+        if (!player.isOnline() || frame >= maxFrames) {
+            return;
+        }
+
+        final MiniMessage mm = MiniMessage.miniMessage();
+        final String rawTitle = getTitleText(true, frame, weaponDisplay);
+        final String rawSubtitle = getSubtitleText(true, frame, weaponDisplay);
+
+        final Component mainTitle = mm.deserialize(rawTitle);
+        final Component subtitle = mm.deserialize(rawSubtitle);
+
+        final int delayTicks = Math.max(1, settings.assignedAnimationFrameDelayTicks);
+        final long stayMillis = Math.max(200L, delayTicks * 50L + 200L);
+
+        final Title title = Title.title(
+            mainTitle,
+            subtitle,
+            Title.Times.times(Duration.ofMillis(0), Duration.ofMillis(stayMillis), Duration.ofMillis(100))
+        );
+        player.showTitle(title);
+
+        Bukkit.getScheduler().runTaskLater(plugin, () -> runAssignedTitleAnimation(frame + 1, maxFrames, weaponDisplay), delayTicks);
+    }
+
+    private String getTitleText(boolean isAssigned, int frameIndex, String weaponDisplay) {
+        String template;
+        if (isAssigned) {
+            final List<String> frames = settings.assignedTitleFrames;
+            if (frames != null && !frames.isEmpty()) {
+                template = frames.get(frameIndex % frames.size());
+            } else {
+                template = settings.assignedTitle;
+            }
+        } else {
+            final List<String> frames = settings.rollStartTitleFrames;
+            if (frames != null && !frames.isEmpty()) {
+                template = frames.get(frameIndex % frames.size());
+            } else {
+                template = settings.rollStartTitle;
+            }
+        }
+        return template == null ? "" : template.replace("<weapon>", weaponDisplay);
+    }
+
+    private String getSubtitleText(boolean isAssigned, int frameIndex, String weaponDisplay) {
+        String template;
+        if (isAssigned) {
+            final List<String> frames = settings.assignedSubtitleFrames;
+            if (frames != null && !frames.isEmpty()) {
+                template = frames.get(frameIndex % frames.size());
+            } else {
+                template = settings.assignedSubtitle;
+            }
+        } else {
+            final List<String> frames = settings.rollSubtitleFrames;
+            if (frames != null && !frames.isEmpty()) {
+                template = frames.get(frameIndex % frames.size());
+            } else {
+                template = settings.rollSubtitle;
+            }
+        }
+        return template == null ? "" : template.replace("<weapon>", weaponDisplay);
     }
 
     private long calculateStepDelay(int step) {

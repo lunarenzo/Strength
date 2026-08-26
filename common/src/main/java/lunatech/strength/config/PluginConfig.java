@@ -321,26 +321,41 @@ public class PluginConfig implements VersionedConfig {
         @Comment("Pitch for consume sound")
         public float consumeSoundPitch = 1.0f;
 
-        @Comment("Title message shown while rolling")
-        public String rollStartTitle = "<yellow>Assigning Weapon...</yellow>";
+        @Comment("Title message shown while rolling (supports <weapon> placeholder)")
+        public String rollStartTitle = "<color:#FF0000><bold><weapon></bold></color>";
+
+        @Comment("Multi-frame title animation sequence while rolling (Leave empty to use rollStartTitle). Each line is displayed sequentially per step.")
+        public List<String> rollStartTitleFrames = List.of();
 
         @Comment("Subtitle message shown while rolling (supports <weapon> placeholder)")
-        public String rollSubtitle = "<gray>ROLLING: <gold><weapon></gold></gray>";
+        public String rollSubtitle = "<white>Rolling your weapon...</white>";
+
+        @Comment("Multi-frame subtitle animation sequence while rolling (Leave empty to use rollSubtitle). Each line is displayed sequentially per step.")
+        public List<String> rollSubtitleFrames = List.of();
 
         @Comment("Main title message shown when a weapon is assigned (supports <weapon> placeholder)")
-        public String assignedTitle = "<gold><bold><weapon></bold></gold>";
+        public String assignedTitle = "<color:#FF0000><bold><weapon></bold></color>";
+
+        @Comment("Multi-frame title animation sequence when a weapon is assigned (Leave empty to use assignedTitle).")
+        public List<String> assignedTitleFrames = List.of();
 
         @Comment("Subtitle message shown when a weapon is assigned (supports <weapon> placeholder)")
         public String assignedSubtitle = "<green>Weapon Assigned!</green>";
 
+        @Comment("Multi-frame subtitle animation sequence when a weapon is assigned (Leave empty to use assignedSubtitle).")
+        public List<String> assignedSubtitleFrames = List.of();
+
+        @Comment("Frame tick delay for assigned title/subtitle animation sequence (if assignedTitleFrames or assignedSubtitleFrames is set)")
+        public int assignedAnimationFrameDelayTicks = 3;
+
         @Comment("Custom display messages for specific weapons (overrides <weapon> placeholder if present)")
         public Map<String, String> weaponCustomMessages = Map.of(
-            "Trident", "<aqua><bold>THUNDEROUS TRIDENT</bold></aqua>",
-            "Sword", "<red><bold>INFERNAL SWORD</bold></red>",
-            "Axe", "<dark_red><bold>EXECUTIONER AXE</bold></dark_red>",
-            "Bow", "<green><bold>WIND BOW</bold></green>",
-            "Shield", "<gold><bold>AEGIS SHIELD</bold></gold>",
-            "Crossbow", "<purple><bold>VOID CROSSBOW</bold></purple>"
+            "Bow", "ʙᴏᴡ",
+            "Axe", "ᴀxᴇ",
+            "Trident", "ᴛʀɪᴅᴇɴᴛ",
+            "Shield", "ѕʜɪᴇʟᴅ",
+            "Crossbow", "ᴄʀᴏѕѕʙᴏᴡ",
+            "Sword", "ѕᴡᴏʀᴅ"
         );
 
         @Comment("Sound played during each animation step")
