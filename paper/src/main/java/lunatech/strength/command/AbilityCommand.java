@@ -64,6 +64,11 @@ public final class AbilityCommand extends Command {
             return;
         }
 
+        if (!lunatech.strength.integration.WorldGuardHook.isAbilityAllowed(plugin, player, player.getLocation())) {
+            player.sendMessage(ColorParser.of("<red>You cannot use weapon abilities in this region!</red>").build());
+            return;
+        }
+
         if ("trident".equalsIgnoreCase(assignedWeapon)) {
             triggerTridentUltimate(player, strengthService);
         } else if ("bow".equalsIgnoreCase(assignedWeapon)) {

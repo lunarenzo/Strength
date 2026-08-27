@@ -70,10 +70,10 @@ public final class WorldGuardHook {
             com.sk89q.worldedit.util.Location weLoc = BukkitAdapter.adapt(loc);
             com.sk89q.worldguard.LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
 
-            if (query.queryState(weLoc, localPlayer, Flags.PVP) == StateFlag.State.DENY) {
+            if (!query.testState(weLoc, localPlayer, Flags.PVP)) {
                 return false;
             }
-            if (STRENGTH_WEAPON_ABILITIES != null && query.queryState(weLoc, localPlayer, STRENGTH_WEAPON_ABILITIES) == StateFlag.State.DENY) {
+            if (STRENGTH_WEAPON_ABILITIES != null && !query.testState(weLoc, localPlayer, STRENGTH_WEAPON_ABILITIES)) {
                 return false;
             }
         } catch (Throwable ignored) {
@@ -94,7 +94,7 @@ public final class WorldGuardHook {
             com.sk89q.worldedit.util.Location weLoc = BukkitAdapter.adapt(loc);
             com.sk89q.worldguard.LocalPlayer localPlayer = victim != null ? WorldGuardPlugin.inst().wrapPlayer(victim) : null;
 
-            if (STRENGTH_PVP_LOSS != null && query.queryState(weLoc, localPlayer, STRENGTH_PVP_LOSS) == StateFlag.State.DENY) {
+            if (STRENGTH_PVP_LOSS != null && !query.testState(weLoc, localPlayer, STRENGTH_PVP_LOSS)) {
                 return false;
             }
         } catch (Throwable ignored) {
@@ -115,7 +115,7 @@ public final class WorldGuardHook {
             com.sk89q.worldedit.util.Location weLoc = BukkitAdapter.adapt(loc);
             com.sk89q.worldguard.LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
 
-            if (STRENGTH_REROLL != null && query.queryState(weLoc, localPlayer, STRENGTH_REROLL) == StateFlag.State.DENY) {
+            if (STRENGTH_REROLL != null && !query.testState(weLoc, localPlayer, STRENGTH_REROLL)) {
                 return false;
             }
         } catch (Throwable ignored) {
