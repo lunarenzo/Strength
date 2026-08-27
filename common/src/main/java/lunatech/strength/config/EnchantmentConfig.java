@@ -11,7 +11,15 @@ import java.util.Map;
  * Enables server owners to limit or blacklist specific enchantments and max levels on weapons, armors, and tools globally.
  */
 @ConfigSerializable
-public class EnchantmentConfig {
+public class EnchantmentConfig implements VersionedConfig {
+    @Comment("Do not change this value!")
+    public int configVersion = 1;
+
+    @Override
+    public int configVersion() {
+        return configVersion;
+    }
+
     @Comment("Enable or disable global enchantment restriction submodule")
     public boolean enabled = true;
 
