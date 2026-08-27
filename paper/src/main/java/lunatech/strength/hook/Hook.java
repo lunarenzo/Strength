@@ -5,6 +5,7 @@ import lunatech.strength.hook.bstats.BStatsHook;
 import lunatech.strength.hook.packetevents.PacketEventsHook;
 import lunatech.strength.hook.placeholderapi.PAPIHook;
 import lunatech.strength.hook.vault.VaultHook;
+import lunatech.strength.hook.worldguard.WorldGuardHook;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -17,7 +18,8 @@ public enum Hook {
     PAPI(PAPIHook.class, "PlaceholderAPI", true),
     PacketEvents(PacketEventsHook.class, "PacketEvents", true),
     Vault(VaultHook.class, "Vault", true),
-    BetterTeams(BetterTeamsHook.class, "BetterTeams", true);
+    BetterTeams(BetterTeamsHook.class, "BetterTeams", true),
+    WorldGuard(WorldGuardHook.class, "WorldGuard", true);
 
     private final @NotNull Class<? extends AbstractHook> hookClass; // The hook class used by this hook
     private final @Nullable String pluginName; // The plugin name used by this hook or null if not applicable
@@ -160,5 +162,15 @@ public enum Hook {
     @NotNull
     public static BetterTeamsHook getBetterTeamsHook() {
         return (BetterTeamsHook) Hook.BetterTeams.get();
+    }
+
+    /**
+     * Gets WorldGuard hook.
+     *
+     * @return the WorldGuard hook
+     */
+    @NotNull
+    public static WorldGuardHook getWorldGuardHook() {
+        return (WorldGuardHook) Hook.WorldGuard.get();
     }
 }
