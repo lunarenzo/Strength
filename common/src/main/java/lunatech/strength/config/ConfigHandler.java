@@ -24,6 +24,7 @@ public class ConfigHandler implements Reloadable {
     private AxeConfig axeCfg;
     private MaceConfig maceCfg;
     private PotionConfig potionCfg;
+    private EnchantmentConfig enchantmentCfg;
     private WeaponsGuiConfig weaponsGuiCfg;
 
     /**
@@ -119,13 +120,30 @@ public class ConfigHandler implements Reloadable {
             .withHeader("Potion & Potion Effect Restriction Configuration")
             .build(PotionConfig.class);
 
-        // 10. Load Weapons GUI configuration
+        // 10. Load decoupled Enchantment Restriction configuration
+        enchantmentCfg = new ConfigLoader()
+            .withLogger(logger)
+            .withDirectory()
+            .withPath(configDir.resolve("enchantment-restrictions.yml"))
+            .withHeader("Global Enchantment Restriction Configuration")
+            .build(EnchantmentConfig.class);
+
+        // 11. Load Weapons GUI configuration
         weaponsGuiCfg = new ConfigLoader()
             .withLogger(logger)
             .withDirectory()
             .withPath(configDir.resolve("weapons-gui.yml"))
             .withHeader("StrengthSMP Weapons GUI Configuration")
             .build(WeaponsGuiConfig.class);
+    }
+
+    /**
+     * Gets enchantment restriction configuration.
+     *
+     * @return the enchantment config
+     */
+    public EnchantmentConfig getEnchantmentConfig() {
+        return enchantmentCfg;
     }
 
     /**
