@@ -22,6 +22,9 @@ public class RulesConfig implements VersionedConfig {
     @Comment("Totem of Undying modular rules configuration")
     public TotemRules totem = new TotemRules();
 
+    @Comment("Naked player (Anti-Strength Farming) rule configuration")
+    public NakedPlayerRules nakedPlayer = new NakedPlayerRules();
+
     @ConfigSerializable
     public static class TotemRules {
         @Comment("Enable or disable Totem of Undying rules module")
@@ -56,5 +59,29 @@ public class RulesConfig implements VersionedConfig {
 
         @Comment("Message sent when a player exhausts their totem quota and enters cooldown")
         public String quotaExhaustedMessage = "<red>You have exhausted your Totem quota! Totems disabled for <time>.</red>";
+    }
+
+    @ConfigSerializable
+    public static class NakedPlayerRules {
+        @Comment("Enable or disable Naked Player Anti-Farming rule")
+        public boolean enabled = true;
+
+        @Comment("Allow strength reward/item drops when killing a naked player (set false to prevent strength farming on naked alts/newbies)")
+        public boolean allowNakedKillReward = false;
+
+        @Comment("If true, a player with completely empty inventory slots (inventory, armor, offhand) is considered naked")
+        public boolean requireCompletelyEmptyInventory = true;
+
+        @Comment("If true, a player with no armor equipped AND no weapons in inventory is considered naked")
+        public boolean checkArmorAndWeapons = true;
+
+        @Comment("List of material names or wildcards considered armor or weapons for the check")
+        public java.util.List<String> gearKeywords = java.util.List.of(
+            "HELMET", "CHESTPLATE", "LEGGINGS", "BOOTS",
+            "SWORD", "AXE", "BOW", "CROSSBOW", "TRIDENT", "MACE", "SHIELD"
+        );
+
+        @Comment("Message sent to killer when strength reward is denied because the victim was naked")
+        public String nakedKillNoRewardMessage = "<red>You did not receive strength for killing <victim> because they were naked!</red>";
     }
 }

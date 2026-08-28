@@ -45,6 +45,10 @@ public final class PlayerKillListener implements Listener {
             }
         }
 
+        final lunatech.strength.config.RulesConfig.NakedPlayerRules nakedRules = configHandler.getRulesConfig().nakedPlayer;
+        final boolean isVictimNaked = isPvp && isNakedPlayer(victim, nakedRules);
+        final boolean allowNakedReward = !isVictimNaked || nakedRules.allowNakedKillReward;
+
         final boolean shouldProcessDeathLoss = settings.deathLoss > 0 && (isPvp || settings.loseStrengthOnNaturalDeath);
 
         int actualLoss = 0;
@@ -58,8 +62,8 @@ public final class PlayerKillListener implements Listener {
             if (actualLoss > 0) {
                 strengthService.setStrength(victim, victimNewStrength);
 
-                // Drop strength item on death if enabled and actual loss > 0
-                if (settings.dropItemOnDeath) {
+                // Drop strength item on death if enabled, actual loss > 0, and allowed by naked player rule
+                if (settings.dropItemOnDeath && allowNakedReward) {
                     event.getDrops().add(strengthService.createStrengthItem(actualLoss));
                 }
 
@@ -73,6 +77,15 @@ public final class PlayerKillListener implements Listener {
 
         // Award kill reward to the killer in PvP
         if (isPvp) {
+            if (!allowNakedReward) {
+                killer.sendMessage(
+                    ColorParser.of(nakedRules.nakedKillNoRewardMessage)
+                        .with("victim", victim.getName())
+                        .build()
+                );
+                return;
+            }
+
             final boolean allowReward = !settings.requireVictimStrengthForReward || actualLoss > 0;
 
             if (allowReward) {
@@ -102,5 +115,51 @@ public final class PlayerKillListener implements Listener {
                 );
             }
         }
+    }
+
+    private static boolean isNakedPlayer(@NotNull Player player, @NotNull lunatech.strength.config.RulesConfig.NakedPlayerRules rules) {
+        if (!rules.enabled) {
+            return false;
+        }
+
+        final org.bukkit.inventory.ItemStack[] contents = player.getInventory().getContents();
+
+        // 1. Completely empty inventory check
+        if (rules.requireCompletelyEmptyInventory) {
+            boolean hasAnyItem = false;
+            for (org.bukkit.inventory.ItemStack item : contents) {
+                if (item != null && !item.isEmpty()) {
+                    hasAnyItem = true;
+                    break;
+                }
+            }
+            if (!hasAnyItem) {
+                return true;
+            }
+        }
+
+        // 2. Check armor and weapons
+        if (rules.checkArmorAndWeapons) {
+            boolean hasGear = false;
+            for (org.bukkit.inventory.ItemStack item : contents) {
+                if (item != null && !item.isEmpty()) {
+                    final String typeName = item.getType().name();
+                    for (String keyword : rules.gearKeywords) {
+                        if (typeName.contains(keyword.toUpperCase())) {
+                            hasGear = true;
+                            break;
+                        }
+                    }
+                    if (hasGear) {
+                        break;
+                    }
+                }
+            }
+            if (!hasGear) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
