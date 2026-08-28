@@ -62,8 +62,10 @@ public final class TotemRuleListener implements Listener {
             return;
         }
 
-        // PvPManager active combat check
-        if (totemRules.preventInCombat && lunatech.strength.integration.PvPManagerHook.isTaggedInCombat(player)) {
+        final boolean isCombat = lunatech.strength.integration.PvPManagerHook.isTaggedInCombat(player);
+
+        // PvPManager active combat check: prevent totem resurrect in combat if enabled
+        if (totemRules.preventInCombat && isCombat) {
             event.setCancelled(true);
             scheduleInventoryUpdate(player);
             player.sendMessage(ColorParser.of(totemRules.totemInCombatMessage).build());
@@ -74,16 +76,20 @@ public final class TotemRuleListener implements Listener {
         final long cooldownUntil = getTotemCooldownUntil(player);
 
         if (now < cooldownUntil) {
-            event.setCancelled(true);
-            scheduleInventoryUpdate(player);
+            // Cooldown ONLY blocks resurrection if quota-only-in-combat is false OR player is in combat!
+            // In PvE / non-combat, resurrection is allowed when quotaOnlyInCombat is enabled.
+            if (!totemRules.quotaOnlyInCombat || isCombat) {
+                event.setCancelled(true);
+                scheduleInventoryUpdate(player);
 
-            final long remainingMillis = cooldownUntil - now;
-            player.sendMessage(
-                ColorParser.of(totemRules.totemOnCooldownMessage)
-                    .with("time", formatTime(remainingMillis))
-                    .build()
-            );
-            return;
+                final long remainingMillis = cooldownUntil - now;
+                player.sendMessage(
+                    ColorParser.of(totemRules.totemOnCooldownMessage)
+                        .with("time", formatTime(remainingMillis))
+                        .build()
+                );
+                return;
+            }
         }
 
         // 1-Tick Deduplication Check
@@ -91,13 +97,11 @@ public final class TotemRuleListener implements Listener {
         final long currentTick = Bukkit.getCurrentTick();
         final long lastTick = lastResurrectTickMap.getOrDefault(uuid, -1L);
         if (lastTick == currentTick) {
-            // Already processed a resurrection on this exact tick
             return;
         }
         lastResurrectTickMap.put(uuid, currentTick);
 
-        // Check if quota should be consumed (if quotaOnlyInCombat is true, only consume if in combat)
-        final boolean isCombat = lunatech.strength.integration.PvPManagerHook.isTaggedInCombat(player);
+        // Check if quota should be consumed (only consume if not quotaOnlyInCombat OR player is in combat)
         final boolean shouldConsumeQuota = !totemRules.quotaOnlyInCombat || isCombat;
 
         if (shouldConsumeQuota) {
@@ -143,14 +147,18 @@ public final class TotemRuleListener implements Listener {
             return;
         }
 
-        if (totemRules.preventInCombat && lunatech.strength.integration.PvPManagerHook.isTaggedInCombat(player)) {
+        final boolean isCombat = lunatech.strength.integration.PvPManagerHook.isTaggedInCombat(player);
+
+        if (totemRules.preventInCombat && isCombat) {
             event.setCancelled(true);
             return;
         }
 
         final long now = System.currentTimeMillis();
         if (now < getTotemCooldownUntil(player)) {
-            event.setCancelled(true);
+            if (!totemRules.quotaOnlyInCombat || isCombat) {
+                event.setCancelled(true);
+            }
         }
     }
 
@@ -174,19 +182,23 @@ public final class TotemRuleListener implements Listener {
             return;
         }
 
-        if (totemRules.preventInCombat && lunatech.strength.integration.PvPManagerHook.isTaggedInCombat(player)) {
+        final boolean isCombat = lunatech.strength.integration.PvPManagerHook.isTaggedInCombat(player);
+
+        if (totemRules.preventInCombat && isCombat) {
             event.setCancelled(true);
             return;
         }
 
         final long now = System.currentTimeMillis();
         if (now < getTotemCooldownUntil(player)) {
-            event.setCancelled(true);
-            return;
+            if (!totemRules.quotaOnlyInCombat || isCombat) {
+                event.setCancelled(true);
+                return;
+            }
         }
 
         if (totemRules.maxInInventory > 0) {
-            final int currentTotems = countTotems(player);
+            final int currentTotems = countPlayerInventoryTotems(player);
             final int pickupAmount = event.getItem().getItemStack().getAmount();
             if (currentTotems + pickupAmount > totemRules.maxInInventory) {
                 event.setCancelled(true);
@@ -225,7 +237,9 @@ public final class TotemRuleListener implements Listener {
             return;
         }
 
-        if (totemRules.preventInCombat && lunatech.strength.integration.PvPManagerHook.isTaggedInCombat(player)) {
+        final boolean isCombat = lunatech.strength.integration.PvPManagerHook.isTaggedInCombat(player);
+
+        if (totemRules.preventInCombat && isCombat) {
             event.setCancelled(true);
             player.sendMessage(ColorParser.of(totemRules.totemInCombatMessage).build());
             return;
@@ -233,24 +247,46 @@ public final class TotemRuleListener implements Listener {
 
         final long now = System.currentTimeMillis();
         if (now < getTotemCooldownUntil(player)) {
-            event.setCancelled(true);
-            player.sendMessage(
-                ColorParser.of(totemRules.totemOnCooldownMessage)
-                    .with("time", formatTime(getTotemCooldownUntil(player) - now))
-                    .build()
-            );
-            return;
+            if (!totemRules.quotaOnlyInCombat || isCombat) {
+                event.setCancelled(true);
+                player.sendMessage(
+                    ColorParser.of(totemRules.totemOnCooldownMessage)
+                        .with("time", formatTime(getTotemCooldownUntil(player) - now))
+                        .build()
+                );
+                return;
+            }
         }
 
         if (totemRules.maxInInventory > 0) {
-            final int currentTotems = countTotems(player);
-            if (currentTotems >= totemRules.maxInInventory && cursor != null && cursor.getType() == Material.TOTEM_OF_UNDYING) {
-                event.setCancelled(true);
-                player.sendMessage(
-                    ColorParser.of(totemRules.maxLimitReachedMessage)
-                        .with("count", String.valueOf(totemRules.maxInInventory))
-                        .build()
-                );
+            final int currentTotems = countPlayerInventoryTotems(player);
+
+            // Shift-clicking a Totem from a container (e.g. Chest) into player inventory
+            if (event.isShiftClick() && event.getClickedInventory() != player.getInventory()) {
+                final int amount = current != null ? current.getAmount() : 1;
+                if (currentTotems + amount > totemRules.maxInInventory) {
+                    event.setCancelled(true);
+                    player.sendMessage(
+                        ColorParser.of(totemRules.maxLimitReachedMessage)
+                            .with("count", String.valueOf(totemRules.maxInInventory))
+                            .build()
+                    );
+                    return;
+                }
+            }
+
+            // Placing a Totem from cursor into player inventory
+            if (cursor != null && cursor.getType() == Material.TOTEM_OF_UNDYING) {
+                if (event.getClickedInventory() == player.getInventory()) {
+                    if (currentTotems + cursor.getAmount() > totemRules.maxInInventory) {
+                        event.setCancelled(true);
+                        player.sendMessage(
+                            ColorParser.of(totemRules.maxLimitReachedMessage)
+                                .with("count", String.valueOf(totemRules.maxInInventory))
+                                .build()
+                        );
+                    }
+                }
             }
         }
     }
@@ -276,20 +312,24 @@ public final class TotemRuleListener implements Listener {
             return;
         }
 
-        if (totemRules.preventInCombat && lunatech.strength.integration.PvPManagerHook.isTaggedInCombat(player)) {
+        final boolean isCombat = lunatech.strength.integration.PvPManagerHook.isTaggedInCombat(player);
+
+        if (totemRules.preventInCombat && isCombat) {
             event.setCancelled(true);
             return;
         }
 
         final long now = System.currentTimeMillis();
         if (now < getTotemCooldownUntil(player)) {
-            event.setCancelled(true);
-            return;
+            if (!totemRules.quotaOnlyInCombat || isCombat) {
+                event.setCancelled(true);
+                return;
+            }
         }
 
         if (totemRules.maxInInventory > 0) {
-            final int currentTotems = countTotems(player);
-            if (currentTotems >= totemRules.maxInInventory) {
+            final int currentTotems = countPlayerInventoryTotems(player);
+            if (currentTotems + oldCursor.getAmount() > totemRules.maxInInventory) {
                 event.setCancelled(true);
                 player.sendMessage(
                     ColorParser.of(totemRules.maxLimitReachedMessage)
@@ -308,17 +348,13 @@ public final class TotemRuleListener implements Listener {
         }, 1L);
     }
 
-    private int countTotems(Player player) {
+    private int countPlayerInventoryTotems(Player player) {
         int count = 0;
         final ItemStack[] contents = player.getInventory().getContents();
         for (ItemStack item : contents) {
             if (item != null && item.getType() == Material.TOTEM_OF_UNDYING) {
                 count += item.getAmount();
             }
-        }
-        final ItemStack cursor = player.getItemOnCursor();
-        if (cursor != null && cursor.getType() == Material.TOTEM_OF_UNDYING) {
-            count += cursor.getAmount();
         }
         return count;
     }
