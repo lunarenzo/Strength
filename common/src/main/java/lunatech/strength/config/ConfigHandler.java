@@ -25,6 +25,7 @@ public class ConfigHandler implements Reloadable {
     private MaceConfig maceCfg;
     private PotionConfig potionCfg;
     private EnchantmentConfig enchantmentCfg;
+    private RulesConfig rulesCfg;
     private WeaponsGuiConfig weaponsGuiCfg;
 
     /**
@@ -128,13 +129,30 @@ public class ConfigHandler implements Reloadable {
             .withHeader("Global Enchantment Restriction Configuration")
             .build(EnchantmentConfig.class);
 
-        // 11. Load Weapons GUI configuration
+        // 11. Load decoupled Modular Rules configuration
+        rulesCfg = new ConfigLoader()
+            .withLogger(logger)
+            .withDirectory()
+            .withPath(configDir.resolve("rules.yml"))
+            .withHeader("Modular Server Rules Configuration")
+            .build(RulesConfig.class);
+
+        // 12. Load Weapons GUI configuration
         weaponsGuiCfg = new ConfigLoader()
             .withLogger(logger)
             .withDirectory()
             .withPath(configDir.resolve("weapons-gui.yml"))
             .withHeader("StrengthSMP Weapons GUI Configuration")
             .build(WeaponsGuiConfig.class);
+    }
+
+    /**
+     * Gets modular rules configuration.
+     *
+     * @return the rules config
+     */
+    public RulesConfig getRulesConfig() {
+        return rulesCfg;
     }
 
     /**
