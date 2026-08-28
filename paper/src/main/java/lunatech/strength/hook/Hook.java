@@ -19,7 +19,8 @@ public enum Hook {
     PacketEvents(PacketEventsHook.class, "PacketEvents", true),
     Vault(VaultHook.class, "Vault", true),
     BetterTeams(BetterTeamsHook.class, "BetterTeams", true),
-    WorldGuard(WorldGuardHook.class, "WorldGuard", true);
+    WorldGuard(WorldGuardHook.class, "WorldGuard", true),
+    PvPManager(lunatech.strength.hook.pvpmanager.PvPManagerHook.class, "PvPManager", true);
 
     private final @NotNull Class<? extends AbstractHook> hookClass; // The hook class used by this hook
     private final @Nullable String pluginName; // The plugin name used by this hook or null if not applicable
@@ -172,5 +173,15 @@ public enum Hook {
     @NotNull
     public static WorldGuardHook getWorldGuardHook() {
         return (WorldGuardHook) Hook.WorldGuard.get();
+    }
+
+    /**
+     * Gets PvPManager hook.
+     *
+     * @return the PvPManager hook
+     */
+    @NotNull
+    public static lunatech.strength.hook.pvpmanager.PvPManagerHook getPvPManagerHook() {
+        return (lunatech.strength.hook.pvpmanager.PvPManagerHook) Hook.PvPManager.get();
     }
 }
