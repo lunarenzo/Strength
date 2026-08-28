@@ -96,22 +96,27 @@ public final class TotemRuleListener implements Listener {
         }
         lastResurrectTickMap.put(uuid, currentTick);
 
-        // Totem pop allowed: Increment pop count
-        final int pops = getTotemPopCount(player) + 1;
+        // Check if quota should be consumed (if quotaOnlyInCombat is true, only consume if in combat)
+        final boolean isCombat = lunatech.strength.integration.PvPManagerHook.isTaggedInCombat(player);
+        final boolean shouldConsumeQuota = !totemRules.quotaOnlyInCombat || isCombat;
 
-        if (totemRules.popQuota > 0 && pops >= totemRules.popQuota) {
-            final long durationMillis = totemRules.cooldownDuration.toMillis();
-            final long expireTime = now + durationMillis;
-            setTotemCooldownUntil(player, expireTime);
-            setTotemPopCount(player, 0);
+        if (shouldConsumeQuota) {
+            final int pops = getTotemPopCount(player) + 1;
 
-            player.sendMessage(
-                ColorParser.of(totemRules.quotaExhaustedMessage)
-                    .with("time", formatTime(durationMillis))
-                    .build()
-            );
-        } else {
-            setTotemPopCount(player, pops);
+            if (totemRules.popQuota > 0 && pops >= totemRules.popQuota) {
+                final long durationMillis = totemRules.cooldownDuration.toMillis();
+                final long expireTime = now + durationMillis;
+                setTotemCooldownUntil(player, expireTime);
+                setTotemPopCount(player, 0);
+
+                player.sendMessage(
+                    ColorParser.of(totemRules.quotaExhaustedMessage)
+                        .with("time", formatTime(durationMillis))
+                        .build()
+                );
+            } else {
+                setTotemPopCount(player, pops);
+            }
         }
     }
 

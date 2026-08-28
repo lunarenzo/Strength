@@ -36,6 +36,9 @@ public class RulesConfig implements VersionedConfig {
         @Comment("Maximum number of Totem pops allowed before triggering a cooldown")
         public int popQuota = 3;
 
+        @Comment("If true, Totem pop quota is only consumed when the player is tagged in active combat via PvPManager. In PvE/survival, totems pop freely without using quota.")
+        public boolean quotaOnlyInCombat = true;
+
         @Comment("Cooldown duration after consuming popQuota totems (e.g. 30m, 1h, 1d, 300s)")
         public Duration cooldownDuration = Duration.ofMinutes(30);
 
