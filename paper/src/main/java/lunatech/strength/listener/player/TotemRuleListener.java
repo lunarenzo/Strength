@@ -3,6 +3,7 @@ package lunatech.strength.listener.player;
 import lunatech.strength.Strength;
 import lunatech.strength.config.RulesConfig;
 import io.github.milkdrinkers.colorparser.paper.ColorParser;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -13,17 +14,25 @@ import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.EntityResurrectEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
- * Listener implementing modular Totem of Undying rules, max inventory limits,
- * usage quotas, and PDC-persisted cooldowns across restarts.
+ * High-performance, edge-case hardened listener implementing modular Totem of Undying rules,
+ * max inventory limits, usage quotas, and PDC-persisted cooldowns across restarts.
  */
 public final class TotemRuleListener implements Listener {
     private static final NamespacedKey TOTEM_POP_COUNT_KEY = new NamespacedKey("strength", "totem_pop_count");
     private static final NamespacedKey TOTEM_COOLDOWN_UNTIL_KEY = new NamespacedKey("strength", "totem_cooldown_until");
+
+    // 1-Tick deduplication buffer to prevent multi-damage double quota reduction in identical tick
+    private static final Map<UUID, Long> lastResurrectTickMap = new ConcurrentHashMap<>();
 
     private final Strength plugin;
 
@@ -35,7 +44,7 @@ public final class TotemRuleListener implements Listener {
         return plugin.getConfigHandler().getRulesConfig().totem;
     }
 
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityResurrect(@NotNull EntityResurrectEvent event) {
         if (!(event.getEntity() instanceof Player player)) {
             return;
@@ -49,6 +58,7 @@ public final class TotemRuleListener implements Listener {
         // BANNED mode completely blocks resurrection
         if ("BANNED".equalsIgnoreCase(totemRules.mode)) {
             event.setCancelled(true);
+            scheduleInventoryUpdate(player);
             return;
         }
 
@@ -57,6 +67,8 @@ public final class TotemRuleListener implements Listener {
 
         if (now < cooldownUntil) {
             event.setCancelled(true);
+            scheduleInventoryUpdate(player);
+
             final long remainingMillis = cooldownUntil - now;
             player.sendMessage(
                 ColorParser.of(totemRules.totemOnCooldownMessage)
@@ -65,6 +77,16 @@ public final class TotemRuleListener implements Listener {
             );
             return;
         }
+
+        // 1-Tick Deduplication Check
+        final UUID uuid = player.getUniqueId();
+        final long currentTick = Bukkit.getCurrentTick();
+        final long lastTick = lastResurrectTickMap.getOrDefault(uuid, -1L);
+        if (lastTick == currentTick) {
+            // Already processed a resurrection on this exact tick
+            return;
+        }
+        lastResurrectTickMap.put(uuid, currentTick);
 
         // Totem pop allowed: Increment pop count
         final int pops = getTotemPopCount(player) + 1;
@@ -82,6 +104,35 @@ public final class TotemRuleListener implements Listener {
             );
         } else {
             setTotemPopCount(player, pops);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onPlayerSwapHandItems(@NotNull PlayerSwapHandItemsEvent event) {
+        final Player player = event.getPlayer();
+        final RulesConfig.TotemRules totemRules = getTotemRules();
+        if (!totemRules.enabled) {
+            return;
+        }
+
+        final ItemStack main = event.getMainHandItem();
+        final ItemStack off = event.getOffHandItem();
+
+        final boolean involvesTotem = (main != null && main.getType() == Material.TOTEM_OF_UNDYING)
+            || (off != null && off.getType() == Material.TOTEM_OF_UNDYING);
+
+        if (!involvesTotem) {
+            return;
+        }
+
+        if ("BANNED".equalsIgnoreCase(totemRules.mode)) {
+            event.setCancelled(true);
+            return;
+        }
+
+        final long now = System.currentTimeMillis();
+        if (now < getTotemCooldownUntil(player)) {
+            event.setCancelled(true);
         }
     }
 
@@ -215,6 +266,14 @@ public final class TotemRuleListener implements Listener {
         }
     }
 
+    private void scheduleInventoryUpdate(Player player) {
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (player.isOnline()) {
+                player.updateInventory();
+            }
+        }, 1L);
+    }
+
     private int countTotems(Player player) {
         int count = 0;
         final ItemStack[] contents = player.getInventory().getContents();
@@ -222,6 +281,10 @@ public final class TotemRuleListener implements Listener {
             if (item != null && item.getType() == Material.TOTEM_OF_UNDYING) {
                 count += item.getAmount();
             }
+        }
+        final ItemStack cursor = player.getItemOnCursor();
+        if (cursor != null && cursor.getType() == Material.TOTEM_OF_UNDYING) {
+            count += cursor.getAmount();
         }
         return count;
     }
