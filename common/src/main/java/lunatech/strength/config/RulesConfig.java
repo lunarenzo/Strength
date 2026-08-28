@@ -39,8 +39,14 @@ public class RulesConfig implements VersionedConfig {
         @Comment("Cooldown duration after consuming popQuota totems (e.g. 30m, 1h, 1d, 300s)")
         public Duration cooldownDuration = Duration.ofMinutes(30);
 
+        @Comment("Prevent players from using Totems of Undying while tagged in active combat (requires PvPManager integration)")
+        public boolean preventInCombat = false;
+
         @Comment("Message sent when a player tries to pick up or hold excess Totems beyond maxInInventory limit")
         public String maxLimitReachedMessage = "<red>You cannot hold more than <count> Totems of Undying in your inventory!</red>";
+
+        @Comment("Message sent when a Totem pop is denied due to active combat")
+        public String totemInCombatMessage = "<red>You cannot use or move Totems of Undying while in active combat!</red>";
 
         @Comment("Message sent when a Totem pop is denied due to active cooldown")
         public String totemOnCooldownMessage = "<red>Your Totem of Undying is on cooldown for another <time>!</red>";

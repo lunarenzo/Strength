@@ -62,6 +62,14 @@ public final class TotemRuleListener implements Listener {
             return;
         }
 
+        // PvPManager active combat check
+        if (totemRules.preventInCombat && lunatech.strength.integration.PvPManagerHook.isTaggedInCombat(player)) {
+            event.setCancelled(true);
+            scheduleInventoryUpdate(player);
+            player.sendMessage(ColorParser.of(totemRules.totemInCombatMessage).build());
+            return;
+        }
+
         final long now = System.currentTimeMillis();
         final long cooldownUntil = getTotemCooldownUntil(player);
 
@@ -130,6 +138,11 @@ public final class TotemRuleListener implements Listener {
             return;
         }
 
+        if (totemRules.preventInCombat && lunatech.strength.integration.PvPManagerHook.isTaggedInCombat(player)) {
+            event.setCancelled(true);
+            return;
+        }
+
         final long now = System.currentTimeMillis();
         if (now < getTotemCooldownUntil(player)) {
             event.setCancelled(true);
@@ -152,6 +165,11 @@ public final class TotemRuleListener implements Listener {
         }
 
         if ("BANNED".equalsIgnoreCase(totemRules.mode)) {
+            event.setCancelled(true);
+            return;
+        }
+
+        if (totemRules.preventInCombat && lunatech.strength.integration.PvPManagerHook.isTaggedInCombat(player)) {
             event.setCancelled(true);
             return;
         }
@@ -202,6 +220,12 @@ public final class TotemRuleListener implements Listener {
             return;
         }
 
+        if (totemRules.preventInCombat && lunatech.strength.integration.PvPManagerHook.isTaggedInCombat(player)) {
+            event.setCancelled(true);
+            player.sendMessage(ColorParser.of(totemRules.totemInCombatMessage).build());
+            return;
+        }
+
         final long now = System.currentTimeMillis();
         if (now < getTotemCooldownUntil(player)) {
             event.setCancelled(true);
@@ -243,6 +267,11 @@ public final class TotemRuleListener implements Listener {
         }
 
         if ("BANNED".equalsIgnoreCase(totemRules.mode)) {
+            event.setCancelled(true);
+            return;
+        }
+
+        if (totemRules.preventInCombat && lunatech.strength.integration.PvPManagerHook.isTaggedInCombat(player)) {
             event.setCancelled(true);
             return;
         }

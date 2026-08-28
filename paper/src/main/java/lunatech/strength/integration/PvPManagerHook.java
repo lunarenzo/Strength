@@ -20,9 +20,19 @@ public final class PvPManagerHook {
      * @return true if player is in combat, false otherwise
      */
     public static boolean isInCombat(@NotNull Strength plugin, @NotNull Player player) {
-        if (!plugin.getConfigHandler().getConfig().pvpmanager.enabled || !plugin.getConfigHandler().getConfig().pvpmanager.preventRerollInCombat) {
+        if (!plugin.getConfigHandler().getConfig().pvpmanager.enabled) {
             return false;
         }
+        return isTaggedInCombat(player);
+    }
+
+    /**
+     * Direct check if player is currently tagged in combat according to PvPManager.
+     *
+     * @param player the player to check
+     * @return true if player is in combat, false otherwise
+     */
+    public static boolean isTaggedInCombat(@NotNull Player player) {
         if (!Bukkit.getPluginManager().isPluginEnabled("PvPManager")) {
             return false;
         }
