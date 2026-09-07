@@ -1,9 +1,11 @@
 package lunatech.strength.listener.player;
 
 import lunatech.strength.Strength;
+import lunatech.strength.config.MaceConfig;
 import lunatech.strength.config.RulesConfig.MaceRules;
 import lunatech.strength.config.PluginConfig.MessagesConfig;
 import lunatech.strength.utility.MessageUtil;
+import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.World;
@@ -175,7 +177,32 @@ public final class MaceListener implements Listener {
                     final long remainingSec = (player.getCooldown(Material.MACE) + 19) / 20;
                     MessageUtil.send(player, getMessages().maceCooldownMessage, "seconds", String.valueOf(remainingSec));
                 } else {
-                    player.setCooldown(Material.MACE, config.cooldown.cooldownSeconds * 20);
+                    final MaceConfig maceAbilityConfig = plugin.getConfigHandler().getMaceConfig();
+                    final String assignedWeapon = plugin.getStrengthService().getAssignedWeapon(player);
+                    final boolean isMacePlayer = "mace".equalsIgnoreCase(assignedWeapon);
+
+                    final UUID uuid = player.getUniqueId();
+                    if (isMacePlayer && MaceAbilityListener.activeUltimatePlayers.containsKey(uuid)) {
+                        // Ultimate Active: 0 cooldown
+                        player.setCooldown(Material.MACE, 0);
+                    } else if (isMacePlayer && maceAbilityConfig.enabled && maceAbilityConfig.passive.enabled) {
+                        // Passive Active: Reduced smash cooldown
+                        final double baseSec = config.cooldown.cooldownSeconds;
+                        final double reductionPct = maceAbilityConfig.passive.cooldownReductionPercent;
+                        final double finalSec = Math.max(0.0, baseSec * (1.0 - (reductionPct / 100.0)));
+                        final int ticks = (int) Math.round(finalSec * 20.0);
+                        player.setCooldown(Material.MACE, ticks);
+                        if (maceAbilityConfig.passive.passiveTriggeredMessage != null && !maceAbilityConfig.passive.passiveTriggeredMessage.isBlank()) {
+                            player.sendMessage(io.github.milkdrinkers.colorparser.paper.ColorParser.of(
+                                maceAbilityConfig.passive.passiveTriggeredMessage
+                                    .replace("{percent}", String.format("%.0f", reductionPct))
+                                    .replace("<percent>", String.format("%.0f", reductionPct))
+                            ).build());
+                        }
+                    } else {
+                        // Normal full smash cooldown
+                        player.setCooldown(Material.MACE, config.cooldown.cooldownSeconds * 20);
+                    }
                 }
             }
         }

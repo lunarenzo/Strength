@@ -1,16 +1,17 @@
 package lunatech.strength.config;
 
+import lunatech.strength.config.exception.ConfigValidationException;
+import lunatech.strength.config.migration.Migration;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.configurate.interfaces.meta.Exclude;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
-import lunatech.strength.config.exception.ConfigValidationException;
-import lunatech.strength.config.migration.Migration;
 
+import java.util.List;
 import java.util.Map;
 
 /**
- * Decoupled configuration for Mace weapon abilities (Passive & Ultimate).
+ * Decoupled configuration for Mace weapon abilities (Passive Smash Cooldown Reduction & Ultimate Auto-Enchant Zero Cooldown).
  */
 @ConfigSerializable
 public class MaceConfig implements VersionedConfig {
@@ -45,62 +46,44 @@ public class MaceConfig implements VersionedConfig {
 
     @ConfigSerializable
     public static class PassiveConfig {
-        @Comment("Enable or disable Mace passive ability.")
+        @Comment("Enable or disable Mace passive smash cooldown reduction.")
         public boolean enabled = true;
 
-        @Comment("Hits required using Mace to trigger passive shockwave.")
-        public int hitsRequired = 3;
+        @Comment("Percentage of Mace Smash cooldown reduced for Mace-assigned players (e.g. 50.0 = 50% reduction).")
+        public double cooldownReductionPercent = 50.0;
 
-        @Comment("Damage multiplier applied on the passive shockwave hit.")
-        public double damageMultiplier = 1.5;
-
-        @Comment("AoE shockwave radius in blocks around the target.")
-        public double shockwaveRadius = 3.5;
-
-        @Comment("Message sent when Mace passive is triggered.")
-        public String passiveTriggeredMessage = "<gold><bold>MACE PASSIVE!</bold> Heavy Seismic Shockwave triggered!</gold>";
+        @Comment("Message sent when Mace passive smash cooldown reduction applies.")
+        public String passiveTriggeredMessage = "<gold><bold>MACE PASSIVE!</bold> Smash attack cooldown reduced by <percent>%!</gold>";
     }
 
     @ConfigSerializable
     public static class UltimateConfig {
-        @Comment("Enable or disable Mace Cataclysmic Slam ultimate ability.")
+        @Comment("Enable or disable Mace ultimate ability.")
         public boolean enabled = true;
 
         @Comment("Strength required to activate Mace Ultimate.")
         public int strengthRequired = 5;
 
-        @Comment("Hits required using Mace to charge Ultimate.")
-        public int hitsRequired = 5;
+        @Comment("Ultimate active duration in seconds.")
+        public int durationSeconds = 15;
 
         @Comment("Cooldown in seconds for Mace Ultimate.")
-        public int cooldownSeconds = 45;
+        public int cooldownSeconds = 60;
 
-        @Comment("Leap upward velocity when activating Cataclysmic Slam.")
-        public double leapVelocity = 1.2;
-
-        @Comment("Slam explosion radius in blocks when landing.")
-        public double slamRadius = 5.0;
-
-        @Comment("Base damage dealt by the Cataclysmic Slam explosion.")
-        public double slamDamage = 12.0;
-
-        @Comment("Message sent when Mace ultimate is fully charged.")
-        public String ultimateChargedMessage = "<green><bold>Cataclysmic Slam is fully charged! Type /ability to activate!</bold></green>";
-
-        @Comment("Message sent indicating ultimate charge progress.")
-        public String ultimateChargeProgressMessage = "<gray>Ultimate Charge: <gold>{charge}/{target}</gold> hits</gray>";
+        @Comment("List of enchantments automatically applied to Mace during ultimate (Format: ENCHANTMENT_KEY:LEVEL).")
+        public List<String> autoEnchantments = List.of("WIND_BURST:2", "DENSITY:5", "BREACH:4");
 
         @Comment("Message sent when Mace ultimate is activated.")
-        public String ultimateActivatedMessage = "<gold><bold>CATACLYSMIC SLAM ACTIVATED!</bold> Leaped into the air — slam down!</gold>";
+        public String ultimateActivatedMessage = "<gold><bold>MACE ULTIMATE ACTIVATED!</bold> Auto-enchanted & zero smash cooldown for <duration>s!</gold>";
+
+        @Comment("Message sent when Mace ultimate expires.")
+        public String ultimateExpiredMessage = "<red>Your Mace Ultimate has expired.</red>";
 
         @Comment("Message sent when player is not holding a Mace.")
         public String mustHoldMaceMessage = "<red>You must be holding a Mace to activate your ultimate!</red>";
 
         @Comment("Message sent when player does not have enough strength.")
         public String notEnoughStrengthMessage = "<red>You do not have enough strength to activate your ultimate! (Required: <req>, Current: <current>)</red>";
-
-        @Comment("Message sent when ultimate is not charged yet.")
-        public String notChargedMessage = "<red>Your ultimate is not charged yet! (Required: <req>, Current: <current> hits)</red>";
 
         @Comment("Message sent when ultimate is on cooldown.")
         public String ultimateCooldownMessage = "<red>Your Ultimate is on cooldown for another <seconds>s!</red>";

@@ -150,23 +150,8 @@ public final class AbilityCommand extends Command {
             return;
         }
 
-        final int currentCharge = MaceAbilityListener.ultimateHitsMap.getOrDefault(uuid, 0);
-        if (currentCharge < settings.ultimate.hitsRequired) {
-            player.sendMessage(
-                ColorParser.of(settings.ultimate.notChargedMessage
-                    .replace("<req>", String.valueOf(settings.ultimate.hitsRequired))
-                    .replace("<current>", String.valueOf(currentCharge)))
-                    .with("req", String.valueOf(settings.ultimate.hitsRequired))
-                    .with("current", String.valueOf(currentCharge))
-                    .build()
-            );
-            return;
-        }
-
-        // Activate Mace Ultimate: Cataclysmic Slam
+        // Activate Mace Ultimate
         MaceAbilityListener.ultimateCooldowns.put(uuid, now);
-        MaceAbilityListener.ultimateHitsMap.put(uuid, 0);
-        MaceAbilityListener.activeUltimatePlayers.put(uuid, now);
 
         new MaceUltimateTask(player, plugin, settings.ultimate).launch();
     }

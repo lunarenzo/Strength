@@ -5,47 +5,48 @@ import lunatech.strength.config.MaceConfig;
 import lunatech.strength.listener.player.MaceAbilityListener;
 import io.github.milkdrinkers.colorparser.paper.ColorParser;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
 /**
- * Task executing Mace Ultimate ability (Cataclysmic Slam).
- * Launches player into the air and monitors ground impact to trigger a high-impact explosion shockwave.
+ * Task managing Mace Ultimate active state.
+ * Auto-enchants held Mace, zeroes smash cooldowns, and safely strips temporary enchantments on expiration.
  */
 public final class MaceUltimateTask extends BukkitRunnable {
     private final Player player;
     private final Strength plugin;
     private final MaceConfig.UltimateConfig settings;
-    private int ticksPassed = 0;
-    private boolean leftGround = false;
+    private final int totalTicks;
+    private int elapsedTicks = 0;
 
     public MaceUltimateTask(@NotNull Player player, @NotNull Strength plugin, @NotNull MaceConfig.UltimateConfig settings) {
         this.player = player;
         this.plugin = plugin;
         this.settings = settings;
+        this.totalTicks = settings.durationSeconds * 20;
     }
 
     public void launch() {
-        // Apply leap velocity
-        final Vector currentVel = player.getVelocity();
-        player.setVelocity(new Vector(currentVel.getX() * 0.5, settings.leapVelocity, currentVel.getZ() * 0.5));
+        final UUID uuid = player.getUniqueId();
+        MaceAbilityListener.activeUltimatePlayers.put(uuid, System.currentTimeMillis());
 
         final Location loc = player.getLocation();
         if (loc.getWorld() != null) {
-            loc.getWorld().playSound(loc, Sound.ITEM_MACE_SMASH_AIR, 1.5f, 0.9f);
-            loc.getWorld().spawnParticle(Particle.EXPLOSION, loc, 5, 0.3, 0.3, 0.3, 0.05);
+            loc.getWorld().playSound(loc, Sound.ITEM_MACE_SMASH_AIR, 1.5f, 1.2f);
+            loc.getWorld().spawnParticle(Particle.EXPLOSION, loc.clone().add(0, 1.0, 0), 5, 0.3, 0.3, 0.3, 0.05);
         }
 
         if (settings.ultimateActivatedMessage != null && !settings.ultimateActivatedMessage.isBlank()) {
-            player.sendMessage(ColorParser.of(settings.ultimateActivatedMessage).build());
+            final String msg = settings.ultimateActivatedMessage
+                .replace("{duration}", String.valueOf(settings.durationSeconds))
+                .replace("<duration>", String.valueOf(settings.durationSeconds));
+            player.sendMessage(ColorParser.of(msg).build());
         }
 
         runTaskTimer(plugin, 1L, 1L);
@@ -53,64 +54,32 @@ public final class MaceUltimateTask extends BukkitRunnable {
 
     @Override
     public void run() {
-        ticksPassed++;
+        elapsedTicks++;
         final UUID uuid = player.getUniqueId();
 
-        if (!player.isOnline() || player.isDead() || ticksPassed > 100) {
+        final String assignedWeapon = plugin.getStrengthService().getAssignedWeapon(player);
+        final boolean isValidState = player.isOnline() && !player.isDead() && "mace".equalsIgnoreCase(assignedWeapon);
+
+        if (!isValidState || elapsedTicks >= totalTicks) {
             MaceAbilityListener.activeUltimatePlayers.remove(uuid);
+            MaceAbilityListener.stripTemporaryEnchantmentsFromPlayer(player, settings);
+
+            if (player.isOnline() && settings.ultimateExpiredMessage != null && !settings.ultimateExpiredMessage.isBlank()) {
+                player.sendMessage(ColorParser.of(settings.ultimateExpiredMessage).build());
+            }
+
             cancel();
             return;
         }
 
-        // Particle trail during leap / fall
+        // Apply auto-enchantments to held Mace and zero out smash cooldown
+        MaceAbilityListener.applyTemporaryEnchantments(player, settings);
+        player.setCooldown(Material.MACE, 0);
+
+        // Visual supercharged particle trail
         final Location loc = player.getLocation();
-        if (loc.getWorld() != null && ticksPassed % 2 == 0) {
-            loc.getWorld().spawnParticle(Particle.CLOUD, loc, 3, 0.2, 0.2, 0.2, 0.02);
-        }
-
-        // Detect leaving ground and subsequent landing
-        final boolean onGround = player.isOnGround() || player.getLocation().getBlock().getType().isSolid();
-        if (!leftGround) {
-            if (!onGround || ticksPassed > 5) {
-                leftGround = true;
-            }
-            return;
-        }
-
-        if (onGround && ticksPassed > 5) {
-            // Impact! Cataclysmic Slam
-            executeCataclysmicSlam(loc);
-            MaceAbilityListener.activeUltimatePlayers.remove(uuid);
-            cancel();
-        }
-    }
-
-    private void executeCataclysmicSlam(Location impactLoc) {
-        if (impactLoc.getWorld() == null) return;
-
-        // Visual and sound effects
-        impactLoc.getWorld().spawnParticle(Particle.EXPLOSION_EMITTER, impactLoc, 2, 0.5, 0.2, 0.5, 0.0);
-        impactLoc.getWorld().spawnParticle(Particle.FLAME, impactLoc.clone().add(0, 0.5, 0), 40, 1.5, 0.5, 1.5, 0.15);
-        impactLoc.getWorld().playSound(impactLoc, Sound.ITEM_MACE_SMASH_GROUND_HEAVY, 2.0f, 0.7f);
-        impactLoc.getWorld().playSound(impactLoc, Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 1.2f);
-
-        final double radius = settings.slamRadius;
-        final double damage = settings.slamDamage;
-
-        // Damage and launch surrounding entities
-        for (Entity entity : impactLoc.getWorld().getNearbyEntities(impactLoc, radius, radius, radius)) {
-            if (entity instanceof LivingEntity target && !target.equals(player)) {
-                target.damage(damage, player);
-
-                // Knockback / Launch effect away from impact center
-                Vector launchDir = target.getLocation().toVector().subtract(impactLoc.toVector());
-                if (launchDir.lengthSquared() < 0.01) {
-                    launchDir = new Vector(0, 1, 0);
-                } else {
-                    launchDir.normalize().multiply(1.2).setY(0.7);
-                }
-                target.setVelocity(launchDir);
-            }
+        if (loc.getWorld() != null && elapsedTicks % 4 == 0) {
+            loc.getWorld().spawnParticle(Particle.END_ROD, loc.clone().add(0, 1.0, 0), 3, 0.3, 0.5, 0.3, 0.02);
         }
     }
 }
