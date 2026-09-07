@@ -120,6 +120,7 @@ public final class Trident2AbilityListener implements Listener {
         if (settings.passive.enabled && settings.passive.shieldStunEnabled && damagee.isBlocking()) {
             final int stunTicks = (int) Math.max(1, settings.passive.shieldStunDurationSeconds * 20);
             damagee.setCooldown(Material.SHIELD, stunTicks);
+            damagee.clearActiveItem();
 
             damagee.getWorld().playSound(damagee.getLocation(), Sound.ITEM_SHIELD_BREAK, 1.0f, 0.9f);
             damagee.getWorld().spawnParticle(
