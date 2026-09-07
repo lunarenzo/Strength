@@ -4,6 +4,7 @@ import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.executors.CommandArguments;
 import lunatech.strength.AbstractStrength;
 import lunatech.strength.Strength;
+import lunatech.strength.config.ArmorsConfig;
 import lunatech.strength.config.AxeConfig;
 import lunatech.strength.config.BowConfig;
 import lunatech.strength.config.CrossbowConfig;
@@ -14,6 +15,7 @@ import lunatech.strength.config.SwordConfig;
 import lunatech.strength.config.Trident2Config;
 import lunatech.strength.config.TridentConfig;
 import lunatech.strength.integration.WorldGuardHook;
+import lunatech.strength.listener.player.ArmorsAbilityListener;
 import lunatech.strength.listener.player.AxeAbilityListener;
 import lunatech.strength.listener.player.BowAbilityListener;
 import lunatech.strength.listener.player.CrossbowAbilityListener;
@@ -23,6 +25,7 @@ import lunatech.strength.listener.player.SwordAbilityListener;
 import lunatech.strength.listener.player.Trident2AbilityListener;
 import lunatech.strength.listener.player.TridentAbilityListener;
 import lunatech.strength.service.StrengthService;
+import lunatech.strength.task.ArmorsUltimateTask;
 import lunatech.strength.task.AxeUltimateTask;
 import lunatech.strength.task.BowBeamTask;
 import lunatech.strength.task.MaceUltimateTask;
@@ -97,6 +100,8 @@ public final class AbilityCommand extends Command {
             triggerAxeUltimate(player, strengthService);
         } else if ("mace".equalsIgnoreCase(assignedWeapon)) {
             triggerMaceUltimate(player, strengthService);
+        } else if ("armors".equalsIgnoreCase(assignedWeapon) || "armor".equalsIgnoreCase(assignedWeapon)) {
+            triggerArmorsUltimate(player, strengthService);
         } else {
             MessageUtil.send(
                 player,
@@ -104,6 +109,55 @@ public final class AbilityCommand extends Command {
                 "weapon", assignedWeapon.toUpperCase()
             );
         }
+    }
+
+    private void triggerArmorsUltimate(Player player, StrengthService strengthService) {
+        final ArmorsConfig settings = plugin.getConfigHandler().getArmorsConfig();
+
+        if (settings == null || !settings.enabled || !settings.ultimate.enabled) {
+            player.sendMessage(ColorParser.of("<red>Armors ultimate ability is currently disabled!</red>").build());
+            return;
+        }
+
+        if (!ArmorsAbilityListener.hasFullArmorSet(player, settings.passive.upgrades)) {
+            player.sendMessage(ColorParser.of(settings.ultimate.mustEquipFullSetMessage).build());
+            return;
+        }
+
+        final int currentStrength = strengthService.getStrength(player);
+        if (currentStrength < settings.ultimate.strengthRequired) {
+            player.sendMessage(
+                ColorParser.of(settings.ultimate.notEnoughStrengthMessage
+                    .replace("<req>", String.valueOf(settings.ultimate.strengthRequired))
+                    .replace("<current>", String.valueOf(currentStrength)))
+                    .with("req", String.valueOf(settings.ultimate.strengthRequired))
+                    .with("current", String.valueOf(currentStrength))
+                    .build()
+            );
+            return;
+        }
+
+        final UUID uuid = player.getUniqueId();
+        final long lastUse = ArmorsAbilityListener.ultimateCooldowns.getOrDefault(uuid, 0L);
+        final long cooldownMillis = settings.ultimate.cooldownSeconds * 1000L;
+        final long now = System.currentTimeMillis();
+
+        if (now - lastUse < cooldownMillis) {
+            final long secondsLeft = (cooldownMillis - (now - lastUse)) / 1000L + 1;
+            player.sendMessage(
+                ColorParser.of(settings.ultimate.ultimateCooldownMessage
+                    .replace("<seconds>", String.valueOf(secondsLeft))
+                    .replace("{seconds}", String.valueOf(secondsLeft)))
+                    .with("seconds", String.valueOf(secondsLeft))
+                    .build()
+            );
+            return;
+        }
+
+        // Activate Armors Ultimate
+        ArmorsAbilityListener.ultimateCooldowns.put(uuid, now);
+
+        new ArmorsUltimateTask(player, plugin, settings.ultimate).launch();
     }
 
     private void triggerMaceUltimate(Player player, StrengthService strengthService) {

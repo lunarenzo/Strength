@@ -3,6 +3,7 @@ package lunatech.strength.listener;
 import lunatech.strength.AbstractStrength;
 import lunatech.strength.Reloadable;
 import lunatech.strength.Strength;
+import lunatech.strength.listener.player.ArmorsAbilityListener;
 import lunatech.strength.listener.player.AxeAbilityListener;
 import lunatech.strength.listener.player.BowAbilityListener;
 import lunatech.strength.listener.player.CrossbowAbilityListener;
@@ -64,6 +65,7 @@ public class ListenerHandler implements Reloadable {
         listeners.add(new SwordAbilityListener(this.plugin, this.plugin.getStrengthService()));
         listeners.add(new AxeAbilityListener(this.plugin, this.plugin.getStrengthService()));
         listeners.add(new MaceAbilityListener(this.plugin, this.plugin.getStrengthService()));
+        listeners.add(new ArmorsAbilityListener(this.plugin, this.plugin.getStrengthService()));
         listeners.add(new MaceListener(this.plugin));
         listeners.add(new PotionListener(this.plugin));
         listeners.add(new EnchantmentRestrictionListener(this.plugin));

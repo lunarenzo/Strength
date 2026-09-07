@@ -12,6 +12,7 @@ public final class PDCKeys {
     public static final NamespacedKey STRENGTH_RECIPE = new NamespacedKey("strengthsmp", "strength_item_recipe");
     public static final NamespacedKey ITEM_REROLL = new NamespacedKey("strengthsmp", "item_reroll");
     public static final NamespacedKey REROLL_RECIPE = new NamespacedKey("strengthsmp", "reroll_item_recipe");
+    public static final NamespacedKey UPGRADED_GEAR = new NamespacedKey("strengthsmp", "upgraded_gear");
 
     private PDCKeys() {
         throw new UnsupportedOperationException("Constant class");

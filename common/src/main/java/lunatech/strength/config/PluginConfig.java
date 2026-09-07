@@ -301,7 +301,7 @@ public class PluginConfig implements VersionedConfig {
         public int rollDelaySeconds = 5;
 
         @Comment("The list of weapons available for rolling")
-        public List<String> availableWeapons = List.of("Trident", "Trident2", "Sword", "Axe", "Bow", "Shield", "Crossbow", "Mace");
+        public List<String> availableWeapons = List.of("Trident", "Trident2", "Sword", "Axe", "Bow", "Shield", "Crossbow", "Mace", "Armors");
 
         @Comment("Total number of animation steps during rolling")
         public int rollSteps = 15;

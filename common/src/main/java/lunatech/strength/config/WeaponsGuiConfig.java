@@ -204,6 +204,23 @@ public class WeaponsGuiConfig implements VersionedConfig {
             )
         ));
 
+        map.put("armors", new GuiSlotItemConfig(
+            17,
+            "DIAMOND_CHESTPLATE",
+            0,
+            "<light_purple><bold>🛡️ ARMOR MASTER (GEAR SET)</bold></light_purple>",
+            List.of(
+                "<yellow><bold>Passive Ability:</bold></yellow> <white>Gear Auto-Upgrade</white>",
+                "<gray>Equipping base armor pieces automatically upgrades them to superior armor.</gray>",
+                "",
+                "<yellow><bold>Ultimate Ability:</bold></yellow> <gold>Juggernaut Stance</gold>",
+                "<gray>Activation: <yellow>/ability</yellow> | Req: Strength <red>5</red> | CD: <green>60s</green></gray>",
+                "<gray>Grants <gold>100% knockback immunity</gold> & boosts <gold>Golden Apple Absorption</gold> for <gold>20s</gold>.</gray>",
+                "",
+                "<dark_gray>Status: {status}</dark_gray>"
+            )
+        ));
+
         return map;
     }
 
