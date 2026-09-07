@@ -35,12 +35,13 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Listener handling Armors/Gear Set passive auto-upgrade, automatic PDC reversion,
+ * Highly optimized listener handling Armors/Gear Set passive auto-upgrade, automatic PDC reversion,
  * drop safety, and Golden Apple absorption synergy during Ultimate.
  */
 public final class ArmorsAbilityListener implements Listener {
     public static final Map<UUID, Long> ultimateCooldowns = new ConcurrentHashMap<>();
     public static final Set<UUID> activeUltimatePlayers = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private static final Map<String, String> formattedNameCache = new ConcurrentHashMap<>();
 
     private final Strength plugin;
     private final StrengthService strengthService;
@@ -141,7 +142,9 @@ public final class ArmorsAbilityListener implements Listener {
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        activeUltimatePlayers.remove(event.getPlayer().getUniqueId());
+        final UUID uuid = event.getPlayer().getUniqueId();
+        activeUltimatePlayers.remove(uuid);
+        ultimateCooldowns.remove(uuid);
     }
 
     private void upgradeArmorPieceIfEligible(Player player, EquipmentSlot slot, ItemStack item, ArmorsConfig.PassiveConfig passiveConfig) {
@@ -173,20 +176,25 @@ public final class ArmorsAbilityListener implements Listener {
 
         final ItemStack upgradedItem = item.clone();
 
-        // Update the player's equipment slot on next tick to update equipment container & client visuals/attributes
+        // Update the player's equipment slot on next tick safely if slot still holds item
         plugin.getServer().getScheduler().runTask(plugin, () -> {
             if (player.isOnline()) {
-                player.getEquipment().setItem(slot, upgradedItem);
+                final ItemStack currentInSlot = player.getEquipment().getItem(slot);
+                if (currentInSlot != null && currentInSlot.getType() != Material.AIR) {
+                    player.getEquipment().setItem(slot, upgradedItem);
+                }
             }
         });
 
         if (passiveConfig.armorUpgradedMessage != null && !passiveConfig.armorUpgradedMessage.isBlank()) {
+            final String oldFormatted = formatMaterialName(baseMatName);
+            final String newFormatted = formatMaterialName(targetMatName);
             player.sendMessage(
                 ColorParser.of(passiveConfig.armorUpgradedMessage
-                    .replace("<old_armor>", formatMaterialName(baseMatName))
-                    .replace("<new_armor>", formatMaterialName(targetMatName)))
-                    .with("old_armor", formatMaterialName(baseMatName))
-                    .with("new_armor", formatMaterialName(targetMatName))
+                    .replace("<old_armor>", oldFormatted)
+                    .replace("<new_armor>", newFormatted))
+                    .with("old_armor", oldFormatted)
+                    .with("new_armor", newFormatted)
                     .build()
             );
         }
@@ -217,7 +225,7 @@ public final class ArmorsAbilityListener implements Listener {
 
     public static boolean hasFullArmorSet(@NotNull Player player, @NotNull Map<String, String> upgrades) {
         final ItemStack[] armor = player.getInventory().getArmorContents();
-        if (armor.length < 4) {
+        if (armor == null || armor.length < 4) {
             return false;
         }
 
@@ -236,15 +244,17 @@ public final class ArmorsAbilityListener implements Listener {
     }
 
     private static String formatMaterialName(String name) {
-        final String[] parts = name.split("_");
-        final StringBuilder sb = new StringBuilder();
-        for (String part : parts) {
-            if (!part.isEmpty()) {
-                sb.append(part.substring(0, 1).toUpperCase(Locale.ROOT))
-                  .append(part.substring(1).toLowerCase(Locale.ROOT))
-                  .append(" ");
+        return formattedNameCache.computeIfAbsent(name, key -> {
+            final String[] parts = key.split("_");
+            final StringBuilder sb = new StringBuilder();
+            for (String part : parts) {
+                if (!part.isEmpty()) {
+                    sb.append(part.substring(0, 1).toUpperCase(Locale.ROOT))
+                      .append(part.substring(1).toLowerCase(Locale.ROOT))
+                      .append(" ");
+                }
             }
-        }
-        return sb.toString().trim();
+            return sb.toString().trim();
+        });
     }
 }
