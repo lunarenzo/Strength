@@ -94,6 +94,9 @@ public class RulesConfig implements VersionedConfig {
         @Comment("Master toggle for the entire mace feature module. Disabling this completely disables all mace features & restrictions.")
         public boolean enabled = true;
 
+        @Comment("Mace Player Assignment Limit Submodule Settings")
+        public AssignmentLimitConfig assignmentLimit = new AssignmentLimitConfig();
+
         @Comment("Mace Limit Submodule Settings")
         public LimitConfig limit = new LimitConfig();
 
@@ -105,6 +108,18 @@ public class RulesConfig implements VersionedConfig {
 
         @Comment("Mace Container Storage Restriction Submodule Settings")
         public ContainerConfig container = new ContainerConfig();
+
+        @ConfigSerializable
+        public static class AssignmentLimitConfig {
+            @Comment("Enable or disable the mace player assignment limit submodule.")
+            public boolean enabled = true;
+
+            @Comment("Maximum number of players that can be assigned to the Mace weapon globally across the server.")
+            public int maxAssignedPlayers = 3;
+
+            @Comment("Message sent when admin tries to assign Mace but player limit is reached.")
+            public String limitReachedMessage = "<red>Cannot assign Mace! Global player limit reached (<count>/<max>).</red>";
+        }
 
         @ConfigSerializable
         public static class LimitConfig {

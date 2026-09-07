@@ -1,6 +1,7 @@
 package lunatech.strength.task;
 
 import lunatech.strength.Strength;
+import lunatech.strength.config.RulesConfig.MaceRules;
 import lunatech.strength.config.PluginConfig.WeaponSettings;
 import lunatech.strength.service.StrengthService;
 import net.kyori.adventure.text.Component;
@@ -12,6 +13,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
@@ -38,13 +40,33 @@ public final class WeaponRollTask {
         this.totalSteps = Math.max(1, settings.rollSteps);
 
         // Pre-select the winning weapon upfront so the roll visual lands on it seamlessly
-        final List<String> available = settings.availableWeapons;
+        final List<String> available = getEligibleWeapons(plugin, player, settings.availableWeapons);
         if (available != null && !available.isEmpty()) {
             final int chosenIndex = ThreadLocalRandom.current().nextInt(available.size());
             this.selectedWeapon = available.get(chosenIndex);
         } else {
             this.selectedWeapon = "Sword";
         }
+    }
+
+    private List<String> getEligibleWeapons(@NotNull Strength plugin, @NotNull Player player, List<String> configuredWeapons) {
+        if (configuredWeapons == null || configuredWeapons.isEmpty()) {
+            return List.of("Sword");
+        }
+        final List<String> eligible = new ArrayList<>(configuredWeapons);
+        final MaceRules maceRules = plugin.getConfigHandler().getRulesConfig().mace;
+        if (maceRules.enabled && maceRules.assignmentLimit.enabled) {
+            final String currentAssigned = plugin.getStrengthService().getAssignedWeapon(player);
+            final boolean isAlreadyMace = "mace".equalsIgnoreCase(currentAssigned);
+
+            final int count = plugin.getStrengthService().countAssignedPlayers("mace");
+            final int activeCount = isAlreadyMace ? Math.max(0, count - 1) : count;
+
+            if (activeCount >= maceRules.assignmentLimit.maxAssignedPlayers) {
+                eligible.removeIf("mace"::equalsIgnoreCase);
+            }
+        }
+        return eligible.isEmpty() ? List.of("Sword") : eligible;
     }
 
     public void start() {
@@ -57,7 +79,7 @@ public final class WeaponRollTask {
         }
 
         final MiniMessage mm = MiniMessage.miniMessage();
-        final List<String> available = settings.availableWeapons;
+        final List<String> available = getEligibleWeapons(plugin, player, settings.availableWeapons);
         if (available == null || available.isEmpty()) {
             return;
         }

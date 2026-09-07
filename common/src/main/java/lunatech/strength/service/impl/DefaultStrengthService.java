@@ -7,7 +7,10 @@ import lunatech.strength.config.PluginConfig.WithdrawItemSettings;
 import lunatech.strength.data.model.PlayerData;
 import lunatech.strength.data.repository.PlayerRepository;
 import lunatech.strength.service.StrengthService;
+import io.papermc.paper.persistence.PersistentDataContainerView;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
@@ -15,6 +18,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.Component;
@@ -142,5 +146,27 @@ public final class DefaultStrengthService implements StrengthService {
         });
 
         return item;
+    }
+
+    @Override
+    public int countAssignedPlayers(@NotNull String weapon) {
+        int count = 0;
+        for (OfflinePlayer offlinePlayer : Bukkit.getOfflinePlayers()) {
+            if (offlinePlayer.isOnline() && offlinePlayer.getPlayer() != null) {
+                final String assigned = getAssignedWeapon(offlinePlayer.getPlayer());
+                if (weapon.equalsIgnoreCase(assigned)) {
+                    count++;
+                }
+            } else {
+                final PersistentDataContainerView pdc = offlinePlayer.getPersistentDataContainer();
+                if (pdc.has(PDCKeys.ASSIGNED_WEAPON, PersistentDataType.STRING)) {
+                    final String assigned = pdc.get(PDCKeys.ASSIGNED_WEAPON, PersistentDataType.STRING);
+                    if (weapon.equalsIgnoreCase(assigned)) {
+                        count++;
+                    }
+                }
+            }
+        }
+        return count;
     }
 }

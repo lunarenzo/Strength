@@ -57,6 +57,14 @@ public interface StrengthService {
     void setAssignedWeapon(@NotNull Player player, @Nullable String weapon);
 
     /**
+     * Counts how many players are currently assigned to a specific weapon globally across the server.
+     *
+     * @param weapon the weapon name
+     * @return count of assigned players
+     */
+    int countAssignedPlayers(@NotNull String weapon);
+
+    /**
      * Creates a physical weapon reroll book item.
      *
      * @return the created ItemStack
