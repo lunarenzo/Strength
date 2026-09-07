@@ -2,7 +2,10 @@ package lunatech.strength.listener.player;
 
 import lunatech.strength.Strength;
 import lunatech.strength.config.Trident2Config;
+import lunatech.strength.hook.betterteams.BetterTeamsHook;
+import lunatech.strength.integration.WorldGuardHook;
 import lunatech.strength.service.StrengthService;
+import lunatech.strength.utility.MessageUtil;
 import io.github.milkdrinkers.colorparser.paper.ColorParser;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -98,13 +101,13 @@ public final class Trident2AbilityListener implements Listener {
 
         // WorldGuard region check for weapon ability
         if (plugin.getServer().getPluginManager().isPluginEnabled("WorldGuard")) {
-            if (!lunatech.strength.integration.WorldGuardHook.isAbilityAllowed(plugin, damager, damagee.getLocation())) {
-                lunatech.strength.utility.MessageUtil.send(damager, plugin.getConfigHandler().getConfig().messages.cannotUseAbilityInRegionMessage);
+            if (!WorldGuardHook.isAbilityAllowed(plugin, damager, damagee.getLocation())) {
+                MessageUtil.send(damager, plugin.getConfigHandler().getConfig().messages.cannotUseAbilityInRegionMessage);
                 return;
             }
         }
 
-        if (!lunatech.strength.hook.betterteams.BetterTeamsHook.canDamage(damager, damagee)) {
+        if (!BetterTeamsHook.canDamage(damager, damagee)) {
             return;
         }
 
