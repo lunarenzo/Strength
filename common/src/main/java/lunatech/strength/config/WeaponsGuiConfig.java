@@ -187,6 +187,23 @@ public class WeaponsGuiConfig implements VersionedConfig {
             )
         ));
 
+        map.put("trident2", new GuiSlotItemConfig(
+            16,
+            "TRIDENT",
+            0,
+            "<gold><bold>⚡ THUNDERSTORM TRIDENT (TRIDENT 2)</bold></gold>",
+            List.of(
+                "<yellow><bold>Passive Ability:</bold></yellow> <white>Sword Speed & Shield Crack</white>",
+                "<gray>Matches <gold>Sword Attack Speed (1.6)</gold> and <red>stuns blocking shields for 5s</red> on hit.</gray>",
+                "",
+                "<yellow><bold>Ultimate Ability:</bold></yellow> <gold>Thunderstorm Domain</gold>",
+                "<gray>Activation: <yellow>/ability</yellow> | Req: Strength <red>5</red> | CD: <green>60s</green></gray>",
+                "<gray>Summons a 15s thunderstorm where <gold>every critical strike</gold> strikes target with lightning.</gray>",
+                "",
+                "<dark_gray>Status: {status}</dark_gray>"
+            )
+        ));
+
         return map;
     }
 

@@ -5,17 +5,20 @@ import dev.jorel.commandapi.executors.CommandArguments;
 import lunatech.strength.AbstractStrength;
 import lunatech.strength.Strength;
 import lunatech.strength.config.TridentConfig;
+import lunatech.strength.config.Trident2Config;
 import lunatech.strength.config.BowConfig;
 import lunatech.strength.config.ShieldConfig;
 import lunatech.strength.config.CrossbowConfig;
 import lunatech.strength.config.SwordConfig;
 import lunatech.strength.listener.player.TridentAbilityListener;
+import lunatech.strength.listener.player.Trident2AbilityListener;
 import lunatech.strength.listener.player.BowAbilityListener;
 import lunatech.strength.listener.player.ShieldAbilityListener;
 import lunatech.strength.listener.player.CrossbowAbilityListener;
 import lunatech.strength.listener.player.SwordAbilityListener;
 import lunatech.strength.service.StrengthService;
 import lunatech.strength.task.TridentUltimateTask;
+import lunatech.strength.task.Trident2UltimateTask;
 import lunatech.strength.task.BowBeamTask;
 import lunatech.strength.task.ShieldUltimateTask;
 import lunatech.strength.task.SwordUltimateTask;
@@ -71,6 +74,8 @@ public final class AbilityCommand extends Command {
 
         if ("trident".equalsIgnoreCase(assignedWeapon)) {
             triggerTridentUltimate(player, strengthService);
+        } else if ("trident2".equalsIgnoreCase(assignedWeapon)) {
+            triggerTrident2Ultimate(player, strengthService);
         } else if ("bow".equalsIgnoreCase(assignedWeapon)) {
             triggerBowUltimate(player, strengthService);
         } else if ("shield".equalsIgnoreCase(assignedWeapon)) {
@@ -474,5 +479,56 @@ public final class AbilityCommand extends Command {
 
         player.playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_IRON, 1.0f, 1.2f);
         lunatech.strength.utility.MessageUtil.send(player, settings.ultimateActivatedMessage);
+    }
+
+    private void triggerTrident2Ultimate(Player player, StrengthService strengthService) {
+        final Trident2Config settings = plugin.getConfigHandler().getTrident2Config();
+        if (!settings.enabled || !settings.ultimate.enabled) {
+            return;
+        }
+
+        final int currentStrength = strengthService.getStrength(player);
+
+        // 1. Validate Weapon Held Requirement
+        if (player.getInventory().getItemInMainHand().getType() != Material.TRIDENT) {
+            lunatech.strength.utility.MessageUtil.send(player, settings.ultimate.mustHoldTridentMessage);
+            return;
+        }
+
+        // 2. Validate Strength Requirement
+        if (currentStrength < settings.ultimate.strengthRequired) {
+            lunatech.strength.utility.MessageUtil.send(
+                player,
+                settings.ultimate.notEnoughStrengthMessage,
+                Map.of("req", String.valueOf(settings.ultimate.strengthRequired), "current", String.valueOf(currentStrength))
+            );
+            return;
+        }
+
+        // 3. Validate Cooldown Requirement
+        final UUID uuid = player.getUniqueId();
+        final long now = System.currentTimeMillis();
+        final long lastUse = Trident2AbilityListener.ultimateCooldowns.getOrDefault(uuid, 0L);
+        final long cooldownMillis = settings.ultimate.cooldownSeconds * 1000L;
+        if (now - lastUse < cooldownMillis) {
+            final long secondsLeft = (cooldownMillis - (now - lastUse)) / 1000L + 1;
+            lunatech.strength.utility.MessageUtil.send(
+                player,
+                settings.ultimate.ultimateCooldownMessage,
+                "seconds", String.valueOf(secondsLeft)
+            );
+            return;
+        }
+
+        // 4. Record active ultimate and cooldown timestamp
+        Trident2AbilityListener.ultimateCooldowns.put(uuid, now);
+        Trident2AbilityListener.activeUltimatePlayers.put(uuid, now + settings.ultimate.durationSeconds * 1000L);
+
+        // 5. Trigger Thunderstorm Ultimate Task
+        new Trident2UltimateTask(player, plugin, settings.ultimate.durationSeconds)
+            .runTaskTimer(plugin, 0L, 1L);
+
+        player.playSound(player.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 1.0f, 1.0f);
+        lunatech.strength.utility.MessageUtil.send(player, settings.ultimate.ultimateActivatedMessage);
     }
 }

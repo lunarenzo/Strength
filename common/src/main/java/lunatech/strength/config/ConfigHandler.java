@@ -17,6 +17,7 @@ public class ConfigHandler implements Reloadable {
 
     private PluginConfig cfg;
     private TridentConfig tridentCfg;
+    private Trident2Config trident2Cfg;
     private BowConfig bowCfg;
     private ShieldConfig shieldCfg;
     private CrossbowConfig crossbowCfg;
@@ -64,6 +65,14 @@ public class ConfigHandler implements Reloadable {
             .withPath(weaponsDir.resolve("trident.yml"))
             .withHeader("Trident Weapon Configuration")
             .build(TridentConfig.class);
+
+        // Load decoupled Trident2 configuration
+        trident2Cfg = new ConfigLoader()
+            .withLogger(logger)
+            .withDirectory()
+            .withPath(weaponsDir.resolve("trident2.yml"))
+            .withHeader("Trident2 Weapon Configuration")
+            .build(Trident2Config.class);
 
         // 3. Load decoupled Bow configuration
         bowCfg = new ConfigLoader()
@@ -180,6 +189,15 @@ public class ConfigHandler implements Reloadable {
      */
     public PluginConfig getConfig() {
         return cfg;
+    }
+
+    /**
+     * Gets trident2 weapon configuration.
+     *
+     * @return the trident2 config
+     */
+    public Trident2Config getTrident2Config() {
+        return trident2Cfg;
     }
 
     /**
