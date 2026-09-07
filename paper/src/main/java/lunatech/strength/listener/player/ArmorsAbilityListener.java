@@ -13,9 +13,11 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -62,14 +64,14 @@ public final class ArmorsAbilityListener implements Listener {
         final ItemStack newItem = event.getNewItem();
         final ItemStack oldItem = event.getOldItem();
 
-        // 1. Process Equipped Item (New Item)
-        if (isArmors && newItem != null && newItem.getType() != Material.AIR) {
-            upgradeArmorPieceIfEligible(player, newItem, config.passive);
-        }
-
-        // 2. Process Unequipped Item (Old Item)
+        // 1. Process Unequipped Item (Old Item)
         if (oldItem != null && oldItem.getType() != Material.AIR) {
             revertUpgradedArmorPiece(oldItem);
+        }
+
+        // 2. Process Equipped Item (New Item)
+        if (isArmors && newItem != null && newItem.getType() != Material.AIR) {
+            upgradeArmorPieceIfEligible(player, event.getSlot(), newItem, config.passive);
         }
     }
 
@@ -125,12 +127,14 @@ public final class ArmorsAbilityListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onInventoryClick(InventoryClickEvent event) {
-        final ItemStack current = event.getCurrentItem();
-        if (current != null && current.getType() != Material.AIR) {
-            revertUpgradedArmorPiece(current);
+        if (event.getSlotType() != InventoryType.SlotType.ARMOR) {
+            final ItemStack current = event.getCurrentItem();
+            if (current != null && current.getType() != Material.AIR) {
+                revertUpgradedArmorPiece(current);
+            }
         }
         final ItemStack cursor = event.getCursor();
-        if (cursor.getType() != Material.AIR) {
+        if (cursor != null && cursor.getType() != Material.AIR) {
             revertUpgradedArmorPiece(cursor);
         }
     }
@@ -140,7 +144,7 @@ public final class ArmorsAbilityListener implements Listener {
         activeUltimatePlayers.remove(event.getPlayer().getUniqueId());
     }
 
-    private void upgradeArmorPieceIfEligible(Player player, ItemStack item, ArmorsConfig.PassiveConfig passiveConfig) {
+    private void upgradeArmorPieceIfEligible(Player player, EquipmentSlot slot, ItemStack item, ArmorsConfig.PassiveConfig passiveConfig) {
         final String baseMatName = item.getType().name();
         final String targetMatName = passiveConfig.upgrades.get(baseMatName);
 
@@ -166,6 +170,15 @@ public final class ArmorsAbilityListener implements Listener {
         pdc.set(PDCKeys.UPGRADED_GEAR, PersistentDataType.STRING, baseMatName);
         item.setItemMeta(meta);
         item.setType(targetMat);
+
+        final ItemStack upgradedItem = item.clone();
+
+        // Update the player's equipment slot on next tick to update equipment container & client visuals/attributes
+        plugin.getServer().getScheduler().runTask(plugin, () -> {
+            if (player.isOnline()) {
+                player.getEquipment().setItem(slot, upgradedItem);
+            }
+        });
 
         if (passiveConfig.armorUpgradedMessage != null && !passiveConfig.armorUpgradedMessage.isBlank()) {
             player.sendMessage(
