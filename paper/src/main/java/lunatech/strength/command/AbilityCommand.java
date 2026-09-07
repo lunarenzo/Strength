@@ -8,6 +8,7 @@ import lunatech.strength.config.AxeConfig;
 import lunatech.strength.config.BowConfig;
 import lunatech.strength.config.CrossbowConfig;
 import lunatech.strength.config.PluginConfig.MessagesConfig;
+import lunatech.strength.config.MaceConfig;
 import lunatech.strength.config.ShieldConfig;
 import lunatech.strength.config.SwordConfig;
 import lunatech.strength.config.Trident2Config;
@@ -16,6 +17,7 @@ import lunatech.strength.integration.WorldGuardHook;
 import lunatech.strength.listener.player.AxeAbilityListener;
 import lunatech.strength.listener.player.BowAbilityListener;
 import lunatech.strength.listener.player.CrossbowAbilityListener;
+import lunatech.strength.listener.player.MaceAbilityListener;
 import lunatech.strength.listener.player.ShieldAbilityListener;
 import lunatech.strength.listener.player.SwordAbilityListener;
 import lunatech.strength.listener.player.Trident2AbilityListener;
@@ -23,6 +25,7 @@ import lunatech.strength.listener.player.TridentAbilityListener;
 import lunatech.strength.service.StrengthService;
 import lunatech.strength.task.AxeUltimateTask;
 import lunatech.strength.task.BowBeamTask;
+import lunatech.strength.task.MaceUltimateTask;
 import lunatech.strength.task.ShieldUltimateTask;
 import lunatech.strength.task.SwordUltimateTask;
 import lunatech.strength.task.Trident2UltimateTask;
@@ -92,6 +95,8 @@ public final class AbilityCommand extends Command {
             triggerSwordUltimate(player, strengthService);
         } else if ("axe".equalsIgnoreCase(assignedWeapon)) {
             triggerAxeUltimate(player, strengthService);
+        } else if ("mace".equalsIgnoreCase(assignedWeapon)) {
+            triggerMaceUltimate(player, strengthService);
         } else {
             MessageUtil.send(
                 player,
@@ -99,6 +104,71 @@ public final class AbilityCommand extends Command {
                 "weapon", assignedWeapon.toUpperCase()
             );
         }
+    }
+
+    private void triggerMaceUltimate(Player player, StrengthService strengthService) {
+        final MaceConfig settings = plugin.getConfigHandler().getMaceConfig();
+
+        if (!settings.enabled || !settings.ultimate.enabled) {
+            player.sendMessage(ColorParser.of("<red>Mace ultimate ability is currently disabled!</red>").build());
+            return;
+        }
+
+        if (player.getInventory().getItemInMainHand().getType() != Material.MACE) {
+            player.sendMessage(ColorParser.of(settings.ultimate.mustHoldMaceMessage).build());
+            return;
+        }
+
+        final int currentStrength = strengthService.getStrength(player);
+        if (currentStrength < settings.ultimate.strengthRequired) {
+            player.sendMessage(
+                ColorParser.of(settings.ultimate.notEnoughStrengthMessage
+                    .replace("<req>", String.valueOf(settings.ultimate.strengthRequired))
+                    .replace("<current>", String.valueOf(currentStrength)))
+                    .with("req", String.valueOf(settings.ultimate.strengthRequired))
+                    .with("current", String.valueOf(currentStrength))
+                    .build()
+            );
+            return;
+        }
+
+        final UUID uuid = player.getUniqueId();
+
+        final long lastUse = MaceAbilityListener.ultimateCooldowns.getOrDefault(uuid, 0L);
+        final long cooldownMillis = settings.ultimate.cooldownSeconds * 1000L;
+        final long now = System.currentTimeMillis();
+
+        if (now - lastUse < cooldownMillis) {
+            final long secondsLeft = (cooldownMillis - (now - lastUse)) / 1000L + 1;
+            player.sendMessage(
+                ColorParser.of(settings.ultimate.ultimateCooldownMessage
+                    .replace("<seconds>", String.valueOf(secondsLeft))
+                    .replace("{seconds}", String.valueOf(secondsLeft)))
+                    .with("seconds", String.valueOf(secondsLeft))
+                    .build()
+            );
+            return;
+        }
+
+        final int currentCharge = MaceAbilityListener.ultimateHitsMap.getOrDefault(uuid, 0);
+        if (currentCharge < settings.ultimate.hitsRequired) {
+            player.sendMessage(
+                ColorParser.of(settings.ultimate.notChargedMessage
+                    .replace("<req>", String.valueOf(settings.ultimate.hitsRequired))
+                    .replace("<current>", String.valueOf(currentCharge)))
+                    .with("req", String.valueOf(settings.ultimate.hitsRequired))
+                    .with("current", String.valueOf(currentCharge))
+                    .build()
+            );
+            return;
+        }
+
+        // Activate Mace Ultimate: Cataclysmic Slam
+        MaceAbilityListener.ultimateCooldowns.put(uuid, now);
+        MaceAbilityListener.ultimateHitsMap.put(uuid, 0);
+        MaceAbilityListener.activeUltimatePlayers.put(uuid, now);
+
+        new MaceUltimateTask(player, plugin, settings.ultimate).launch();
     }
 
     private void triggerAxeUltimate(Player player, StrengthService strengthService) {

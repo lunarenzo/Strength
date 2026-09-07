@@ -7,11 +7,10 @@ import org.spongepowered.configurate.objectmapping.meta.Comment;
 import lunatech.strength.config.exception.ConfigValidationException;
 import lunatech.strength.config.migration.Migration;
 
-import java.util.List;
 import java.util.Map;
 
 /**
- * Decoupled configuration for Mace features and restrictions.
+ * Decoupled configuration for Mace weapon abilities (Passive & Ultimate).
  */
 @ConfigSerializable
 public class MaceConfig implements VersionedConfig {
@@ -35,105 +34,75 @@ public class MaceConfig implements VersionedConfig {
     public void validate() throws ConfigValidationException {
     }
 
-    @Comment("Master toggle for the entire mace feature module. Disabling this completely disables all mace features & restrictions.")
+    @Comment("Master toggle for Mace weapon passive and ultimate abilities.")
     public boolean enabled = true;
 
-    @Comment("Mace Limit Submodule Settings")
-    public LimitConfig limit = new LimitConfig();
+    @Comment("Mace Passive Ability Settings")
+    public PassiveConfig passive = new PassiveConfig();
 
-    @Comment("Mace Cooldown Submodule Settings")
-    public CooldownConfig cooldown = new CooldownConfig();
-
-    @Comment("Mace Enchanting Submodule Settings")
-    public EnchantConfig enchant = new EnchantConfig();
-
-    @Comment("Mace Container Storage Restriction Submodule Settings")
-    public ContainerConfig container = new ContainerConfig();
+    @Comment("Mace Ultimate Ability Settings")
+    public UltimateConfig ultimate = new UltimateConfig();
 
     @ConfigSerializable
-    public static class LimitConfig {
-        @Comment("Enable or disable the mace limit submodule.")
+    public static class PassiveConfig {
+        @Comment("Enable or disable Mace passive ability.")
         public boolean enabled = true;
 
-        @Comment("Maximum number of maces allowed globally across the server. Set to 0 to completely disable maces (crafting, holding, usage).")
-        public int maxAmount = 3;
+        @Comment("Hits required using Mace to trigger passive shockwave.")
+        public int hitsRequired = 3;
+
+        @Comment("Damage multiplier applied on the passive shockwave hit.")
+        public double damageMultiplier = 1.5;
+
+        @Comment("AoE shockwave radius in blocks around the target.")
+        public double shockwaveRadius = 3.5;
+
+        @Comment("Message sent when Mace passive is triggered.")
+        public String passiveTriggeredMessage = "<gold><bold>MACE PASSIVE!</bold> Heavy Seismic Shockwave triggered!</gold>";
     }
 
     @ConfigSerializable
-    public static class CooldownConfig {
-        @Comment("Enable or disable mace smash attack cooldown submodule.")
+    public static class UltimateConfig {
+        @Comment("Enable or disable Mace Cataclysmic Slam ultimate ability.")
         public boolean enabled = true;
 
-        @Comment("Cooldown duration in seconds after performing a mace smash attack.")
-        public int cooldownSeconds = 30;
-    }
+        @Comment("Strength required to activate Mace Ultimate.")
+        public int strengthRequired = 5;
 
-    @ConfigSerializable
-    public static class EnchantConfig {
-        @Comment("Enable or disable mace enchanting submodule.")
-        public boolean enabled = true;
+        @Comment("Hits required using Mace to charge Ultimate.")
+        public int hitsRequired = 5;
 
-        @Comment("Allow maces to be enchanted at all? If false, enchanting maces in enchanting tables or applying enchantments via anvils is disabled.")
-        public boolean allowEnchanting = false;
+        @Comment("Cooldown in seconds for Mace Ultimate.")
+        public int cooldownSeconds = 45;
 
-        @Comment("Allow renaming maces in an anvil even when allowEnchanting is set to false?")
-        public boolean allowRenaming = true;
+        @Comment("Leap upward velocity when activating Cataclysmic Slam.")
+        public double leapVelocity = 1.2;
 
-        @Comment("Mode engine for enchantment restrictions: WHITELIST or BLACKLIST.")
-        public String mode = "BLACKLIST";
+        @Comment("Slam explosion radius in blocks when landing.")
+        public double slamRadius = 5.0;
 
-        @Comment("""
-            ================================================================================
-             MACE ENCHANTMENT RESTRICTION FORMAT GUIDE
-            ================================================================================
-             Configure list of enchantment names or namespaced keys to blacklist or whitelist.
-             Supported Format Examples:
-               - 'minecraft:density'
-               - 'minecraft:breach'
-               - 'minecraft:wind_burst'
-               - 'minecraft:mending'
-               - 'minecraft:unbreaking'
-               - 'minecraft:sharpness'
-               - 'minecraft:smite'
-               - 'minecraft:bane_of_arthropods'
-               - 'minecraft:fire_aspect'
-               - 'minecraft:looting'
-               - 'minecraft:knockback'
-               - 'minecraft:curse_of_vanishing'
-               - 'minecraft:curse_of_binding'
-             You may enter either full namespaced keys (e.g. 'minecraft:density') or short names (e.g. 'density').
-            ================================================================================
-            """)
-        public List<String> enchantments = List.of(
-            "minecraft:density",
-            "minecraft:breach",
-            "minecraft:wind_burst"
-        );
-    }
+        @Comment("Base damage dealt by the Cataclysmic Slam explosion.")
+        public double slamDamage = 12.0;
 
-    @ConfigSerializable
-    public static class ContainerConfig {
-        @Comment("Enable or disable mace container storage restriction submodule.")
-        public boolean enabled = true;
+        @Comment("Message sent when Mace ultimate is fully charged.")
+        public String ultimateChargedMessage = "<green><bold>Cataclysmic Slam is fully charged! Type /ability to activate!</bold></green>";
 
-        @Comment("Allow storing maces inside containers?")
-        public boolean allowStorage = false;
+        @Comment("Message sent indicating ultimate charge progress.")
+        public String ultimateChargeProgressMessage = "<gray>Ultimate Charge: <gold>{charge}/{target}</gold> hits</gray>";
 
-        @Comment("Mode engine for container restrictions: BLACKLIST or WHITELIST.")
-        public String mode = "BLACKLIST";
+        @Comment("Message sent when Mace ultimate is activated.")
+        public String ultimateActivatedMessage = "<gold><bold>CATACLYSMIC SLAM ACTIVATED!</bold> Leaped into the air — slam down!</gold>";
 
-        @Comment("""
-            Comprehensive default blacklist of all tile entities, storage items, container blocks, and transport storage entities.
-            Covers: Chests, Trapped Chests, Ender Chests, Shulker Boxes (all 16 colors), Barrels, Furnaces, Blast Furnaces,
-            Smokers, Hoppers, Droppers, Dispensers, Brewing Stands, Beacons, Crafters, Chiseled Bookshelves, Decorated Pots,
-            Jukeboxes, Lecterns, Bundles (all 16 colors), Storage Minecarts, Storage Boats, Rafts, Composters, and Campfires.
-            Note: Anvils and Enchanting Tables are governed separately by the 'enchant' submodule.
-            """)
-        public List<String> containers = List.of(
-            "CHEST", "TRAPPED_CHEST", "ENDER_CHEST", "SHULKER", "BARREL",
-            "FURNACE", "BLAST_FURNACE", "SMOKER", "HOPPER", "DROPPER", "DISPENSER",
-            "BREWING", "BEACON", "CRAFTER", "BOOKSHELF", "DECORATED_POT", "JUKEBOX",
-            "LECTERN", "BUNDLE", "MINECART", "BOAT", "RAFT", "COMPOSTER", "CAMPFIRE"
-        );
+        @Comment("Message sent when player is not holding a Mace.")
+        public String mustHoldMaceMessage = "<red>You must be holding a Mace to activate your ultimate!</red>";
+
+        @Comment("Message sent when player does not have enough strength.")
+        public String notEnoughStrengthMessage = "<red>You do not have enough strength to activate your ultimate! (Required: <req>, Current: <current>)</red>";
+
+        @Comment("Message sent when ultimate is not charged yet.")
+        public String notChargedMessage = "<red>Your ultimate is not charged yet! (Required: <req>, Current: <current> hits)</red>";
+
+        @Comment("Message sent when ultimate is on cooldown.")
+        public String ultimateCooldownMessage = "<red>Your Ultimate is on cooldown for another <seconds>s!</red>";
     }
 }

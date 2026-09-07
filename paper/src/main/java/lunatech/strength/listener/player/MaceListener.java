@@ -1,7 +1,7 @@
 package lunatech.strength.listener.player;
 
 import lunatech.strength.Strength;
-import lunatech.strength.config.MaceConfig;
+import lunatech.strength.config.RulesConfig.MaceRules;
 import lunatech.strength.config.PluginConfig.MessagesConfig;
 import lunatech.strength.utility.MessageUtil;
 import org.bukkit.Material;
@@ -45,8 +45,8 @@ public final class MaceListener implements Listener {
         this.plugin = plugin;
     }
 
-    private MaceConfig getConfig() {
-        return plugin.getConfigHandler().getMaceConfig();
+    private MaceRules getConfig() {
+        return plugin.getConfigHandler().getRulesConfig().mace;
     }
 
     private MessagesConfig getMessages() {
@@ -59,7 +59,7 @@ public final class MaceListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onPrepareItemCraft(@NotNull PrepareItemCraftEvent event) {
-        final MaceConfig config = getConfig();
+        final MaceRules config = getConfig();
         if (!config.enabled) {
             return;
         }
@@ -96,7 +96,7 @@ public final class MaceListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onCraftItem(@NotNull CraftItemEvent event) {
-        final MaceConfig config = getConfig();
+        final MaceRules config = getConfig();
         if (!config.enabled) {
             return;
         }
@@ -139,7 +139,7 @@ public final class MaceListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onEntityDamageByEntity(@NotNull EntityDamageByEntityEvent event) {
-        final MaceConfig config = getConfig();
+        final MaceRules config = getConfig();
         if (!config.enabled) {
             return;
         }
@@ -187,7 +187,7 @@ public final class MaceListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onPlayerInteract(@NotNull PlayerInteractEvent event) {
-        final MaceConfig config = getConfig();
+        final MaceRules config = getConfig();
         if (!config.enabled || !config.limit.enabled) {
             return;
         }
@@ -209,7 +209,7 @@ public final class MaceListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onPlayerItemHeld(@NotNull PlayerItemHeldEvent event) {
-        final MaceConfig config = getConfig();
+        final MaceRules config = getConfig();
         if (!config.enabled || !config.limit.enabled) {
             return;
         }
@@ -230,7 +230,7 @@ public final class MaceListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onEntityPickupItem(@NotNull EntityPickupItemEvent event) {
-        final MaceConfig config = getConfig();
+        final MaceRules config = getConfig();
         if (!config.enabled || !config.limit.enabled) {
             return;
         }
@@ -263,7 +263,7 @@ public final class MaceListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onPrepareItemEnchant(@NotNull PrepareItemEnchantEvent event) {
-        final MaceConfig config = getConfig();
+        final MaceRules config = getConfig();
         if (!config.enabled || !config.enchant.enabled) {
             return;
         }
@@ -275,7 +275,7 @@ public final class MaceListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onEnchantItem(@NotNull EnchantItemEvent event) {
-        final MaceConfig config = getConfig();
+        final MaceRules config = getConfig();
         if (!config.enabled || !config.enchant.enabled) {
             return;
         }
@@ -299,7 +299,7 @@ public final class MaceListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onPrepareAnvil(@NotNull PrepareAnvilEvent event) {
-        final MaceConfig config = getConfig();
+        final MaceRules config = getConfig();
         if (!config.enabled || !config.enchant.enabled) {
             return;
         }
@@ -348,7 +348,7 @@ public final class MaceListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onInventoryClick(@NotNull InventoryClickEvent event) {
-        final MaceConfig config = getConfig();
+        final MaceRules config = getConfig();
         if (!config.enabled) {
             return;
         }
@@ -422,7 +422,7 @@ public final class MaceListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onInventoryDrag(@NotNull InventoryDragEvent event) {
-        final MaceConfig config = getConfig();
+        final MaceRules config = getConfig();
         if (!config.enabled) {
             return;
         }
@@ -463,7 +463,7 @@ public final class MaceListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onInventoryMoveItem(@NotNull InventoryMoveItemEvent event) {
-        final MaceConfig config = getConfig();
+        final MaceRules config = getConfig();
         if (!config.enabled || !config.container.enabled) {
             return;
         }
@@ -499,7 +499,7 @@ public final class MaceListener implements Listener {
                 || type == InventoryType.STONECUTTER;
     }
 
-    private boolean isContainerRestricted(@NotNull Inventory inventory, @NotNull MaceConfig.ContainerConfig config) {
+    private boolean isContainerRestricted(@NotNull Inventory inventory, @NotNull MaceRules.ContainerConfig config) {
         if (isWorkstationInventory(inventory.getType())) {
             return false;
         }
@@ -537,7 +537,7 @@ public final class MaceListener implements Listener {
         return false;
     }
 
-    private boolean isEnchantmentRestricted(@NotNull Map<Enchantment, Integer> enchants, @NotNull MaceConfig.EnchantConfig config) {
+    private boolean isEnchantmentRestricted(@NotNull Map<Enchantment, Integer> enchants, @NotNull MaceRules.EnchantConfig config) {
         if (enchants.isEmpty()) {
             return false;
         }
