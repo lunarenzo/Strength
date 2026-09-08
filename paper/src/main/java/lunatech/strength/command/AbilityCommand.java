@@ -534,12 +534,19 @@ public final class AbilityCommand extends Command {
 
     private void triggerShieldUltimate(Player player, StrengthService strengthService) {
         final ShieldConfig settings = plugin.getConfigHandler().getShieldConfig();
-        final int currentStrength = strengthService.getStrength(player);
+
+        if (settings == null || !settings.enabled || !settings.ultimate.enabled) {
+            final String disabledMsg = (settings != null && settings.ultimate != null && settings.ultimate.ultimateDisabledMessage != null)
+                ? settings.ultimate.ultimateDisabledMessage
+                : "<red>Shield ultimate ability is currently disabled!</red>";
+            player.sendMessage(ColorParser.of(disabledMsg).build());
+            return;
+        }
 
         // 1. Validate Weapon Held Requirement (Main hand or Offhand)
         if (player.getInventory().getItemInMainHand().getType() != Material.SHIELD
             && player.getInventory().getItemInOffHand().getType() != Material.SHIELD) {
-            MessageUtil.send(player, settings.mustHoldShieldMessage);
+            player.sendMessage(ColorParser.of(settings.ultimate.mustHoldShieldMessage).build());
             return;
         }
 
@@ -547,34 +554,42 @@ public final class AbilityCommand extends Command {
         final UUID uuid = player.getUniqueId();
         final long now = System.currentTimeMillis();
         final long lastUse = ShieldAbilityListener.ultimateCooldowns.getOrDefault(uuid, 0L);
-        final long cooldownMillis = settings.ultimateCooldownSeconds * 1000L;
+        final long cooldownMillis = settings.ultimate.cooldownSeconds * 1000L;
         if (now - lastUse < cooldownMillis) {
             final long secondsLeft = (cooldownMillis - (now - lastUse)) / 1000L + 1;
-            MessageUtil.send(
-                player,
-                settings.ultimateCooldownMessage,
-                "seconds", String.valueOf(secondsLeft)
-            );
+            final String msg = settings.ultimate.ultimateCooldownMessage
+                .replace("<seconds>", String.valueOf(secondsLeft))
+                .replace("{seconds}", String.valueOf(secondsLeft));
+            player.sendMessage(ColorParser.of(msg).with("seconds", String.valueOf(secondsLeft)).build());
             return;
         }
 
         // 3. Validate Strength Requirement
-        if (currentStrength < settings.ultimateStrengthRequired) {
-            MessageUtil.send(
-                player,
-                settings.notEnoughStrengthMessage,
-                Map.of("req", String.valueOf(settings.ultimateStrengthRequired), "current", String.valueOf(currentStrength))
+        final int currentStrength = strengthService.getStrength(player);
+        if (currentStrength < settings.ultimate.strengthRequired) {
+            final String msg = settings.ultimate.notEnoughStrengthMessage
+                .replace("<req>", String.valueOf(settings.ultimate.strengthRequired))
+                .replace("<current>", String.valueOf(currentStrength));
+            player.sendMessage(
+                ColorParser.of(msg)
+                    .with("req", String.valueOf(settings.ultimate.strengthRequired))
+                    .with("current", String.valueOf(currentStrength))
+                    .build()
             );
             return;
         }
 
         // 4. Validate Hit Charge Requirement
         final int currentCharge = ShieldAbilityListener.ultimateHits.getOrDefault(uuid, 0);
-        if (currentCharge < settings.ultimateHitsRequired) {
-            MessageUtil.send(
-                player,
-                settings.notChargedMessage,
-                Map.of("req", String.valueOf(settings.ultimateHitsRequired), "current", String.valueOf(currentCharge))
+        if (currentCharge < settings.ultimate.hitsRequired) {
+            final String msg = settings.ultimate.notChargedMessage
+                .replace("<req>", String.valueOf(settings.ultimate.hitsRequired))
+                .replace("<current>", String.valueOf(currentCharge));
+            player.sendMessage(
+                ColorParser.of(msg)
+                    .with("req", String.valueOf(settings.ultimate.hitsRequired))
+                    .with("current", String.valueOf(currentCharge))
+                    .build()
             );
             return;
         }
@@ -584,10 +599,10 @@ public final class AbilityCommand extends Command {
         ShieldAbilityListener.ultimateCooldowns.put(uuid, now);
 
         // 6. Trigger Ability Task (Bubble Shield & God Mode task)
-        new ShieldUltimateTask(player, settings)
+        new ShieldUltimateTask(player, plugin, settings.ultimate)
             .runTaskTimer(plugin, 0L, 1L);
 
-        MessageUtil.send(player, settings.ultimateActivatedMessage);
+        player.sendMessage(ColorParser.of(settings.ultimate.ultimateActivatedMessage).build());
     }
 
     private void triggerCrossbowUltimate(Player player, StrengthService strengthService) {

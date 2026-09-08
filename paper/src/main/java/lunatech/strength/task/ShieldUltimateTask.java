@@ -1,7 +1,9 @@
 package lunatech.strength.task;
 
+import lunatech.strength.Strength;
 import lunatech.strength.config.ShieldConfig;
 import lunatech.strength.listener.player.ShieldAbilityListener;
+import io.github.milkdrinkers.colorparser.paper.ColorParser;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -18,22 +20,24 @@ import org.joml.Vector3f;
 import java.util.UUID;
 
 /**
- * Task that manages the active Shield Ultimate: spawning the visual bubble ItemDisplay,
- * locking the spawn rotation to prevent tilting, adding it as a passenger on the player for
- * zero movement latency/lag, and removing it upon expiration.
+ * Task managing active Shield Ultimate: spawning visual bubble ItemDisplay,
+ * locking spawn pitch to prevent vertical tilting, adding it as passenger on player
+ * for zero movement latency, and removing it upon expiration.
  */
 public final class ShieldUltimateTask extends BukkitRunnable {
     private final Player player;
-    private final ShieldConfig settings;
+    private final Strength plugin;
+    private final ShieldConfig.UltimateConfig settings;
     private final int durationTicks;
     private int elapsedTicks = 0;
     private ItemDisplay bubbleEntity = null;
 
-    public ShieldUltimateTask(@NotNull Player player, @NotNull ShieldConfig settings) {
+    public ShieldUltimateTask(@NotNull Player player, @NotNull Strength plugin, @NotNull ShieldConfig.UltimateConfig settings) {
         this.player = player;
+        this.plugin = plugin;
         this.settings = settings;
-        this.durationTicks = settings.ultimateDurationTicks;
-        
+        this.durationTicks = settings.durationTicks;
+
         // Secure active status immediately on instantiation
         ShieldAbilityListener.shieldUltimateActive.put(player.getUniqueId(), true);
     }
@@ -46,14 +50,14 @@ public final class ShieldUltimateTask extends BukkitRunnable {
             return;
         }
 
-        // 1. Spawning the visual display bubble (Tick 0)
+        // 1. Spawning visual display bubble (Tick 0)
         if (elapsedTicks == 0) {
             player.getWorld().playSound(player.getLocation(), Sound.ITEM_SHIELD_BLOCK, 1.0f, 0.8f);
 
             try {
                 final Material mat = Material.valueOf(settings.bubbleMaterial);
-                
-                // Spawn at player's location with pitch locked to 0.0 to prevent vertical tilting
+
+                // Spawn at player location with pitch locked to 0.0 to prevent vertical tilting
                 final Location spawnLoc = player.getLocation().clone();
                 spawnLoc.setPitch(0.0f);
 
@@ -66,8 +70,8 @@ public final class ShieldUltimateTask extends BukkitRunnable {
                     }
                     display.setItemStack(item);
                     display.setItemDisplayTransform(ItemDisplay.ItemDisplayTransform.HEAD);
-                    
-                    // Center the bubble horizontally/vertically relative to the player mounting point (usually head level)
+
+                    // Center bubble horizontally/vertically relative to player head level
                     display.setTransformation(new Transformation(
                         new Vector3f(settings.bubbleOffsetX, settings.bubbleOffsetY, settings.bubbleOffsetZ),
                         new Quaternionf(),
@@ -76,7 +80,7 @@ public final class ShieldUltimateTask extends BukkitRunnable {
                     ));
                 });
 
-                // Set passenger so the display smoothly follows player client-side with absolute zero latency
+                // Set passenger so display smoothly follows player client-side with zero latency
                 player.addPassenger(bubbleEntity);
             } catch (Exception e) {
                 final Location spawnLoc = player.getLocation().clone();
@@ -107,7 +111,9 @@ public final class ShieldUltimateTask extends BukkitRunnable {
         }
 
         if (player.isOnline()) {
-            lunatech.strength.utility.MessageUtil.send(player, settings.ultimateExpiredMessage);
+            if (settings.ultimateExpiredMessage != null && !settings.ultimateExpiredMessage.isBlank()) {
+                player.sendMessage(ColorParser.of(settings.ultimateExpiredMessage).build());
+            }
             player.playSound(player.getLocation(), Sound.BLOCK_BEACON_DEACTIVATE, 1.0f, 1.0f);
         }
     }
