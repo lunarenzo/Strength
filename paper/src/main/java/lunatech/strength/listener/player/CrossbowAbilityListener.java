@@ -156,8 +156,13 @@ public final class CrossbowAbilityListener implements Listener {
                                 shooter.sendMessage(ColorParser.of(settings.ultimate.ultimateChargedMessage).build());
                                 shooter.playSound(shooter.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.2f);
                             } else {
+                                final String msg = settings.ultimate.ultimateChargeProgressMessage
+                                    .replace("<charge>", String.valueOf(nextUltHits))
+                                    .replace("{charge}", String.valueOf(nextUltHits))
+                                    .replace("<target>", String.valueOf(targetUltHits))
+                                    .replace("{target}", String.valueOf(targetUltHits));
                                 shooter.sendMessage(
-                                    ColorParser.of(settings.ultimate.ultimateChargeProgressMessage)
+                                    ColorParser.of(msg)
                                         .with("charge", String.valueOf(nextUltHits))
                                         .with("target", String.valueOf(targetUltHits))
                                         .build()

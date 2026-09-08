@@ -85,7 +85,7 @@ public class CrossbowConfig implements VersionedConfig {
         public String ultimateChargedMessage = "<green><bold>Crossbow Ultimate is fully charged! Use /ability to activate!</bold></green>";
 
         @Comment("Message sent indicating ultimate charge progress")
-        public String ultimateChargeProgressMessage = "<gray>Ultimate Charge: <gold>{charge}/{target}</gold> passive hits</gray>";
+        public String ultimateChargeProgressMessage = "<gray>Ultimate Charge: <gold><charge>/<target></gold> passive hits</gray>";
 
         @Comment("Message sent when crossbow ultimate is activated")
         public String ultimateActivatedMessage = "<gold><bold>CROSSBOW ULTIMATE ACTIVATED!</bold> Your next arrow shot on an enemy will immobilize them!</gold>";
@@ -103,10 +103,10 @@ public class CrossbowConfig implements VersionedConfig {
         public String mustHoldCrossbowMessage = "<red>You must be holding a Crossbow to activate your ultimate!</red>";
 
         @Comment("Message sent when player does not have enough strength")
-        public String notEnoughStrengthMessage = "<red>You do not have enough strength to activate your ultimate! (Required: {req}, Current: {current})</red>";
+        public String notEnoughStrengthMessage = "<red>You do not have enough strength to activate your ultimate! (Required: <req>, Current: <current>)</red>";
 
         @Comment("Message sent when ultimate is not charged yet")
-        public String notChargedMessage = "<red>Your ultimate is not charged yet! (Required: {req}, Current: {current} passive hits)</red>";
+        public String notChargedMessage = "<red>Your ultimate is not charged yet! (Required: <req>, Current: <current> passive hits)</red>";
 
         @Comment("Message sent to the immobilized player when attempting to move or teleport")
         public String trapEscapeBlockedMessage = "<red>You are immobilized and cannot move or teleport!</red>";
