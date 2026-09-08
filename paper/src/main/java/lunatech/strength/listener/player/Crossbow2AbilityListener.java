@@ -81,6 +81,9 @@ public final class Crossbow2AbilityListener implements Listener {
 
         final Entity projectile = event.getProjectile();
         if (projectile instanceof AbstractArrow arrow) {
+            if (config.passive.shieldPiercing) {
+                arrow.setPierceLevel(127);
+            }
             final PersistentDataContainer pdc = arrow.getPersistentDataContainer();
             pdc.set(PDCKeys.CROSSBOW2_SHOT, PersistentDataType.BYTE, (byte) 1);
         }
@@ -103,10 +106,14 @@ public final class Crossbow2AbilityListener implements Listener {
         }
 
         if (projectile.getShooter() instanceof Player shooter) {
-            // 1. Shield Piercing
+            // 1. Shield Piercing Enforcement
             if (config.passive.shieldPiercing && target instanceof Player targetPlayer) {
                 if (targetPlayer.isBlocking()) {
-                    event.setDamage(event.getDamage());
+                    try {
+                        if (event.isApplicable(EntityDamageByEntityEvent.DamageModifier.BLOCKING)) {
+                            event.setDamage(EntityDamageByEntityEvent.DamageModifier.BLOCKING, 0.0);
+                        }
+                    } catch (Throwable ignored) {}
                 }
             }
 
