@@ -16,6 +16,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -51,14 +52,30 @@ public final class ArmorsAbilityListener implements Listener {
         this.strengthService = strengthService;
     }
 
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        final ArmorsConfig config = plugin.getConfigHandler().getArmorsConfig();
+        if (config != null && config.passive != null && config.passive.upgrades != null) {
+            validateAndCleanUpgradedArmor(event.getPlayer(), config.passive.upgrades);
+        }
+    }
+
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onArmorChange(PlayerArmorChangeEvent event) {
         final ArmorsConfig config = plugin.getConfigHandler().getArmorsConfig();
-        if (config == null || !config.enabled || !config.passive.enabled) {
+        if (config == null || !config.enabled) {
             return;
         }
 
         final Player player = event.getPlayer();
+        if (config.passive != null && config.passive.upgrades != null) {
+            validateAndCleanUpgradedArmor(player, config.passive.upgrades);
+        }
+
+        if (!config.passive.enabled) {
+            return;
+        }
+
         final String assigned = strengthService.getAssignedWeapon(player);
         final boolean isArmors = assigned != null && ("armors".equalsIgnoreCase(assigned) || "armor".equalsIgnoreCase(assigned));
 
@@ -223,6 +240,31 @@ public final class ArmorsAbilityListener implements Listener {
         }
     }
 
+    public static void validateAndCleanUpgradedArmor(@NotNull Player player, @NotNull Map<String, String> currentUpgrades) {
+        if (!player.isOnline()) return;
+
+        final ItemStack[] armor = player.getInventory().getArmorContents();
+        if (armor == null) return;
+
+        for (ItemStack piece : armor) {
+            if (piece == null || piece.getType() == Material.AIR) continue;
+
+            final ItemMeta meta = piece.getItemMeta();
+            if (meta == null) continue;
+
+            final PersistentDataContainer pdc = meta.getPersistentDataContainer();
+            final String baseMatName = pdc.get(PDCKeys.UPGRADED_GEAR, PersistentDataType.STRING);
+            if (baseMatName == null) continue;
+
+            final String expectedTarget = currentUpgrades.get(baseMatName);
+            final String currentMatName = piece.getType().name();
+
+            if (expectedTarget == null || !expectedTarget.equalsIgnoreCase(currentMatName)) {
+                revertUpgradedArmorPiece(piece);
+            }
+        }
+    }
+
     public static boolean hasFullArmorSet(@NotNull Player player, @NotNull Map<String, String> upgrades) {
         final ItemStack[] armor = player.getInventory().getArmorContents();
         if (armor == null || armor.length < 4) {
@@ -234,9 +276,24 @@ public final class ArmorsAbilityListener implements Listener {
                 return false;
             }
             final String matName = piece.getType().name();
-            final boolean isBase = upgrades.containsKey(matName);
-            final boolean isUpgraded = upgrades.containsValue(matName);
-            if (!isBase && !isUpgraded) {
+
+            if (upgrades.containsKey(matName)) {
+                continue;
+            }
+
+            final ItemMeta meta = piece.getItemMeta();
+            if (meta == null) {
+                return false;
+            }
+
+            final PersistentDataContainer pdc = meta.getPersistentDataContainer();
+            final String originalBaseMat = pdc.get(PDCKeys.UPGRADED_GEAR, PersistentDataType.STRING);
+            if (originalBaseMat == null) {
+                return false;
+            }
+
+            final String expectedTarget = upgrades.get(originalBaseMat);
+            if (expectedTarget == null || !expectedTarget.equalsIgnoreCase(matName)) {
                 return false;
             }
         }
