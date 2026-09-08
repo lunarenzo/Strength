@@ -23,8 +23,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
@@ -67,6 +65,11 @@ public final class CrossbowAbilityListener implements Listener {
             return;
         }
 
+        final CrossbowConfig settings = plugin.getConfigHandler().getCrossbowConfig();
+        if (!settings.enabled) {
+            return;
+        }
+
         final String assigned = strengthService.getAssignedWeapon(player);
         if (!"crossbow".equalsIgnoreCase(assigned)) {
             return;
@@ -86,7 +89,7 @@ public final class CrossbowAbilityListener implements Listener {
         projectile.getPersistentDataContainer().set(CROSSBOW_ARROW_KEY, PersistentDataType.BYTE, (byte) 1);
         projectile.setMetadata("CrossbowArrow", new FixedMetadataValue(plugin, true));
 
-        if (crossbowUltimatePrimed.getOrDefault(uuid, false)) {
+        if (settings.ultimate.enabled && crossbowUltimatePrimed.getOrDefault(uuid, false)) {
             crossbowUltimatePrimed.put(uuid, false);
             projectile.getPersistentDataContainer().set(CROSSBOW_ULT_KEY, PersistentDataType.BYTE, (byte) 1);
             projectile.setMetadata("CrossbowUltimateArrow", new FixedMetadataValue(plugin, true));
@@ -110,6 +113,11 @@ public final class CrossbowAbilityListener implements Listener {
             return;
         }
 
+        final CrossbowConfig settings = plugin.getConfigHandler().getCrossbowConfig();
+        if (!settings.enabled) {
+            return;
+        }
+
         final String assigned = strengthService.getAssignedWeapon(shooter);
         if (!"crossbow".equalsIgnoreCase(assigned)) {
             return;
@@ -120,7 +128,6 @@ public final class CrossbowAbilityListener implements Listener {
         }
 
         final UUID shooterUuid = shooter.getUniqueId();
-        final CrossbowConfig settings = plugin.getConfigHandler().getCrossbowConfig();
 
         // Edge Case 2: Multishot Cooldown Check (5 ticks / 250ms) to prevent single Multishot burst from multi-incrementing passive
         final long now = System.currentTimeMillis();
@@ -129,30 +136,34 @@ public final class CrossbowAbilityListener implements Listener {
             lastPassiveHitTime.put(shooterUuid, now);
 
             // 1. Passive Hit Tracker: Every Nth shot hit deals configurable damage multiplier
-            final int currentPassiveHits = passiveHits.merge(shooterUuid, 1, Integer::sum);
-            if (currentPassiveHits >= settings.passiveHitsRequired) {
-                passiveHits.put(shooterUuid, 0); // reset count
+            if (settings.passive.enabled) {
+                final int currentPassiveHits = passiveHits.merge(shooterUuid, 1, Integer::sum);
+                if (currentPassiveHits >= settings.passive.hitsRequired) {
+                    passiveHits.put(shooterUuid, 0); // reset count
 
-                event.setDamage(event.getDamage() * settings.passiveDamageMultiplier);
-                shooter.sendMessage(ColorParser.of(settings.passiveTriggeredShooterMessage).build());
+                    event.setDamage(event.getDamage() * settings.passive.damageMultiplier);
+                    shooter.sendMessage(ColorParser.of(settings.passive.passiveTriggeredShooterMessage).build());
 
-                // 2. Ultimate Charge Increment
-                final int currentUltHits = ultimateHits.getOrDefault(shooterUuid, 0);
-                final int targetUltHits = settings.ultimateHitsRequired;
-                if (currentUltHits < targetUltHits) {
-                    final int nextUltHits = currentUltHits + 1;
-                    ultimateHits.put(shooterUuid, nextUltHits);
+                    // 2. Ultimate Charge Increment
+                    if (settings.ultimate.enabled) {
+                        final int currentUltHits = ultimateHits.getOrDefault(shooterUuid, 0);
+                        final int targetUltHits = settings.ultimate.hitsRequired;
+                        if (currentUltHits < targetUltHits) {
+                            final int nextUltHits = currentUltHits + 1;
+                            ultimateHits.put(shooterUuid, nextUltHits);
 
-                    if (nextUltHits == targetUltHits) {
-                        shooter.sendMessage(ColorParser.of(settings.ultimateChargedMessage).build());
-                        shooter.playSound(shooter.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.2f);
-                    } else {
-                        shooter.sendMessage(
-                            ColorParser.of(settings.ultimateChargeProgressMessage)
-                                .with("charge", String.valueOf(nextUltHits))
-                                .with("target", String.valueOf(targetUltHits))
-                                .build()
-                        );
+                            if (nextUltHits == targetUltHits) {
+                                shooter.sendMessage(ColorParser.of(settings.ultimate.ultimateChargedMessage).build());
+                                shooter.playSound(shooter.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.2f);
+                            } else {
+                                shooter.sendMessage(
+                                    ColorParser.of(settings.ultimate.ultimateChargeProgressMessage)
+                                        .with("charge", String.valueOf(nextUltHits))
+                                        .with("target", String.valueOf(targetUltHits))
+                                        .build()
+                                );
+                            }
+                        }
                     }
                 }
             }
@@ -161,7 +172,7 @@ public final class CrossbowAbilityListener implements Listener {
         // 3. Crossbow Ultimate Shot Trigger
         final boolean isUltArrow = arrow.getPersistentDataContainer().has(CROSSBOW_ULT_KEY, PersistentDataType.BYTE)
             || arrow.hasMetadata("CrossbowUltimateArrow");
-        if (isUltArrow) {
+        if (isUltArrow && settings.ultimate.enabled) {
             final UUID victimUuid = victim.getUniqueId();
             final Location freezeLoc = victim.getLocation().clone();
 
@@ -186,12 +197,12 @@ public final class CrossbowAbilityListener implements Listener {
                 }
             });
 
-            new CrossbowImmobilizeTask(victim, vehicle, settings.immobilizeDurationSeconds)
+            new CrossbowImmobilizeTask(victim, vehicle, settings.ultimate.immobilizeDurationSeconds)
                 .runTaskTimer(plugin, 0L, 1L);
 
             victim.getWorld().playSound(victim.getLocation(), Sound.ITEM_CROSSBOW_HIT, 1.0f, 0.5f);
-            victim.sendMessage(ColorParser.of(settings.immobilizedVictimMessage).build());
-            shooter.sendMessage(ColorParser.of(settings.immobilizedShooterMessage).build());
+            victim.sendMessage(ColorParser.of(settings.ultimate.immobilizedVictimMessage).build());
+            shooter.sendMessage(ColorParser.of(settings.ultimate.immobilizedShooterMessage).build());
         }
     }
 
@@ -226,7 +237,7 @@ public final class CrossbowAbilityListener implements Listener {
         if (immobilizedPlayers.containsKey(uuid)) {
             event.setCancelled(true);
             final CrossbowConfig settings = plugin.getConfigHandler().getCrossbowConfig();
-            event.getPlayer().sendMessage(ColorParser.of(settings.trapEscapeBlockedMessage).build());
+            event.getPlayer().sendMessage(ColorParser.of(settings.ultimate.trapEscapeBlockedMessage).build());
         }
     }
 

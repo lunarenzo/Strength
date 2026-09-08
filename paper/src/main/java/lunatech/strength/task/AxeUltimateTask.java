@@ -50,10 +50,10 @@ public final class AxeUltimateTask extends BukkitRunnable {
         final AxeConfig settings = plugin.getConfigHandler().getAxeConfig();
         final ItemStack head = new ItemStack(Material.PLAYER_HEAD);
         final SkullMeta meta = (SkullMeta) head.getItemMeta();
-        if (meta != null && settings.skullBase64Texture != null && !settings.skullBase64Texture.isEmpty()) {
+        if (meta != null && settings.ultimate.skullBase64Texture != null && !settings.ultimate.skullBase64Texture.isEmpty()) {
             try {
                 final PlayerProfile profile = Bukkit.createProfile(UUID.randomUUID(), "ExecutionerSkull");
-                profile.setProperty(new ProfileProperty("textures", settings.skullBase64Texture));
+                profile.setProperty(new ProfileProperty("textures", settings.ultimate.skullBase64Texture));
                 meta.setPlayerProfile(profile);
                 head.setItemMeta(meta);
             } catch (Throwable ignored) {}
@@ -86,15 +86,15 @@ public final class AxeUltimateTask extends BukkitRunnable {
                     continue;
                 }
 
-                final double total = entry.getValue() * settings.damageMultiplier;
-                final String msg = settings.pendingDamageActionbarMessage.replace("{amount}", String.format("%.1f", total));
+                final double total = entry.getValue() * settings.ultimate.damageMultiplier;
+                final String msg = settings.ultimate.pendingDamageActionbarMessage.replace("{amount}", String.format("%.1f", total));
                 target.sendActionBar(ColorParser.of(msg).build());
 
                 // 1. Floating & Rotating Skull ItemDisplay on target's head (Passenger Mounted for Zero Lag/Desync)
                 updateFloatingSkull(target, settings);
 
                 // 2. Bleeding Particle Effect dripping from target's body (Authentic Blood Item/Block Crumbs)
-                if (settings.enableBleedParticles && elapsedTicks % Math.max(1, settings.bleedParticleFrequencyTicks) == 0) {
+                if (settings.ultimate.enableBleedParticles && elapsedTicks % Math.max(1, settings.ultimate.bleedParticleFrequencyTicks) == 0) {
                     spawnBloodParticles(target, settings);
                 }
             }
@@ -105,36 +105,36 @@ public final class AxeUltimateTask extends BukkitRunnable {
 
     private void spawnBloodParticles(Player target, AxeConfig settings) {
         try {
-            Material mat = Material.matchMaterial(settings.bleedParticleMaterial);
+            Material mat = Material.matchMaterial(settings.ultimate.bleedParticleMaterial);
             if (mat == null) mat = Material.REDSTONE_BLOCK;
 
-            final String typeStr = settings.bleedParticleType != null ? settings.bleedParticleType.toUpperCase() : "ITEM";
+            final String typeStr = settings.ultimate.bleedParticleType != null ? settings.ultimate.bleedParticleType.toUpperCase() : "ITEM";
 
             if ("BLOCK".equals(typeStr) || "BLOCK_CRUMB".equals(typeStr)) {
                 target.getWorld().spawnParticle(
                     Particle.BLOCK,
                     target.getLocation().add(0, 1.0, 0),
-                    settings.bleedParticleCount,
+                    settings.ultimate.bleedParticleCount,
                     0.3, 0.5, 0.3,
-                    settings.bleedParticleSpeed,
+                    settings.ultimate.bleedParticleSpeed,
                     mat.createBlockData()
                 );
             } else if ("DAMAGE_INDICATOR".equals(typeStr)) {
                 target.getWorld().spawnParticle(
                     Particle.DAMAGE_INDICATOR,
                     target.getLocation().add(0, 1.0, 0),
-                    settings.bleedParticleCount,
+                    settings.ultimate.bleedParticleCount,
                     0.3, 0.5, 0.3,
-                    settings.bleedParticleSpeed
+                    settings.ultimate.bleedParticleSpeed
                 );
             } else {
                 // Default: Particle.ITEM (blood item crumbs)
                 target.getWorld().spawnParticle(
                     Particle.ITEM,
                     target.getLocation().add(0, 1.0, 0),
-                    settings.bleedParticleCount,
+                    settings.ultimate.bleedParticleCount,
                     0.3, 0.5, 0.3,
-                    settings.bleedParticleSpeed,
+                    settings.ultimate.bleedParticleSpeed,
                     new ItemStack(mat)
                 );
             }
@@ -142,9 +142,9 @@ public final class AxeUltimateTask extends BukkitRunnable {
             target.getWorld().spawnParticle(
                 Particle.ITEM,
                 target.getLocation().add(0, 1.0, 0),
-                settings.bleedParticleCount,
+                settings.ultimate.bleedParticleCount,
                 0.3, 0.5, 0.3,
-                settings.bleedParticleSpeed,
+                settings.ultimate.bleedParticleSpeed,
                 new ItemStack(Material.REDSTONE_BLOCK)
             );
         }
@@ -152,11 +152,11 @@ public final class AxeUltimateTask extends BukkitRunnable {
 
     private void updateFloatingSkull(Player target, AxeConfig settings) {
         final UUID targetUuid = target.getUniqueId();
-        final float finalAngleRad = (float) ((skullAngles.getOrDefault(targetUuid, 0.0f) + Math.toRadians(settings.skullRotationSpeedDegrees)) % (2.0 * Math.PI));
+        final float finalAngleRad = (float) ((skullAngles.getOrDefault(targetUuid, 0.0f) + Math.toRadians(settings.ultimate.skullRotationSpeedDegrees)) % (2.0 * Math.PI));
         skullAngles.put(targetUuid, finalAngleRad);
 
-        final float yTranslation = (float) settings.skullHeightOffset;
-        final float scale = (float) settings.skullScale;
+        final float yTranslation = (float) settings.ultimate.skullHeightOffset;
+        final float scale = (float) settings.ultimate.skullScale;
 
         ItemDisplay display = skullDisplays.get(targetUuid);
         if (display == null || !display.isValid()) {
@@ -174,7 +174,7 @@ public final class AxeUltimateTask extends BukkitRunnable {
                     new AxisAngle4f(0, 0, 1, 0)
                 ));
                 entity.setBillboard(ItemDisplay.Billboard.FIXED);
-                entity.setViewRange((float) (settings.skullViewDistanceBlocks / 64.0));
+                entity.setViewRange((float) (settings.ultimate.skullViewDistanceBlocks / 64.0));
                 entity.setMetadata("AxeExecutionerSkull", new org.bukkit.metadata.FixedMetadataValue(plugin, true));
             });
 
@@ -216,7 +216,7 @@ public final class AxeUltimateTask extends BukkitRunnable {
             for (Map.Entry<UUID, Double> entry : damageMap.entrySet()) {
                 final Player target = plugin.getServer().getPlayer(entry.getKey());
                 if (target != null && target.isOnline() && !target.isDead()) {
-                    final double rawDamage = entry.getValue() * settings.damageMultiplier;
+                    final double rawDamage = entry.getValue() * settings.ultimate.damageMultiplier;
 
                     // Multi-Totem & Totem Bypass Guardrail: Cap final burst damage to player's current health + absorption
                     final double currentHealth = target.getHealth();
@@ -232,7 +232,7 @@ public final class AxeUltimateTask extends BukkitRunnable {
         }
 
         if (attacker.isOnline()) {
-            lunatech.strength.utility.MessageUtil.send(attacker, settings.ultimateExpiredMessage);
+            lunatech.strength.utility.MessageUtil.send(attacker, settings.ultimate.ultimateExpiredMessage);
         }
     }
 }

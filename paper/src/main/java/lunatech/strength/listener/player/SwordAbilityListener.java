@@ -111,7 +111,7 @@ public final class SwordAbilityListener implements Listener {
         lastOffhandAttackTimes.remove(uuid);
 
         final SwordConfig settings = plugin.getConfigHandler().getSwordConfig();
-        player.sendMessage(ColorParser.of(settings.ultimateExpiredMessage).build());
+        player.sendMessage(ColorParser.of(settings.ultimate.ultimateExpiredMessage).build());
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -131,6 +131,11 @@ public final class SwordAbilityListener implements Listener {
 
         // Ignore uncharged spam strikes (must be >= 0.9f full attack strength, matching 1:1 main-hand vanilla)
         if (damager.getCooledAttackStrength(0.0f) < 0.9f) {
+            return;
+        }
+
+        final SwordConfig settings = plugin.getConfigHandler().getSwordConfig();
+        if (!settings.enabled) {
             return;
         }
 
@@ -158,8 +163,12 @@ public final class SwordAbilityListener implements Listener {
         final UUID uuid = damager.getUniqueId();
         final SwordConfig settings = plugin.getConfigHandler().getSwordConfig();
 
+        if (!settings.passive.enabled) {
+            return baseDamage;
+        }
+
         final long now = System.currentTimeMillis();
-        final long timeoutMs = (long) (settings.passiveComboTimeoutSeconds * 1000.0);
+        final long timeoutMs = (long) (settings.passive.comboTimeoutSeconds * 1000.0);
         final long lastHit = lastHitTimes.getOrDefault(uuid, 0L);
 
         int combo = (now - lastHit > timeoutMs) ? 0 : comboCounts.getOrDefault(uuid, 0);
@@ -168,29 +177,29 @@ public final class SwordAbilityListener implements Listener {
 
         double finalDamage = baseDamage;
 
-        if (combo >= settings.passiveComboHitsRequired) {
+        if (combo >= settings.passive.comboHitsRequired) {
             comboCounts.put(uuid, 0);
-            finalDamage = baseDamage * settings.passiveCritDamageMultiplier;
+            finalDamage = baseDamage * settings.passive.critDamageMultiplier;
 
             victim.getWorld().spawnParticle(Particle.CRIT, victim.getLocation().add(0, 1.0, 0), 15, 0.3, 0.5, 0.3, 0.1);
             victim.getWorld().spawnParticle(Particle.DAMAGE_INDICATOR, victim.getLocation().add(0, 1.0, 0), 5, 0.2, 0.4, 0.2, 0.1);
             damager.playSound(damager.getLocation(), Sound.ENTITY_PLAYER_ATTACK_CRIT, 1.0f, 1.0f);
-            damager.sendMessage(ColorParser.of(settings.passiveAutoCritMessage).build());
+            damager.sendMessage(ColorParser.of(settings.passive.passiveAutoCritMessage).build());
 
             // Increment Ultimate Charge on Passive Trigger (only when NOT in active dual wield)
-            if (!activeDualWield.getOrDefault(uuid, false)) {
+            if (settings.ultimate.enabled && !activeDualWield.getOrDefault(uuid, false)) {
                 final int currentUltHits = ultimateHits.getOrDefault(uuid, 0);
-                final int targetUltHits = settings.ultimateHitsRequired;
+                final int targetUltHits = settings.ultimate.hitsRequired;
                 if (currentUltHits < targetUltHits) {
                     final int nextUltHits = currentUltHits + 1;
                     ultimateHits.put(uuid, nextUltHits);
 
                     if (nextUltHits == targetUltHits) {
-                        damager.sendMessage(ColorParser.of(settings.ultimateChargedMessage).build());
+                        damager.sendMessage(ColorParser.of(settings.ultimate.ultimateChargedMessage).build());
                         damager.playSound(damager.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.2f);
                     } else {
                         damager.sendMessage(
-                            ColorParser.of(settings.ultimateChargeProgressMessage
+                            ColorParser.of(settings.ultimate.ultimateChargeProgressMessage
                                 .replace("{charge}", String.valueOf(nextUltHits))
                                 .replace("{target}", String.valueOf(targetUltHits)))
                                 .with("charge", String.valueOf(nextUltHits))
@@ -203,11 +212,11 @@ public final class SwordAbilityListener implements Listener {
         } else {
             comboCounts.put(uuid, combo);
             damager.sendMessage(
-                ColorParser.of(settings.passiveComboProgressMessage
+                ColorParser.of(settings.passive.passiveComboProgressMessage
                     .replace("{combo}", String.valueOf(combo))
-                    .replace("{required}", String.valueOf(settings.passiveComboHitsRequired)))
+                    .replace("{required}", String.valueOf(settings.passive.comboHitsRequired)))
                     .with("combo", String.valueOf(combo))
-                    .with("required", String.valueOf(settings.passiveComboHitsRequired))
+                    .with("required", String.valueOf(settings.passive.comboHitsRequired))
                     .build()
             );
         }
@@ -245,7 +254,7 @@ public final class SwordAbilityListener implements Listener {
                 final RayTraceResult result = player.getWorld().rayTraceEntities(
                     player.getEyeLocation(),
                     player.getEyeLocation().getDirection(),
-                    settings.offhandReachDistance,
+                    settings.ultimate.offhandReachDistance,
                     e -> e instanceof LivingEntity && !e.equals(player)
                 );
 
@@ -312,7 +321,7 @@ public final class SwordAbilityListener implements Listener {
             player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1.0f, 1.0f);
 
             // Collateral AoE sweep damage to nearby entities
-            final double sweepDmg = settings.offhandSweepDamageMultiplier + (offhand != null && offhand.containsEnchantment(org.bukkit.enchantments.Enchantment.SWEEPING_EDGE) 
+            final double sweepDmg = settings.ultimate.offhandSweepDamageMultiplier + (offhand != null && offhand.containsEnchantment(org.bukkit.enchantments.Enchantment.SWEEPING_EDGE) 
                 ? offhand.getEnchantmentLevel(org.bukkit.enchantments.Enchantment.SWEEPING_EDGE) : 0.0);
 
             for (org.bukkit.entity.Entity nearby : target.getWorld().getNearbyEntities(target.getBoundingBox().expand(1.0, 0.25, 1.0))) {

@@ -79,12 +79,13 @@ public final class BowAbilityListener implements Listener {
 
                 if (isFullDraw) {
                     final BowConfig settings = plugin.getConfigHandler().getBowConfig();
+                    if (!settings.enabled || !settings.ultimate.enabled) continue;
 
                     // Play charge sounds ONCE upon reaching full draw (>= 18 ticks of continuous right-click)
                     if (!chargeSoundPlayed.getOrDefault(uuid, false)) {
                         chargeSoundPlayed.put(uuid, true);
-                        playSound(player.getLocation(), settings.ultimateChargeSound, 1.0f, 1.0f);
-                        playSound(player.getLocation(), settings.ultimateCustomChargeSound, 1.0f, 1.0f);
+                        playSound(player.getLocation(), settings.ultimate.chargeSound, 1.0f, 1.0f);
+                        playSound(player.getLocation(), settings.ultimate.customChargeSound, 1.0f, 1.0f);
                     }
 
                     // Spawn or update face spiral entity (1m in front of eyes)
@@ -95,19 +96,19 @@ public final class BowAbilityListener implements Listener {
                     ItemDisplay spiral = activeAimSpirals.get(uuid);
                     if (spiral == null || !spiral.isValid()) {
                         try {
-                            final Material mat = Material.valueOf(settings.beamMaterial);
+                            final Material mat = Material.valueOf(settings.ultimate.beamMaterial);
                             spiral = player.getWorld().spawn(spiralLoc, ItemDisplay.class, display -> {
                                 final ItemStack item = new ItemStack(mat, 1);
                                 final ItemMeta meta = item.getItemMeta();
                                 if (meta != null) {
-                                    meta.setCustomModelData(settings.beamSpiralCustomModelData);
+                                    meta.setCustomModelData(settings.ultimate.beamSpiralCustomModelData);
                                     item.setItemMeta(meta);
                                 }
                                 display.setItemStack(item);
                                 display.setTransformation(new Transformation(
                                     new Vector3f(0),
                                     new Quaternionf(),
-                                    new Vector3f((float) settings.ultimateWidth * 2.0f, (float) settings.ultimateWidth * 2.0f, 0.01f),
+                                    new Vector3f((float) settings.ultimate.width * 2.0f, (float) settings.ultimate.width * 2.0f, 0.01f),
                                     new Quaternionf()
                                 ));
                             });
@@ -137,7 +138,7 @@ public final class BowAbilityListener implements Listener {
                         spiral.setTransformation(new Transformation(
                             new Vector3f(0),
                             rot,
-                            new Vector3f((float) settings.ultimateWidth * 2.0f, (float) settings.ultimateWidth * 2.0f, 0.01f),
+                            new Vector3f((float) settings.ultimate.width * 2.0f, (float) settings.ultimate.width * 2.0f, 0.01f),
                             new Quaternionf()
                         ));
                         spiral.teleport(spiralLoc);
@@ -146,11 +147,11 @@ public final class BowAbilityListener implements Listener {
                     // Aiming Laser Guide particles
                     final Location start = player.getEyeLocation().add(player.getEyeLocation().getDirection().multiply(1.0));
                     final Vector dir = player.getEyeLocation().getDirection().normalize();
-                    for (double d = 0.0; d < settings.ultimateRange; d += 0.5) {
+                    for (double d = 0.0; d < settings.ultimate.range; d += 0.5) {
                         final Location p = start.clone().add(dir.clone().multiply(d));
                         p.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, p, 1, 0.0, 0.0, 0.0, 0.0);
                     }
-                    final Location end = start.clone().add(dir.clone().multiply(settings.ultimateRange));
+                    final Location end = start.clone().add(dir.clone().multiply(settings.ultimate.range));
                     end.getWorld().spawnParticle(Particle.END_ROD, end, 2, 0.1, 0.1, 0.1, 0.01);
                 } else {
                     final ItemDisplay spiral = activeAimSpirals.remove(uuid);
@@ -181,13 +182,17 @@ public final class BowAbilityListener implements Listener {
             return;
         }
 
+        final BowConfig settings = plugin.getConfigHandler().getBowConfig();
+        if (!settings.enabled || !settings.ultimate.enabled) {
+            return;
+        }
+
         // Cancel arrow launch and item consumption
         event.setCancelled(true);
 
         final ItemDisplay activeSpiral = activeAimSpirals.remove(uuid);
         chargeSoundPlayed.remove(uuid);
 
-        final BowConfig settings = plugin.getConfigHandler().getBowConfig();
         final int left = remainingUltShots.merge(uuid, -1, Integer::sum);
         if (left <= 0) {
             remainingUltShots.remove(uuid);
@@ -198,7 +203,7 @@ public final class BowAbilityListener implements Listener {
             .runTaskTimer(plugin, 0L, 1L);
 
         shooter.sendMessage(ColorParser.of(
-            "<gold><bold>Fired Bow Beam!</bold> (" + Math.max(0, left) + "/" + settings.ultimateBeams + " shots remaining)</gold>"
+            "<gold><bold>Fired Bow Beam!</bold> (" + Math.max(0, left) + "/" + settings.ultimate.beams + " shots remaining)</gold>"
         ).build());
     }
 
@@ -210,6 +215,11 @@ public final class BowAbilityListener implements Listener {
 
         // Verify the item used is a standard Bow (not a Crossbow)
         if (event.getBow() == null || event.getBow().getType() != Material.BOW) {
+            return;
+        }
+
+        final BowConfig settings = plugin.getConfigHandler().getBowConfig();
+        if (!settings.enabled) {
             return;
         }
 
@@ -230,7 +240,7 @@ public final class BowAbilityListener implements Listener {
         arrow.getPersistentDataContainer().set(BOW_ARROW_KEY, PersistentDataType.BYTE, (byte) 1);
 
         final UUID uuid = shooter.getUniqueId();
-        if (bowPassiveReady.getOrDefault(uuid, false)) {
+        if (settings.passive.enabled && bowPassiveReady.getOrDefault(uuid, false)) {
             bowPassiveReady.put(uuid, false); // Consume passive trigger
 
             // Tag arrow as passive cobweb arrow
@@ -244,12 +254,12 @@ public final class BowAbilityListener implements Listener {
                         cancel();
                         return;
                     }
-                    final lunatech.strength.config.BowConfig bowCfg = plugin.getConfigHandler().getBowConfig();
+                    final BowConfig bowCfg = plugin.getConfigHandler().getBowConfig();
                     try {
-                        org.bukkit.Material mat = org.bukkit.Material.matchMaterial(bowCfg.passiveTrailParticleMaterial);
+                        org.bukkit.Material mat = org.bukkit.Material.matchMaterial(bowCfg.passive.trailParticleMaterial);
                         if (mat == null) mat = org.bukkit.Material.COBWEB;
 
-                        final String typeStr = bowCfg.passiveTrailParticleType != null ? bowCfg.passiveTrailParticleType.toUpperCase() : "ITEM";
+                        final String typeStr = bowCfg.passive.trailParticleType != null ? bowCfg.passive.trailParticleType.toUpperCase() : "ITEM";
 
                         if ("CLOUD".equals(typeStr)) {
                             arrow.getWorld().spawnParticle(Particle.CLOUD, arrow.getLocation(), 2, 0.05, 0.05, 0.05, 0.02);
@@ -264,7 +274,7 @@ public final class BowAbilityListener implements Listener {
                 }
             }.runTaskTimer(plugin, 0L, 1L);
 
-            shooter.sendMessage(ColorParser.of(plugin.getConfigHandler().getBowConfig().passiveTriggeredShooterMessage).build());
+            shooter.sendMessage(ColorParser.of(settings.passive.passiveTriggeredShooterMessage).build());
             shooter.playSound(shooter.getLocation(), Sound.ENTITY_LLAMA_SPIT, 1.0f, 1.0f);
         }
     }
@@ -287,6 +297,11 @@ public final class BowAbilityListener implements Listener {
             return;
         }
 
+        final BowConfig settings = plugin.getConfigHandler().getBowConfig();
+        if (!settings.enabled) {
+            return;
+        }
+
         // Verify shooter has Bow weapon role assigned
         final String assigned = strengthService.getAssignedWeapon(shooter);
         if (!"bow".equalsIgnoreCase(assigned)) {
@@ -298,12 +313,12 @@ public final class BowAbilityListener implements Listener {
         }
 
         final UUID shooterUuid = shooter.getUniqueId();
-        final BowConfig settings = plugin.getConfigHandler().getBowConfig();
-
         final boolean isPassiveArrow = arrow.getPersistentDataContainer().has(BOW_PASSIVE_KEY, PersistentDataType.BYTE)
             || arrow.hasMetadata("BowPassiveArrow");
 
         if (isPassiveArrow) {
+            if (!settings.passive.enabled) return;
+
             // Nullify knockback velocity (including Punch I/II or full-charge bow velocity) so target doesn't fly out of trap
             victim.setVelocity(new org.bukkit.util.Vector(0, 0, 0));
 
@@ -328,45 +343,49 @@ public final class BowAbilityListener implements Listener {
                     activeCobwebs.put(blockLoc, originalData);
                     chestBlock.setType(Material.COBWEB);
 
-                    victim.sendMessage(ColorParser.of(settings.passiveTrappedVictimMessage).build());
+                    victim.sendMessage(ColorParser.of(settings.passive.passiveTrappedVictimMessage).build());
                     victim.playSound(victimLoc, Sound.ENTITY_SPIDER_DEATH, 1.0f, 0.8f);
 
                     // Schedule automatic cobweb removal and block state restoration
                     Bukkit.getScheduler().runTaskLater(plugin, () -> {
                         restoreCobwebBlock(blockLoc);
-                    }, settings.passiveCobwebDurationSeconds * 20L);
+                    }, settings.passive.cobwebDurationSeconds * 20L);
                 }
             }, 1L);
         } else {
             // 1. Passive hit tracking: Increment hits (ONLY for normal non-passive bow hits)
-            final int currentPassiveHits = passiveHits.merge(shooterUuid, 1, Integer::sum);
-            if (currentPassiveHits >= settings.passiveHitsRequired) {
-                passiveHits.put(shooterUuid, 0); // Reset count
-                bowPassiveReady.put(shooterUuid, true); // Next valid shot will trap the target in a cobweb
+            if (settings.passive.enabled) {
+                final int currentPassiveHits = passiveHits.merge(shooterUuid, 1, Integer::sum);
+                if (currentPassiveHits >= settings.passive.hitsRequired) {
+                    passiveHits.put(shooterUuid, 0); // Reset count
+                    bowPassiveReady.put(shooterUuid, true); // Next valid shot will trap the target in a cobweb
 
-                shooter.sendMessage(ColorParser.of(settings.passiveReadyShooterMessage).build());
-                shooter.playSound(shooter.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
+                    shooter.sendMessage(ColorParser.of(settings.passive.passiveReadyShooterMessage).build());
+                    shooter.playSound(shooter.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
+                }
             }
 
             // 2. Ultimate hit tracking: Increment hits
-            final int currentUltHits = ultimateHits.getOrDefault(shooterUuid, 0);
-            final int targetUltHits = settings.ultimateHitsRequired;
-            if (currentUltHits < targetUltHits) {
-                final int nextUltHits = currentUltHits + 1;
-                ultimateHits.put(shooterUuid, nextUltHits);
+            if (settings.ultimate.enabled) {
+                final int currentUltHits = ultimateHits.getOrDefault(shooterUuid, 0);
+                final int targetUltHits = settings.ultimate.hitsRequired;
+                if (currentUltHits < targetUltHits) {
+                    final int nextUltHits = currentUltHits + 1;
+                    ultimateHits.put(shooterUuid, nextUltHits);
 
-                if (nextUltHits == targetUltHits) {
-                    shooter.sendMessage(ColorParser.of(settings.ultimateChargedMessage).build());
-                    shooter.playSound(shooter.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.2f);
-                } else {
-                    shooter.sendMessage(
-                        ColorParser.of(settings.ultimateChargeProgressMessage
-                            .replace("{charge}", String.valueOf(nextUltHits))
-                            .replace("{target}", String.valueOf(targetUltHits)))
-                            .with("charge", String.valueOf(nextUltHits))
-                            .with("target", String.valueOf(targetUltHits))
-                            .build()
-                    );
+                    if (nextUltHits == targetUltHits) {
+                        shooter.sendMessage(ColorParser.of(settings.ultimate.ultimateChargedMessage).build());
+                        shooter.playSound(shooter.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.2f);
+                    } else {
+                        shooter.sendMessage(
+                            ColorParser.of(settings.ultimate.ultimateChargeProgressMessage
+                                .replace("<charge>", String.valueOf(nextUltHits))
+                                .replace("<target>", String.valueOf(targetUltHits)))
+                                .with("charge", String.valueOf(nextUltHits))
+                                .with("target", String.valueOf(targetUltHits))
+                                .build()
+                        );
+                    }
                 }
             }
         }

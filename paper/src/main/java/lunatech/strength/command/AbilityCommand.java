@@ -340,14 +340,22 @@ public final class AbilityCommand extends Command {
 
     private void triggerAxeUltimate(Player player, StrengthService strengthService) {
         final AxeConfig settings = plugin.getConfigHandler().getAxeConfig();
+        if (settings == null || !settings.enabled || !settings.ultimate.enabled) {
+            final String disabledMsg = (settings != null && settings.ultimate != null && settings.ultimate.ultimateDisabledMessage != null)
+                ? settings.ultimate.ultimateDisabledMessage
+                : "<red>Axe ultimate ability is currently disabled!</red>";
+            player.sendMessage(ColorParser.of(disabledMsg).build());
+            return;
+        }
+
         final int currentStrength = strengthService.getStrength(player);
 
-        if (currentStrength < settings.ultimateStrengthRequired) {
+        if (currentStrength < settings.ultimate.strengthRequired) {
             player.sendMessage(
-                ColorParser.of(settings.notEnoughStrengthMessage
-                    .replace("{req}", String.valueOf(settings.ultimateStrengthRequired))
+                ColorParser.of(settings.ultimate.notEnoughStrengthMessage
+                    .replace("{req}", String.valueOf(settings.ultimate.strengthRequired))
                     .replace("{current}", String.valueOf(currentStrength)))
-                    .with("req", String.valueOf(settings.ultimateStrengthRequired))
+                    .with("req", String.valueOf(settings.ultimate.strengthRequired))
                     .with("current", String.valueOf(currentStrength))
                     .build()
             );
@@ -358,13 +366,13 @@ public final class AbilityCommand extends Command {
 
         // Check Cooldown Requirement
         final long lastUse = AxeAbilityListener.ultimateCooldowns.getOrDefault(uuid, 0L);
-        final long cooldownMillis = settings.ultimateCooldownSeconds * 1000L;
+        final long cooldownMillis = settings.ultimate.cooldownSeconds * 1000L;
         final long now = System.currentTimeMillis();
 
         if (now - lastUse < cooldownMillis) {
             final long secondsLeft = (cooldownMillis - (now - lastUse)) / 1000L + 1;
             player.sendMessage(
-                ColorParser.of(settings.ultimateCooldownMessage
+                ColorParser.of(settings.ultimate.ultimateCooldownMessage
                     .replace("<seconds>", String.valueOf(secondsLeft))
                     .replace("{seconds}", String.valueOf(secondsLeft)))
                     .with("seconds", String.valueOf(secondsLeft))
@@ -374,12 +382,12 @@ public final class AbilityCommand extends Command {
         }
 
         final int currentCharge = AxeAbilityListener.ultimateHitsMap.getOrDefault(uuid, 0);
-        if (currentCharge < settings.ultimateCritsRequired) {
+        if (currentCharge < settings.ultimate.critsRequired) {
             player.sendMessage(
-                ColorParser.of(settings.notChargedMessage
-                    .replace("{req}", String.valueOf(settings.ultimateCritsRequired))
+                ColorParser.of(settings.ultimate.notChargedMessage
+                    .replace("{req}", String.valueOf(settings.ultimate.critsRequired))
                     .replace("{current}", String.valueOf(currentCharge)))
-                    .with("req", String.valueOf(settings.ultimateCritsRequired))
+                    .with("req", String.valueOf(settings.ultimate.critsRequired))
                     .with("current", String.valueOf(currentCharge))
                     .build()
             );
@@ -388,12 +396,12 @@ public final class AbilityCommand extends Command {
 
         final ItemStack mainhand = player.getInventory().getItemInMainHand();
         if (mainhand == null || !Tag.ITEMS_AXES.isTagged(mainhand.getType())) {
-            MessageUtil.send(player, settings.mustHoldAxeMessage);
+            MessageUtil.send(player, settings.ultimate.mustHoldAxeMessage);
             return;
         }
 
         if (AxeAbilityListener.activeUltimateAttackers.getOrDefault(uuid, false)) {
-            MessageUtil.send(player, settings.alreadyActiveMessage);
+            MessageUtil.send(player, settings.ultimate.alreadyActiveMessage);
             return;
         }
 
@@ -404,12 +412,12 @@ public final class AbilityCommand extends Command {
 
         MessageUtil.send(
             player,
-            settings.ultimateActivatedMessage
-                .replace("{seconds}", String.valueOf(settings.ultimateDurationSeconds))
-                .replace("{multiplier}", String.valueOf(settings.damageMultiplier))
+            settings.ultimate.ultimateActivatedMessage
+                .replace("{seconds}", String.valueOf(settings.ultimate.durationSeconds))
+                .replace("{multiplier}", String.valueOf(settings.ultimate.damageMultiplier))
         );
 
-        new AxeUltimateTask(player, plugin, settings.ultimateDurationSeconds).runTaskTimer(plugin, 0L, 1L);
+        new AxeUltimateTask(player, plugin, settings.ultimate.durationSeconds).runTaskTimer(plugin, 0L, 1L);
     }
 
     private void triggerTridentUltimate(Player player, StrengthService strengthService) {
@@ -492,11 +500,19 @@ public final class AbilityCommand extends Command {
 
     private void triggerBowUltimate(Player player, StrengthService strengthService) {
         final BowConfig settings = plugin.getConfigHandler().getBowConfig();
+        if (settings == null || !settings.enabled || !settings.ultimate.enabled) {
+            final String disabledMsg = (settings != null && settings.ultimate != null && settings.ultimate.ultimateDisabledMessage != null)
+                ? settings.ultimate.ultimateDisabledMessage
+                : "<red>Bow ultimate ability is currently disabled!</red>";
+            player.sendMessage(ColorParser.of(disabledMsg).build());
+            return;
+        }
+
         final int currentStrength = strengthService.getStrength(player);
 
         // 1. Validate Weapon Held Requirement
         if (player.getInventory().getItemInMainHand().getType() != Material.BOW) {
-            MessageUtil.send(player, settings.mustHoldBowMessage);
+            MessageUtil.send(player, settings.ultimate.mustHoldBowMessage);
             return;
         }
 
@@ -504,34 +520,34 @@ public final class AbilityCommand extends Command {
         final UUID uuid = player.getUniqueId();
         final long now = System.currentTimeMillis();
         final long lastUse = BowAbilityListener.ultimateCooldowns.getOrDefault(uuid, 0L);
-        final long cooldownMillis = settings.ultimateCooldownSeconds * 1000L;
+        final long cooldownMillis = settings.ultimate.cooldownSeconds * 1000L;
         if (now - lastUse < cooldownMillis) {
             final long secondsLeft = (cooldownMillis - (now - lastUse)) / 1000L + 1;
             MessageUtil.send(
                 player,
-                settings.ultimateCooldownMessage,
+                settings.ultimate.ultimateCooldownMessage,
                 "seconds", String.valueOf(secondsLeft)
             );
             return;
         }
 
         // 3. Validate Strength Requirement
-        if (currentStrength < settings.ultimateStrengthRequired) {
+        if (currentStrength < settings.ultimate.strengthRequired) {
             MessageUtil.send(
                 player,
-                settings.notEnoughStrengthMessage,
-                Map.of("req", String.valueOf(settings.ultimateStrengthRequired), "current", String.valueOf(currentStrength))
+                settings.ultimate.notEnoughStrengthMessage,
+                Map.of("req", String.valueOf(settings.ultimate.strengthRequired), "current", String.valueOf(currentStrength))
             );
             return;
         }
 
         // 4. Validate Hit Charge Requirement
         final int currentCharge = BowAbilityListener.ultimateHits.getOrDefault(uuid, 0);
-        if (currentCharge < settings.ultimateHitsRequired) {
+        if (currentCharge < settings.ultimate.hitsRequired) {
             MessageUtil.send(
                 player,
-                settings.notChargedMessage,
-                Map.of("req", String.valueOf(settings.ultimateHitsRequired), "current", String.valueOf(currentCharge))
+                settings.ultimate.notChargedMessage,
+                Map.of("req", String.valueOf(settings.ultimate.hitsRequired), "current", String.valueOf(currentCharge))
             );
             return;
         }
@@ -539,12 +555,12 @@ public final class AbilityCommand extends Command {
         // 5. Clear Ultimate Charge, set remaining shots, and record cooldown timestamp
         BowAbilityListener.ultimateHits.put(uuid, 0);
         BowAbilityListener.ultimateCooldowns.put(uuid, now);
-        BowAbilityListener.remainingUltShots.put(uuid, settings.ultimateBeams);
+        BowAbilityListener.remainingUltShots.put(uuid, settings.ultimate.beams);
 
         // Sound cue for arming ultimate
         player.playSound(player.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 1.0f, 1.2f);
 
-        MessageUtil.send(player, settings.ultimateActivatedMessage);
+        MessageUtil.send(player, settings.ultimate.ultimateActivatedMessage);
     }
 
     private void triggerShieldUltimate(Player player, StrengthService strengthService) {
@@ -622,20 +638,28 @@ public final class AbilityCommand extends Command {
 
     private void triggerCrossbowUltimate(Player player, StrengthService strengthService) {
         final CrossbowConfig settings = plugin.getConfigHandler().getCrossbowConfig();
+        if (settings == null || !settings.enabled || !settings.ultimate.enabled) {
+            final String disabledMsg = (settings != null && settings.ultimate != null && settings.ultimate.ultimateDisabledMessage != null)
+                ? settings.ultimate.ultimateDisabledMessage
+                : "<red>Crossbow ultimate ability is currently disabled!</red>";
+            player.sendMessage(ColorParser.of(disabledMsg).build());
+            return;
+        }
+
         final int currentStrength = strengthService.getStrength(player);
 
         // 1. Validate Weapon Held Requirement
         if (player.getInventory().getItemInMainHand().getType() != Material.CROSSBOW) {
-            MessageUtil.send(player, settings.mustHoldCrossbowMessage);
+            MessageUtil.send(player, settings.ultimate.mustHoldCrossbowMessage);
             return;
         }
 
         // 2. Validate Strength Requirement
-        if (currentStrength < settings.ultimateStrengthRequired) {
+        if (currentStrength < settings.ultimate.strengthRequired) {
             MessageUtil.send(
                 player,
-                settings.notEnoughStrengthMessage,
-                Map.of("req", String.valueOf(settings.ultimateStrengthRequired), "current", String.valueOf(currentStrength))
+                settings.ultimate.notEnoughStrengthMessage,
+                Map.of("req", String.valueOf(settings.ultimate.strengthRequired), "current", String.valueOf(currentStrength))
             );
             return;
         }
@@ -643,14 +667,14 @@ public final class AbilityCommand extends Command {
         // 3. Validate Cooldown Requirement
         final UUID uuid = player.getUniqueId();
         final long lastUse = CrossbowAbilityListener.ultimateCooldowns.getOrDefault(uuid, 0L);
-        final long cooldownMillis = settings.ultimateCooldownSeconds * 1000L;
+        final long cooldownMillis = settings.ultimate.cooldownSeconds * 1000L;
         final long now = System.currentTimeMillis();
 
         if (now - lastUse < cooldownMillis) {
             final long secondsLeft = (cooldownMillis - (now - lastUse)) / 1000L + 1;
             MessageUtil.send(
                 player,
-                settings.ultimateCooldownMessage,
+                settings.ultimate.ultimateCooldownMessage,
                 "seconds", String.valueOf(secondsLeft)
             );
             return;
@@ -658,11 +682,11 @@ public final class AbilityCommand extends Command {
 
         // 4. Validate Hit Charge Requirement
         final int currentCharge = CrossbowAbilityListener.ultimateHits.getOrDefault(uuid, 0);
-        if (currentCharge < settings.ultimateHitsRequired) {
+        if (currentCharge < settings.ultimate.hitsRequired) {
             MessageUtil.send(
                 player,
-                settings.notChargedMessage,
-                Map.of("req", String.valueOf(settings.ultimateHitsRequired), "current", String.valueOf(currentCharge))
+                settings.ultimate.notChargedMessage,
+                Map.of("req", String.valueOf(settings.ultimate.hitsRequired), "current", String.valueOf(currentCharge))
             );
             return;
         }
@@ -674,18 +698,26 @@ public final class AbilityCommand extends Command {
 
         // Feedbacks
         player.playSound(player.getLocation(), Sound.ITEM_CROSSBOW_LOADING_END, 1.0f, 1.0f);
-        MessageUtil.send(player, settings.ultimateActivatedMessage);
+        MessageUtil.send(player, settings.ultimate.ultimateActivatedMessage);
     }
 
     private void triggerSwordUltimate(Player player, StrengthService strengthService) {
         final SwordConfig settings = plugin.getConfigHandler().getSwordConfig();
+        if (settings == null || !settings.enabled || !settings.ultimate.enabled) {
+            final String disabledMsg = (settings != null && settings.ultimate != null && settings.ultimate.ultimateDisabledMessage != null)
+                ? settings.ultimate.ultimateDisabledMessage
+                : "<red>Sword ultimate ability is currently disabled!</red>";
+            player.sendMessage(ColorParser.of(disabledMsg).build());
+            return;
+        }
+
         final int currentStrength = strengthService.getStrength(player);
 
-        if (currentStrength < settings.ultimateStrengthRequired) {
+        if (currentStrength < settings.ultimate.strengthRequired) {
             MessageUtil.send(
                 player,
-                settings.notEnoughStrengthMessage,
-                Map.of("req", String.valueOf(settings.ultimateStrengthRequired), "current", String.valueOf(currentStrength))
+                settings.ultimate.notEnoughStrengthMessage,
+                Map.of("req", String.valueOf(settings.ultimate.strengthRequired), "current", String.valueOf(currentStrength))
             );
             return;
         }
@@ -694,32 +726,32 @@ public final class AbilityCommand extends Command {
 
         // Validate Cooldown Requirement
         final long lastUse = SwordAbilityListener.ultimateCooldowns.getOrDefault(uuid, 0L);
-        final long cooldownMillis = settings.ultimateCooldownSeconds * 1000L;
+        final long cooldownMillis = settings.ultimate.cooldownSeconds * 1000L;
         final long now = System.currentTimeMillis();
 
         if (now - lastUse < cooldownMillis) {
             final long secondsLeft = (cooldownMillis - (now - lastUse)) / 1000L + 1;
             MessageUtil.send(
                 player,
-                settings.ultimateCooldownMessage,
+                settings.ultimate.ultimateCooldownMessage,
                 "seconds", String.valueOf(secondsLeft)
             );
             return;
         }
 
         final int currentCharge = SwordAbilityListener.ultimateHits.getOrDefault(uuid, 0);
-        if (currentCharge < settings.ultimateHitsRequired) {
+        if (currentCharge < settings.ultimate.hitsRequired) {
             MessageUtil.send(
                 player,
-                settings.notChargedMessage,
-                Map.of("req", String.valueOf(settings.ultimateHitsRequired), "current", String.valueOf(currentCharge))
+                settings.ultimate.notChargedMessage,
+                Map.of("req", String.valueOf(settings.ultimate.hitsRequired), "current", String.valueOf(currentCharge))
             );
             return;
         }
 
         final ItemStack mainHand = player.getInventory().getItemInMainHand();
         if (mainHand == null || !Tag.ITEMS_SWORDS.isTagged(mainHand.getType())) {
-            MessageUtil.send(player, settings.mustHoldSwordMessage);
+            MessageUtil.send(player, settings.ultimate.mustHoldSwordMessage);
             return;
         }
 
@@ -748,10 +780,10 @@ public final class AbilityCommand extends Command {
         SwordAbilityListener.activeDualWield.put(uuid, true);
 
         // Start duration task
-        new SwordUltimateTask(player, plugin, settings.ultimateDurationSeconds).runTaskTimer(plugin, 0L, 1L);
+        new SwordUltimateTask(player, plugin, settings.ultimate.durationSeconds).runTaskTimer(plugin, 0L, 1L);
 
         player.playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_IRON, 1.0f, 1.2f);
-        MessageUtil.send(player, settings.ultimateActivatedMessage);
+        MessageUtil.send(player, settings.ultimate.ultimateActivatedMessage);
     }
 
     private void triggerTrident2Ultimate(Player player, StrengthService strengthService) {

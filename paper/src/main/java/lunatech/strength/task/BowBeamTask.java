@@ -54,29 +54,29 @@ public final class BowBeamTask extends BukkitRunnable {
 
         // 1. Fire Phase (Tick 0 - Immediately upon release)
         if (beamTick == 0) {
-            playSound(player.getLocation(), settings.ultimateFireSound, 1.0f, 1.0f);
+            playSound(player.getLocation(), settings.ultimate.fireSound, 1.0f, 1.0f);
 
             // Calculate center spawn location for the main beam (Z scale mid-point)
-            final Location center = player.getEyeLocation().add(player.getEyeLocation().getDirection().multiply(settings.ultimateRange / 2.0 + 1.5));
+            final Location center = player.getEyeLocation().add(player.getEyeLocation().getDirection().multiply(settings.ultimate.range / 2.0 + 1.5));
             center.setYaw(player.getEyeLocation().getYaw());
             center.setPitch(player.getEyeLocation().getPitch());
 
             try {
-                final Material mat = Material.valueOf(settings.beamMaterial);
+                final Material mat = Material.valueOf(settings.ultimate.beamMaterial);
                 
                 // Spawn main beam Display
                 currentBeamEntity = player.getWorld().spawn(center, ItemDisplay.class, display -> {
                     final ItemStack item = new ItemStack(mat, 1);
                     final ItemMeta meta = item.getItemMeta();
                     if (meta != null) {
-                        meta.setCustomModelData(settings.beamCustomModelData);
+                        meta.setCustomModelData(settings.ultimate.beamCustomModelData);
                         item.setItemMeta(meta);
                     }
                     display.setItemStack(item);
                     display.setTransformation(new Transformation(
                         new Vector3f(0),
                         new Quaternionf(),
-                        new Vector3f((float) settings.ultimateWidth, (float) settings.ultimateWidth, (float) settings.ultimateRange / 3.0f),
+                        new Vector3f((float) settings.ultimate.width, (float) settings.ultimate.width, (float) settings.ultimate.range / 3.0f),
                         new Quaternionf()
                     ));
                 });
@@ -91,14 +91,14 @@ public final class BowBeamTask extends BukkitRunnable {
                         final ItemStack item = new ItemStack(mat, 1);
                         final ItemMeta meta = item.getItemMeta();
                         if (meta != null) {
-                            meta.setCustomModelData(settings.beamSpiralCustomModelData);
+                            meta.setCustomModelData(settings.ultimate.beamSpiralCustomModelData);
                             item.setItemMeta(meta);
                         }
                         display.setItemStack(item);
                         display.setTransformation(new Transformation(
                             new Vector3f(0),
                             new Quaternionf(),
-                            new Vector3f((float) settings.ultimateWidth * 2.0f, (float) settings.ultimateWidth * 2.0f, 0.01f),
+                            new Vector3f((float) settings.ultimate.width * 2.0f, (float) settings.ultimate.width * 2.0f, 0.01f),
                             new Quaternionf()
                         ));
                     });
@@ -113,15 +113,15 @@ public final class BowBeamTask extends BukkitRunnable {
             final Set<LivingEntity> damaged = new HashSet<>();
             final Location eyeLoc = player.getEyeLocation();
             final Vector beamDir = eyeLoc.getDirection().normalize();
-            for (double d = 1.0; d <= settings.ultimateRange; d += 0.5) {
+            for (double d = 1.0; d <= settings.ultimate.range; d += 0.5) {
                 final Location point = eyeLoc.clone().add(beamDir.clone().multiply(d));
-                for (Entity entity : point.getWorld().getNearbyEntities(point, settings.ultimateWidth + 1.0, settings.ultimateWidth + 1.0, settings.ultimateWidth + 1.0)) {
+                for (Entity entity : point.getWorld().getNearbyEntities(point, settings.ultimate.width + 1.0, settings.ultimate.width + 1.0, settings.ultimate.width + 1.0)) {
                     if (entity instanceof LivingEntity living && living != player && !(living instanceof ItemDisplay)) {
                         if (living instanceof Player target && !lunatech.strength.hook.betterteams.BetterTeamsHook.canDamage(player, target)) {
                             continue;
                         }
                         if (damaged.add(living)) {
-                            living.damage(settings.ultimateDamage, player);
+                            living.damage(settings.ultimate.damage, player);
                             living.getWorld().playSound(living.getLocation(), Sound.ENTITY_GENERIC_HURT, 1.0f, 1.0f);
                         }
                     }
@@ -135,16 +135,16 @@ public final class BowBeamTask extends BukkitRunnable {
             final Quaternionf rot = new Quaternionf().rotateZ((float) Math.toRadians(angle));
 
             // Pulsing/Tapering scale (shrink to 0 in the last 10 ticks)
-            float scale = (float) settings.ultimateWidth;
+            float scale = (float) settings.ultimate.width;
             if (beamTick > 10) {
-                scale = (float) settings.ultimateWidth * (1.0f - (beamTick - 10) / 10.0f);
+                scale = (float) settings.ultimate.width * (1.0f - (beamTick - 10) / 10.0f);
             }
 
             if (currentBeamEntity != null && currentBeamEntity.isValid()) {
                 currentBeamEntity.setTransformation(new Transformation(
                     new Vector3f(0),
                     rot,
-                    new Vector3f(scale, scale, (float) settings.ultimateRange / 3.0f),
+                    new Vector3f(scale, scale, (float) settings.ultimate.range / 3.0f),
                     new Quaternionf()
                 ));
                 currentBeamEntity.setInterpolationDuration(1);
