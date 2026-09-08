@@ -25,6 +25,7 @@ public class ConfigHandler implements Reloadable {
     private AxeConfig axeCfg;
     private MaceConfig maceCfg;
     private ArmorsConfig armorsCfg;
+    private SpearConfig spearCfg;
     private PotionConfig potionCfg;
     private EnchantmentConfig enchantmentCfg;
     private RulesConfig rulesCfg;
@@ -130,6 +131,14 @@ public class ConfigHandler implements Reloadable {
             .withPath(weaponsDir.resolve("armors.yml"))
             .withHeader("Armors Weapon & Feature Configuration")
             .build(ArmorsConfig.class);
+
+        // Load decoupled Spear configuration
+        spearCfg = new ConfigLoader()
+            .withLogger(logger)
+            .withDirectory()
+            .withPath(weaponsDir.resolve("spear.yml"))
+            .withHeader("Spear Weapon Configuration")
+            .build(SpearConfig.class);
 
         // 9. Load decoupled Potion Restriction configuration
         potionCfg = new ConfigLoader()
@@ -279,6 +288,15 @@ public class ConfigHandler implements Reloadable {
      */
     public ArmorsConfig getArmorsConfig() {
         return armorsCfg;
+    }
+
+    /**
+     * Gets spear weapon configuration.
+     *
+     * @return the spear config
+     */
+    public SpearConfig getSpearConfig() {
+        return spearCfg;
     }
 
     /**

@@ -17,6 +17,7 @@ import lunatech.strength.listener.player.RerollConfirmationGuiListener;
 import lunatech.strength.listener.player.RerollConsumeListener;
 import lunatech.strength.listener.player.RerollRecipeGuiListener;
 import lunatech.strength.listener.player.ShieldAbilityListener;
+import lunatech.strength.listener.player.SpearAbilityListener;
 import lunatech.strength.listener.player.StrengthConsumeListener;
 import lunatech.strength.listener.player.StrengthRecipeGuiListener;
 import lunatech.strength.listener.player.SwordAbilityListener;
@@ -66,6 +67,7 @@ public class ListenerHandler implements Reloadable {
         listeners.add(new AxeAbilityListener(this.plugin, this.plugin.getStrengthService()));
         listeners.add(new MaceAbilityListener(this.plugin, this.plugin.getStrengthService()));
         listeners.add(new ArmorsAbilityListener(this.plugin, this.plugin.getStrengthService()));
+        listeners.add(new SpearAbilityListener(this.plugin, this.plugin.getStrengthService()));
         listeners.add(new MaceListener(this.plugin));
         listeners.add(new PotionListener(this.plugin));
         listeners.add(new EnchantmentRestrictionListener(this.plugin));

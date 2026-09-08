@@ -221,6 +221,23 @@ public class WeaponsGuiConfig implements VersionedConfig {
             )
         ));
 
+        map.put("spear", new GuiSlotItemConfig(
+            18,
+            "DIAMOND_SPEAR",
+            0,
+            "<gold><bold>🗡️ SPEAR OF ACHILLES</bold></gold>",
+            List.of(
+                "<yellow><bold>Passive Ability:</bold></yellow> <white>Sword Speed & Poke Bonus</white>",
+                "<gray>Boosts attack speed to <gold>Sword Speed (1.6)</gold> and deals <red>+2.0 bonus damage</red> on strikes.</gray>",
+                "",
+                "<yellow><bold>Ultimate Ability:</bold></yellow> <gold>Relentless Thrust (Zero Hunger Lunge)</gold>",
+                "<gray>Activation: <yellow>/ability</yellow> | Req: Strength <red>5</red> | Charges: <gold>5 hits</gold> | CD: <green>60s</green></gray>",
+                "<gray>Auto-enchants spear & removes hunger consumption during lunges for <gold>15s</gold>.</gray>",
+                "",
+                "<dark_gray>Status: {status}</dark_gray>"
+            )
+        ));
+
         return map;
     }
 

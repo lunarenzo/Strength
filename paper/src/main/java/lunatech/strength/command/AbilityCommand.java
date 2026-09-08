@@ -11,6 +11,7 @@ import lunatech.strength.config.CrossbowConfig;
 import lunatech.strength.config.PluginConfig.MessagesConfig;
 import lunatech.strength.config.MaceConfig;
 import lunatech.strength.config.ShieldConfig;
+import lunatech.strength.config.SpearConfig;
 import lunatech.strength.config.SwordConfig;
 import lunatech.strength.config.Trident2Config;
 import lunatech.strength.config.TridentConfig;
@@ -21,6 +22,7 @@ import lunatech.strength.listener.player.BowAbilityListener;
 import lunatech.strength.listener.player.CrossbowAbilityListener;
 import lunatech.strength.listener.player.MaceAbilityListener;
 import lunatech.strength.listener.player.ShieldAbilityListener;
+import lunatech.strength.listener.player.SpearAbilityListener;
 import lunatech.strength.listener.player.SwordAbilityListener;
 import lunatech.strength.listener.player.Trident2AbilityListener;
 import lunatech.strength.listener.player.TridentAbilityListener;
@@ -30,6 +32,7 @@ import lunatech.strength.task.AxeUltimateTask;
 import lunatech.strength.task.BowBeamTask;
 import lunatech.strength.task.MaceUltimateTask;
 import lunatech.strength.task.ShieldUltimateTask;
+import lunatech.strength.task.SpearUltimateTask;
 import lunatech.strength.task.SwordUltimateTask;
 import lunatech.strength.task.Trident2UltimateTask;
 import lunatech.strength.task.TridentUltimateTask;
@@ -102,6 +105,8 @@ public final class AbilityCommand extends Command {
             triggerMaceUltimate(player, strengthService);
         } else if ("armors".equalsIgnoreCase(assignedWeapon) || "armor".equalsIgnoreCase(assignedWeapon)) {
             triggerArmorsUltimate(player, strengthService);
+        } else if ("spear".equalsIgnoreCase(assignedWeapon)) {
+            triggerSpearUltimate(player, strengthService);
         } else {
             MessageUtil.send(
                 player,
@@ -109,6 +114,69 @@ public final class AbilityCommand extends Command {
                 "weapon", assignedWeapon.toUpperCase()
             );
         }
+    }
+
+    private void triggerSpearUltimate(Player player, StrengthService strengthService) {
+        final SpearConfig settings = plugin.getConfigHandler().getSpearConfig();
+
+        if (settings == null || !settings.enabled || !settings.ultimate.enabled) {
+            player.sendMessage(ColorParser.of("<red>Spear ultimate ability is currently disabled!</red>").build());
+            return;
+        }
+
+        if (!SpearAbilityListener.isSpear(player.getInventory().getItemInMainHand())) {
+            player.sendMessage(ColorParser.of(settings.ultimate.mustHoldSpearMessage).build());
+            return;
+        }
+
+        final int currentStrength = strengthService.getStrength(player);
+        if (currentStrength < settings.ultimate.strengthRequired) {
+            player.sendMessage(
+                ColorParser.of(settings.ultimate.notEnoughStrengthMessage
+                    .replace("<req>", String.valueOf(settings.ultimate.strengthRequired))
+                    .replace("<current>", String.valueOf(currentStrength)))
+                    .with("req", String.valueOf(settings.ultimate.strengthRequired))
+                    .with("current", String.valueOf(currentStrength))
+                    .build()
+            );
+            return;
+        }
+
+        final UUID uuid = player.getUniqueId();
+        final int currentHits = SpearAbilityListener.ultimateHits.getOrDefault(uuid, 0);
+        if (currentHits < settings.ultimate.hitsRequired) {
+            player.sendMessage(
+                ColorParser.of(settings.ultimate.notChargedMessage
+                    .replace("<req>", String.valueOf(settings.ultimate.hitsRequired))
+                    .replace("<current>", String.valueOf(currentHits)))
+                    .with("req", String.valueOf(settings.ultimate.hitsRequired))
+                    .with("current", String.valueOf(currentHits))
+                    .build()
+            );
+            return;
+        }
+
+        final long lastUse = SpearAbilityListener.ultimateCooldowns.getOrDefault(uuid, 0L);
+        final long cooldownMillis = settings.ultimate.cooldownSeconds * 1000L;
+        final long now = System.currentTimeMillis();
+
+        if (now - lastUse < cooldownMillis) {
+            final long secondsLeft = (cooldownMillis - (now - lastUse)) / 1000L + 1;
+            player.sendMessage(
+                ColorParser.of(settings.ultimate.ultimateCooldownMessage
+                    .replace("<seconds>", String.valueOf(secondsLeft))
+                    .replace("{seconds}", String.valueOf(secondsLeft)))
+                    .with("seconds", String.valueOf(secondsLeft))
+                    .build()
+            );
+            return;
+        }
+
+        // Activate Spear Ultimate
+        SpearAbilityListener.ultimateHits.put(uuid, 0);
+        SpearAbilityListener.ultimateCooldowns.put(uuid, now);
+
+        new SpearUltimateTask(player, plugin, settings.ultimate).launch();
     }
 
     private void triggerArmorsUltimate(Player player, StrengthService strengthService) {
