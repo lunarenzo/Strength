@@ -32,9 +32,11 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 
 /**
  * Listener handling Spear passive abilities (faster attack speed, bonus poke damage, hit charging),
@@ -100,7 +102,7 @@ public final class SpearAbilityListener implements Listener {
         }
 
         // 2. Ultimate Hit Charging
-        if (config.ultimate.enabled) {
+        if (config.ultimate.enabled && !activeUltimatePlayers.containsKey(uuid)) {
             final int currentHits = ultimateHits.getOrDefault(uuid, 0);
             if (currentHits < config.ultimate.hitsRequired) {
                 final int newHits = currentHits + 1;
@@ -144,10 +146,39 @@ public final class SpearAbilityListener implements Listener {
             if (isSpearUser && isSpear(nextItem)) {
                 final SpearConfig config = plugin.getConfigHandler().getSpearConfig();
                 if (config != null && config.enabled && config.passive.enabled && config.passive.matchSwordAttackSpeed) {
-                    // Add +4.0 attack speed so spear recovery matches sword speed 1.6
-                    speedAttr.addModifier(new AttributeModifier(ATTACK_SPEED_KEY, 4.0, AttributeModifier.Operation.ADD_NUMBER));
+                    // Vanilla player base attack speed is 4.0. Vanilla sword has -2.4 modifier for net 1.6 attack speed.
+                    // Adding -2.4 modifier sets net spear attack speed to 1.6 (sword attack speed).
+                    speedAttr.addModifier(new AttributeModifier(ATTACK_SPEED_KEY, -2.4, AttributeModifier.Operation.ADD_NUMBER));
                 }
             }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onHandSwap(PlayerSwapHandItemsEvent event) {
+        final Player player = event.getPlayer();
+        plugin.getServer().getScheduler().runTask(plugin, () -> updateAttackSpeed(player));
+    }
+
+    public void updateAttackSpeed(@NotNull Player player) {
+        final AttributeInstance speedAttr = player.getAttribute(Attribute.ATTACK_SPEED);
+        if (speedAttr == null) return;
+
+        removeAttackSpeedModifier(speedAttr);
+
+        final String assigned = strengthService.getAssignedWeapon(player);
+        if (assigned == null || !"spear".equalsIgnoreCase(assigned)) {
+            return;
+        }
+
+        final ItemStack mainHand = player.getInventory().getItemInMainHand();
+        if (!isSpear(mainHand)) {
+            return;
+        }
+
+        final SpearConfig config = plugin.getConfigHandler().getSpearConfig();
+        if (config != null && config.enabled && config.passive.enabled && config.passive.matchSwordAttackSpeed) {
+            speedAttr.addModifier(new AttributeModifier(ATTACK_SPEED_KEY, -2.4, AttributeModifier.Operation.ADD_NUMBER));
         }
     }
 
@@ -163,7 +194,28 @@ public final class SpearAbilityListener implements Listener {
         if (meta == null) return;
 
         final PersistentDataContainer pdc = meta.getPersistentDataContainer();
-        pdc.set(TEMP_ULT_KEY, PersistentDataType.BYTE, (byte) 1);
+
+        // Capture original enchantment levels before applying temporary ones
+        if (!pdc.has(TEMP_ULT_KEY, PersistentDataType.BYTE)) {
+            pdc.set(TEMP_ULT_KEY, PersistentDataType.BYTE, (byte) 1);
+
+            final StringBuilder preEnchantsSb = new StringBuilder();
+            for (String entry : settings.autoEnchantments) {
+                if (entry == null || entry.isBlank()) continue;
+                final String[] parts = entry.split(":");
+                final String enchKey = parts[0].trim().toLowerCase();
+                final NamespacedKey key = NamespacedKey.minecraft(enchKey);
+                final Enchantment enchantment = Registry.ENCHANTMENT.get(key);
+                if (enchantment != null) {
+                    final int preLevel = meta.getEnchantLevel(enchantment);
+                    if (preEnchantsSb.length() > 0) {
+                        preEnchantsSb.append(";");
+                    }
+                    preEnchantsSb.append(enchKey).append("=").append(preLevel);
+                }
+            }
+            pdc.set(PDCKeys.SPEAR_PRE_ULT_ENCHANTS, PersistentDataType.STRING, preEnchantsSb.toString());
+        }
 
         for (String entry : settings.autoEnchantments) {
             if (entry == null || entry.isBlank()) continue;
@@ -197,7 +249,22 @@ public final class SpearAbilityListener implements Listener {
         final PersistentDataContainer pdc = meta.getPersistentDataContainer();
         if (!pdc.has(TEMP_ULT_KEY, PersistentDataType.BYTE)) return;
 
+        final String preEnchantsData = pdc.get(PDCKeys.SPEAR_PRE_ULT_ENCHANTS, PersistentDataType.STRING);
         pdc.remove(TEMP_ULT_KEY);
+        pdc.remove(PDCKeys.SPEAR_PRE_ULT_ENCHANTS);
+
+        final Map<String, Integer> preEnchantMap = new HashMap<>();
+        if (preEnchantsData != null && !preEnchantsData.isBlank()) {
+            final String[] pairs = preEnchantsData.split(";");
+            for (String pair : pairs) {
+                final String[] kv = pair.split("=");
+                if (kv.length == 2) {
+                    try {
+                        preEnchantMap.put(kv[0].toLowerCase(), Integer.parseInt(kv[1]));
+                    } catch (NumberFormatException ignored) {}
+                }
+            }
+        }
 
         for (String entry : settings.autoEnchantments) {
             if (entry == null || entry.isBlank()) continue;
@@ -207,7 +274,12 @@ public final class SpearAbilityListener implements Listener {
             final NamespacedKey key = NamespacedKey.minecraft(enchKey);
             final Enchantment enchantment = Registry.ENCHANTMENT.get(key);
             if (enchantment != null) {
-                meta.removeEnchant(enchantment);
+                final int preLevel = preEnchantMap.getOrDefault(enchKey, 0);
+                if (preLevel > 0) {
+                    meta.addEnchant(enchantment, preLevel, true);
+                } else {
+                    meta.removeEnchant(enchantment);
+                }
             }
         }
 
