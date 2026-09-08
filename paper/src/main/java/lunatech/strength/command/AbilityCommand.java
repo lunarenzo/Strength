@@ -8,6 +8,7 @@ import lunatech.strength.config.ArmorsConfig;
 import lunatech.strength.config.AxeConfig;
 import lunatech.strength.config.BowConfig;
 import lunatech.strength.config.CrossbowConfig;
+import lunatech.strength.config.Crossbow2Config;
 import lunatech.strength.config.PluginConfig.MessagesConfig;
 import lunatech.strength.config.MaceConfig;
 import lunatech.strength.config.ShieldConfig;
@@ -20,6 +21,7 @@ import lunatech.strength.listener.player.ArmorsAbilityListener;
 import lunatech.strength.listener.player.AxeAbilityListener;
 import lunatech.strength.listener.player.BowAbilityListener;
 import lunatech.strength.listener.player.CrossbowAbilityListener;
+import lunatech.strength.listener.player.Crossbow2AbilityListener;
 import lunatech.strength.listener.player.MaceAbilityListener;
 import lunatech.strength.listener.player.ShieldAbilityListener;
 import lunatech.strength.listener.player.SpearAbilityListener;
@@ -30,6 +32,7 @@ import lunatech.strength.service.StrengthService;
 import lunatech.strength.task.ArmorsUltimateTask;
 import lunatech.strength.task.AxeUltimateTask;
 import lunatech.strength.task.BowBeamTask;
+import lunatech.strength.task.Crossbow2UltimateTask;
 import lunatech.strength.task.MaceUltimateTask;
 import lunatech.strength.task.ShieldUltimateTask;
 import lunatech.strength.task.SpearUltimateTask;
@@ -107,6 +110,8 @@ public final class AbilityCommand extends Command {
             triggerArmorsUltimate(player, strengthService);
         } else if ("spear".equalsIgnoreCase(assignedWeapon)) {
             triggerSpearUltimate(player, strengthService);
+        } else if ("crossbow2".equalsIgnoreCase(assignedWeapon)) {
+            triggerCrossbow2Ultimate(player, strengthService);
         } else {
             MessageUtil.send(
                 player,
@@ -180,6 +185,58 @@ public final class AbilityCommand extends Command {
         SpearAbilityListener.ultimateCooldowns.put(uuid, now);
 
         new SpearUltimateTask(player, plugin, settings.ultimate).launch();
+    }
+
+    private void triggerCrossbow2Ultimate(Player player, StrengthService strengthService) {
+        final Crossbow2Config settings = plugin.getConfigHandler().getCrossbow2Config();
+
+        if (settings == null || !settings.enabled || !settings.ultimate.enabled) {
+            final String disabledMsg = (settings != null && settings.ultimate != null && settings.ultimate.ultimateDisabledMessage != null)
+                ? settings.ultimate.ultimateDisabledMessage
+                : "<red>Crossbow2 ultimate ability is currently disabled!</red>";
+            player.sendMessage(ColorParser.of(disabledMsg).build());
+            return;
+        }
+
+        if (!Crossbow2AbilityListener.isCrossbow(player.getInventory().getItemInMainHand())) {
+            player.sendMessage(ColorParser.of(settings.ultimate.mustHoldCrossbowMessage).build());
+            return;
+        }
+
+        final int currentStrength = strengthService.getStrength(player);
+        if (currentStrength < settings.ultimate.strengthRequired) {
+            player.sendMessage(
+                ColorParser.of(settings.ultimate.notEnoughStrengthMessage
+                    .replace("<req>", String.valueOf(settings.ultimate.strengthRequired))
+                    .replace("<current>", String.valueOf(currentStrength)))
+                    .with("req", String.valueOf(settings.ultimate.strengthRequired))
+                    .with("current", String.valueOf(currentStrength))
+                    .build()
+            );
+            return;
+        }
+
+        final UUID uuid = player.getUniqueId();
+        final long lastUse = Crossbow2AbilityListener.ultimateCooldowns.getOrDefault(uuid, 0L);
+        final long cooldownMillis = settings.ultimate.cooldownSeconds * 1000L;
+        final long now = System.currentTimeMillis();
+
+        if (now - lastUse < cooldownMillis) {
+            final long secondsLeft = (cooldownMillis - (now - lastUse)) / 1000L + 1;
+            player.sendMessage(
+                ColorParser.of(settings.ultimate.ultimateCooldownMessage
+                    .replace("<seconds>", String.valueOf(secondsLeft))
+                    .replace("{seconds}", String.valueOf(secondsLeft)))
+                    .with("seconds", String.valueOf(secondsLeft))
+                    .build()
+            );
+            return;
+        }
+
+        // Activate Crossbow2 Ultimate
+        Crossbow2AbilityListener.ultimateCooldowns.put(uuid, now);
+
+        new Crossbow2UltimateTask(player, plugin, settings.ultimate).launch();
     }
 
     private void triggerArmorsUltimate(Player player, StrengthService strengthService) {
