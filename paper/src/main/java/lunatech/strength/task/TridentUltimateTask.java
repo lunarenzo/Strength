@@ -1,70 +1,87 @@
 package lunatech.strength.task;
 
+import lunatech.strength.Strength;
 import lunatech.strength.config.TridentConfig;
+import lunatech.strength.hook.betterteams.BetterTeamsHook;
+import lunatech.strength.integration.WorldGuardHook;
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+import java.util.UUID;
+
 /**
- * Task that manages the Thunderous Barrage Ultimate ability for Trident:
- * Rapid forward thrust strikes piercing enemies with high speed, applying slowness to caster
- * and spawning custom 3D FreeMinecraftModels VFX and custom thunder ronin sounds.
+ * Task managing active Trident Ultimate (Thunderous Barrage):
+ * Rapid forward thrust strikes piercing enemies with high speed, applying slowness to caster,
+ * spawning custom 3D FreeMinecraftModels VFX, and playing custom audio.
  */
 public final class TridentUltimateTask extends BukkitRunnable {
     // Pre-cached static particle transition to eliminate GC heap allocations in the 20 Hz tick loop
     private static final Particle.DustTransition RING_DUST_TRANSITION =
         new Particle.DustTransition(Color.fromRGB(243, 255, 178), Color.fromRGB(50, 255, 211), 1.2f);
 
+    private static final String BARRAGE_ACTIVE_KEY = "trident_barrage_active";
+
     // Pre-cached static MethodHandles for FMM dynamic reflection (< 0.001 mspt overhead)
-    private static java.lang.invoke.MethodHandle FMM_CREATE_HANDLE;
-    private static java.lang.invoke.MethodHandle FMM_PLAY_ANIMATION_HANDLE;
-    private static java.lang.invoke.MethodHandle FMM_TELEPORT_HANDLE;
-    private static java.lang.invoke.MethodHandle FMM_REMOVE_HANDLE;
+    private static MethodHandle FMM_CREATE_HANDLE;
+    private static MethodHandle FMM_PLAY_ANIMATION_HANDLE;
+    private static MethodHandle FMM_TELEPORT_HANDLE;
+    private static MethodHandle FMM_REMOVE_HANDLE;
 
     static {
         try {
-            Class<?> staticEntityClass = Class.forName("com.magmaguy.freeminecraftmodels.customentity.StaticEntity");
-            java.lang.invoke.MethodHandles.Lookup lookup = java.lang.invoke.MethodHandles.publicLookup();
+            final Class<?> staticEntityClass = Class.forName("com.magmaguy.freeminecraftmodels.customentity.StaticEntity");
+            final MethodHandles.Lookup lookup = MethodHandles.publicLookup();
 
             FMM_CREATE_HANDLE = lookup.findStatic(staticEntityClass, "create",
-                java.lang.invoke.MethodType.methodType(staticEntityClass, String.class, Location.class));
+                MethodType.methodType(staticEntityClass, String.class, Location.class));
 
             FMM_PLAY_ANIMATION_HANDLE = lookup.findVirtual(staticEntityClass, "playAnimation",
-                java.lang.invoke.MethodType.methodType(boolean.class, String.class, boolean.class, boolean.class));
+                MethodType.methodType(boolean.class, String.class, boolean.class, boolean.class));
 
             FMM_TELEPORT_HANDLE = lookup.findVirtual(staticEntityClass, "teleport",
-                java.lang.invoke.MethodType.methodType(void.class, Location.class, boolean.class));
+                MethodType.methodType(void.class, Location.class, boolean.class));
 
             FMM_REMOVE_HANDLE = lookup.findVirtual(staticEntityClass, "remove",
-                java.lang.invoke.MethodType.methodType(void.class));
-        } catch (Throwable ignored) {
+                MethodType.methodType(void.class));
+        } catch (ReflectiveOperationException ignored) {
             // FreeMinecraftModels not present or API signature changed
         }
     }
 
     private final Player player;
-    private final TridentConfig settings;
+    private final Strength plugin;
+    private final TridentConfig.UltimateConfig settings;
     private final int durationTicks;
-    private int elapsedTicks = 0;
+    private int elapsedTicks;
+    private int executedHits;
 
     // FMM model reference stored dynamically to avoid hard compile classloading dependency failures
-    private Object barrageFmmModel = null;
+    private Object barrageFmmModel;
 
-    public TridentUltimateTask(@NotNull Player player, @NotNull TridentConfig settings) {
+    public TridentUltimateTask(@NotNull Player player, @NotNull Strength plugin, @NotNull TridentConfig.UltimateConfig settings) {
         this.player = player;
+        this.plugin = plugin;
         this.settings = settings;
-        this.durationTicks = settings.ultimateDurationTicks;
+        this.durationTicks = settings.durationTicks;
     }
-
-    private int executedHits = 0;
 
     @Override
     public void run() {
@@ -87,21 +104,23 @@ public final class TridentUltimateTask extends BukkitRunnable {
             final double baseWorldX = loc.getX();
             final double baseWorldY = loc.getY() + 0.1;
             final double baseWorldZ = loc.getZ();
-            final org.bukkit.World world = loc.getWorld();
+            final World world = loc.getWorld();
 
-            for (int i = 0; i < 40; i++) {
-                final double angle = (2 * Math.PI / 40) * i;
-                final double px = baseWorldX + (radius * Math.cos(angle));
-                final double pz = baseWorldZ + (radius * Math.sin(angle));
-                world.spawnParticle(Particle.DUST_COLOR_TRANSITION, px, baseWorldY, pz, 1, 0, 0, 0, 0, RING_DUST_TRANSITION);
+            if (world != null) {
+                for (int i = 0; i < 40; i++) {
+                    final double angle = (2 * Math.PI / 40.0) * i;
+                    final double px = baseWorldX + (radius * Math.cos(angle));
+                    final double pz = baseWorldZ + (radius * Math.sin(angle));
+                    world.spawnParticle(Particle.DUST_COLOR_TRANSITION, px, baseWorldY, pz, 1, 0, 0, 0, 0, RING_DUST_TRANSITION);
+                }
             }
         }
 
         // 2. Spawn FMM Model & Start Barrage Audio (Tick 8)
         if (elapsedTicks == 8) {
-            final org.bukkit.plugin.Plugin plugin = org.bukkit.plugin.java.JavaPlugin.getProvidingPlugin(getClass());
-            player.setMetadata("trident_barrage_active", new org.bukkit.metadata.FixedMetadataValue(plugin, true));
-            final org.bukkit.util.Vector forwardDir = player.getLocation().getDirection().setY(0).normalize();
+            final Plugin pluginInstance = JavaPlugin.getProvidingPlugin(getClass());
+            player.setMetadata(BARRAGE_ACTIVE_KEY, new FixedMetadataValue(pluginInstance, true));
+            final Vector forwardDir = player.getLocation().getDirection().setY(0).normalize();
             final Location spawnLoc = player.getLocation().add(0, 1.2, 0).add(forwardDir.clone().multiply(1.5));
             spawnLoc.setYaw((float) (player.getLocation().getYaw() + settings.modelYawOffsetDegrees));
             spawnFmmModel(settings.barrageModelId, spawnLoc);
@@ -111,24 +130,24 @@ public final class TridentUltimateTask extends BukkitRunnable {
         // Keep 3D model attached to player as player moves or turns (1:1 smooth pitch & yaw tracking via MethodHandle)
         if (elapsedTicks >= 8 && barrageFmmModel != null && FMM_TELEPORT_HANDLE != null) {
             try {
-                final org.bukkit.util.Vector dir = player.getLocation().getDirection().normalize();
+                final Vector dir = player.getLocation().getDirection().normalize();
                 final Location currentModelLoc = player.getLocation().add(0, 1.2, 0).add(dir.clone().multiply(1.5));
                 currentModelLoc.setYaw((float) (player.getLocation().getYaw() + settings.modelYawOffsetDegrees));
                 currentModelLoc.setPitch(player.getLocation().getPitch());
                 FMM_TELEPORT_HANDLE.invoke(barrageFmmModel, currentModelLoc, false);
-            } catch (Throwable ignored) {}
+            } catch (Throwable ignored) {
+            }
         }
 
         // 3. Multi-Thrust Damage Loop (up to maxBarrageHits spaced every configured interval ticks)
-        final int interval = Math.max(1, settings.lightningStrikeIntervalTicks);
+        final int interval = Math.max(1, settings.strikeIntervalTicks);
         if (elapsedTicks >= 8 && (elapsedTicks - 8) % interval == 0 && executedHits < settings.maxBarrageHits) {
             executedHits++;
-            final Location eyeLoc = player.getEyeLocation();
-            final double reachLength = settings.ultimateRadius;
-            final double halfWidth = settings.ultimateWidthBlocks / 2.0;
+            final double reachLength = settings.radius;
+            final double halfWidth = settings.widthBlocks / 2.0;
 
             // Horizontal forward look vector (ignoring pitch skew for strict box projection)
-            final org.bukkit.util.Vector forwardDir = player.getLocation().getDirection().setY(0);
+            final Vector forwardDir = player.getLocation().getDirection().setY(0);
             if (forwardDir.lengthSquared() < 1e-6) {
                 forwardDir.setX(1).setY(0).setZ(0);
             } else {
@@ -136,16 +155,24 @@ public final class TridentUltimateTask extends BukkitRunnable {
             }
 
             // Perpendicular horizontal right vector (90 deg to right of forward look)
-            final org.bukkit.util.Vector rightDir = new org.bukkit.util.Vector(-forwardDir.getZ(), 0, forwardDir.getX()).normalize();
+            final Vector rightDir = new Vector(-forwardDir.getZ(), 0, forwardDir.getX()).normalize();
 
             // Real-time damage box raycast following player camera direction
-            for (LivingEntity target : player.getWorld().getNearbyLivingEntities(player.getLocation(), reachLength + 1.0)) {
+            final World world = player.getWorld();
+            for (LivingEntity target : world.getNearbyLivingEntities(player.getLocation(), reachLength + 1.0)) {
                 if (target.equals(player) || target instanceof ArmorStand || !target.isValid() || target.isDead()) {
                     continue;
                 }
 
+                // WorldGuard region check for target location
+                if (plugin.getServer().getPluginManager().isPluginEnabled("WorldGuard")) {
+                    if (!WorldGuardHook.isAbilityAllowed(plugin, player, target.getLocation())) {
+                        continue;
+                    }
+                }
+
                 // Vector from player feet to target feet
-                final org.bukkit.util.Vector toTarget = target.getLocation().toVector().subtract(player.getLocation().toVector());
+                final Vector toTarget = target.getLocation().toVector().subtract(player.getLocation().toVector());
 
                 // 1. Forward projection length check (must be strictly in front of player between 0.1 and reachLength)
                 final double forwardDist = toTarget.dot(forwardDir);
@@ -153,7 +180,7 @@ public final class TridentUltimateTask extends BukkitRunnable {
                     continue;
                 }
 
-                // 2. Lateral width check (must be within halfWidth to the left or right of center line)
+                // 2. Lateral width check (must be within halfWidth to left or right of center line)
                 final double lateralDist = Math.abs(toTarget.dot(rightDir));
                 if (lateralDist > halfWidth) {
                     continue;
@@ -165,25 +192,26 @@ public final class TridentUltimateTask extends BukkitRunnable {
                     continue;
                 }
 
-                if (target instanceof Player targetPlayer && !lunatech.strength.hook.betterteams.BetterTeamsHook.canDamage(player, targetPlayer)) {
+                if (target instanceof Player targetPlayer && !BetterTeamsHook.canDamage(player, targetPlayer)) {
                     continue;
                 }
 
-                // Save velocity before damage to prevent knockback (1:1 MythicMobs pkb=true)
-                final org.bukkit.util.Vector preVel = target.getVelocity().clone();
+                // Save velocity before damage to prevent knockback
+                final Vector preVel = target.getVelocity().clone();
 
-                // Bypass invulnerability frames matching MythicMobs hnp=true (Has No Protection)
+                // Bypass invulnerability frames matching MythicMobs hnp=true
                 target.setMaximumNoDamageTicks(0);
                 target.setNoDamageTicks(0);
 
                 // Deal barrage thrust damage
-                target.damage(settings.ultimateDamage, player);
+                target.damage(settings.damage, player);
                 target.setNoDamageTicks(0);
 
-                // Cancel Spigot knockback impulse on next tick (1:1 MythicMobs pkb=true)
+                // Cancel Spigot knockback impulse on next tick
                 final LivingEntity finalTarget = target;
-                org.bukkit.Bukkit.getScheduler().runTaskLater(
-                    org.bukkit.plugin.java.JavaPlugin.getProvidingPlugin(getClass()),
+                final Plugin pluginInstance = JavaPlugin.getProvidingPlugin(getClass());
+                Bukkit.getScheduler().runTaskLater(
+                    pluginInstance,
                     () -> {
                         if (finalTarget.isValid() && !finalTarget.isDead()) {
                             finalTarget.setVelocity(preVel);
@@ -203,7 +231,7 @@ public final class TridentUltimateTask extends BukkitRunnable {
     private void tryPlaySound(String customSoundKey, Sound fallbackSound, float volume, float pitch) {
         try {
             player.getWorld().playSound(player.getLocation(), customSoundKey, volume, pitch);
-        } catch (Throwable t) {
+        } catch (Exception t) {
             player.getWorld().playSound(player.getLocation(), fallbackSound, volume, pitch);
         }
     }
@@ -213,9 +241,9 @@ public final class TridentUltimateTask extends BukkitRunnable {
             return;
         }
         try {
-            Object model = FMM_CREATE_HANDLE.invoke(modelId, location);
+            final Object model = FMM_CREATE_HANDLE.invoke(modelId, location);
             if (model != null) {
-                boolean success = (boolean) FMM_PLAY_ANIMATION_HANDLE.invoke(model, "skill", false, false);
+                final boolean success = (boolean) FMM_PLAY_ANIMATION_HANDLE.invoke(model, "skill", false, false);
                 if (!success) {
                     FMM_PLAY_ANIMATION_HANDLE.invoke(model, "animation", false, false);
                 }
@@ -231,20 +259,23 @@ public final class TridentUltimateTask extends BukkitRunnable {
             return;
         }
         try {
-            Object impact = FMM_CREATE_HANDLE.invoke(impactModelId, location);
+            final Object impact = FMM_CREATE_HANDLE.invoke(impactModelId, location);
             if (impact != null) {
                 try {
-                    boolean success = (boolean) FMM_PLAY_ANIMATION_HANDLE.invoke(impact, "animation", false, false);
+                    final boolean success = (boolean) FMM_PLAY_ANIMATION_HANDLE.invoke(impact, "animation", false, false);
                     if (!success) {
                         FMM_PLAY_ANIMATION_HANDLE.invoke(impact, "skill", false, false);
                     }
-                } catch (Throwable ignored) {}
-                org.bukkit.Bukkit.getScheduler().runTaskLater(
-                    org.bukkit.plugin.java.JavaPlugin.getProvidingPlugin(getClass()),
+                } catch (Throwable ignored) {
+                }
+                final Plugin pluginInstance = JavaPlugin.getProvidingPlugin(getClass());
+                Bukkit.getScheduler().runTaskLater(
+                    pluginInstance,
                     () -> {
                         try {
                             FMM_REMOVE_HANDLE.invoke(impact);
-                        } catch (Throwable ignored) {}
+                        } catch (Throwable ignored) {
+                        }
                     },
                     6L
                 );
@@ -255,14 +286,15 @@ public final class TridentUltimateTask extends BukkitRunnable {
     }
 
     private void cleanup() {
-        if (player.hasMetadata("trident_barrage_active")) {
-            final org.bukkit.plugin.Plugin plugin = org.bukkit.plugin.java.JavaPlugin.getProvidingPlugin(getClass());
-            player.removeMetadata("trident_barrage_active", plugin);
+        if (player.hasMetadata(BARRAGE_ACTIVE_KEY)) {
+            final Plugin pluginInstance = JavaPlugin.getProvidingPlugin(getClass());
+            player.removeMetadata(BARRAGE_ACTIVE_KEY, pluginInstance);
         }
         if (barrageFmmModel != null && FMM_REMOVE_HANDLE != null) {
             try {
                 FMM_REMOVE_HANDLE.invoke(barrageFmmModel);
-            } catch (Throwable ignored) {}
+            } catch (Throwable ignored) {
+            }
             barrageFmmModel = null;
         }
     }

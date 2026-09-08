@@ -2,10 +2,13 @@ package lunatech.strength.listener.player;
 
 import lunatech.strength.Strength;
 import lunatech.strength.config.TridentConfig;
+import lunatech.strength.hook.betterteams.BetterTeamsHook;
+import lunatech.strength.integration.WorldGuardHook;
 import lunatech.strength.service.StrengthService;
+import lunatech.strength.utility.MessageUtil;
 import io.github.milkdrinkers.colorparser.paper.ColorParser;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -23,6 +26,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * Listener that tracks player hits with a trident to trigger the lightning passive and charge the ultimate.
  */
 public final class TridentAbilityListener implements Listener {
+    private static final String BARRAGE_ACTIVE_KEY = "trident_barrage_active";
+
     private final Strength plugin;
     private final StrengthService strengthService;
 
@@ -42,6 +47,11 @@ public final class TridentAbilityListener implements Listener {
             return;
         }
 
+        final TridentConfig settings = plugin.getConfigHandler().getTridentConfig();
+        if (settings == null || !settings.enabled) {
+            return;
+        }
+
         // Verify that damager is holding a Trident
         if (damager.getInventory().getItemInMainHand().getType() != Material.TRIDENT) {
             return;
@@ -55,71 +65,78 @@ public final class TridentAbilityListener implements Listener {
 
         // WorldGuard region check for weapon ability
         if (plugin.getServer().getPluginManager().isPluginEnabled("WorldGuard")) {
-            if (!lunatech.strength.integration.WorldGuardHook.isAbilityAllowed(plugin, damager, damagee.getLocation())) {
-                lunatech.strength.utility.MessageUtil.send(damager, plugin.getConfigHandler().getConfig().messages.cannotUseAbilityInRegionMessage);
+            if (!WorldGuardHook.isAbilityAllowed(plugin, damager, damagee.getLocation())) {
+                MessageUtil.send(damager, plugin.getConfigHandler().getConfig().messages.cannotUseAbilityInRegionMessage);
                 return;
             }
         }
 
-        if (!lunatech.strength.hook.betterteams.BetterTeamsHook.canDamage(damager, damagee)) {
+        if (!BetterTeamsHook.canDamage(damager, damagee)) {
             return;
         }
 
-        final TridentConfig settings = plugin.getConfigHandler().getTridentConfig();
+        final UUID damagerUuid = damager.getUniqueId();
 
         // 1. Passive Trigger: Every N hits, summon visual lightning bolt and apply configured passive damage
-        final UUID damagerUuid = damager.getUniqueId();
-        final int currentPassiveHits = passiveHits.merge(damagerUuid, 1, Integer::sum);
-        if (currentPassiveHits >= settings.passiveHitsRequired) {
-            passiveHits.put(damagerUuid, 0); // Reset count back to 0 immediately
+        if (settings.passive != null && settings.passive.enabled) {
+            final int currentPassiveHits = passiveHits.merge(damagerUuid, 1, Integer::sum);
+            if (currentPassiveHits >= settings.passive.hitsRequired) {
+                passiveHits.put(damagerUuid, 0); // Reset count back to 0 immediately
 
-            // Apply configured damage multiplier + extra bonus damage
-            final double baseDamage = event.getDamage();
-            final double multipliedDamage = (baseDamage * settings.passiveDamageMultiplier) + settings.passiveLightningDamage;
-            event.setDamage(multipliedDamage);
+                // Apply configured damage multiplier + extra bonus damage
+                final double baseDamage = event.getDamage();
+                final double multipliedDamage = (baseDamage * settings.passive.damageMultiplier) + settings.passive.lightningDamage;
+                event.setDamage(multipliedDamage);
 
-            // Visual lightning effect (does not deal vanilla 5.0 damage or start fires)
-            damagee.getWorld().strikeLightningEffect(damagee.getLocation());
+                // Visual lightning effect (does not deal vanilla 5.0 damage or start fires)
+                damagee.getWorld().strikeLightningEffect(damagee.getLocation());
 
-            // Animated 2D Billboard Yellow Lightning Particle (wax_off mapped to lightning_yellow_*.png)
-            org.bukkit.Particle particleType = org.bukkit.Particle.WAX_OFF;
-            try {
-                particleType = org.bukkit.Particle.valueOf(settings.passiveParticleType.toUpperCase());
-            } catch (Exception ignored) {}
+                // Animated 2D Billboard Yellow Lightning Particle
+                Particle particleType = Particle.WAX_OFF;
+                try {
+                    particleType = Particle.valueOf(settings.passive.particleType.toUpperCase());
+                } catch (Exception ignored) {
+                }
 
-            damagee.getWorld().spawnParticle(
-                particleType,
-                damagee.getLocation().add(0, 1, 0),
-                15, 0.4, 0.8, 0.4, 0.05
-            );
+                damagee.getWorld().spawnParticle(
+                    particleType,
+                    damagee.getLocation().add(0, 1, 0),
+                    15, 0.4, 0.8, 0.4, 0.05
+                );
 
-            damagee.playSound(damagee.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 0.8f, 1.0f);
-            damager.sendMessage(ColorParser.of(settings.passiveTriggeredMessage).build());
+                damagee.playSound(damagee.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 0.8f, 1.0f);
+                damager.sendMessage(ColorParser.of(settings.passive.passiveTriggeredMessage).build());
+            }
         }
 
         // 2. Ultimate Charge: Accumulate N hits to unlock Ultimate (skipped during active barrage to prevent infinite loops)
-        if (damager.hasMetadata("trident_barrage_active")) {
-            return;
-        }
+        if (settings.ultimate != null && settings.ultimate.enabled) {
+            if (damager.hasMetadata(BARRAGE_ACTIVE_KEY)) {
+                return;
+            }
 
-        final int currentUltHits = ultimateHits.getOrDefault(damagerUuid, 0);
-        final int targetUltHits = settings.ultimateHitsRequired;
-        if (currentUltHits < targetUltHits) {
-            final int nextUltHits = currentUltHits + 1;
-            ultimateHits.put(damagerUuid, nextUltHits);
+            final int currentUltHits = ultimateHits.getOrDefault(damagerUuid, 0);
+            final int targetUltHits = settings.ultimate.hitsRequired;
+            if (currentUltHits < targetUltHits) {
+                final int nextUltHits = currentUltHits + 1;
+                ultimateHits.put(damagerUuid, nextUltHits);
 
-            if (nextUltHits == targetUltHits) {
-                damager.sendMessage(ColorParser.of(settings.ultimateChargedMessage).build());
-                damager.playSound(damager.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.2f);
-            } else {
-                damager.sendMessage(
-                    ColorParser.of(settings.ultimateChargeProgressMessage
+                if (nextUltHits == targetUltHits) {
+                    damager.sendMessage(ColorParser.of(settings.ultimate.ultimateChargedMessage).build());
+                    damager.playSound(damager.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.2f);
+                } else {
+                    final String msg = settings.ultimate.ultimateChargeProgressMessage
+                        .replace("<charge>", String.valueOf(nextUltHits))
                         .replace("{charge}", String.valueOf(nextUltHits))
-                        .replace("{target}", String.valueOf(targetUltHits)))
-                        .with("charge", String.valueOf(nextUltHits))
-                        .with("target", String.valueOf(targetUltHits))
-                        .build()
-                );
+                        .replace("<target>", String.valueOf(targetUltHits))
+                        .replace("{target}", String.valueOf(targetUltHits));
+                    damager.sendMessage(
+                        ColorParser.of(msg)
+                            .with("charge", String.valueOf(nextUltHits))
+                            .with("target", String.valueOf(targetUltHits))
+                            .build()
+                    );
+                }
             }
         }
     }

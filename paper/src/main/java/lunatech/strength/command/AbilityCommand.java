@@ -414,17 +414,24 @@ public final class AbilityCommand extends Command {
 
     private void triggerTridentUltimate(Player player, StrengthService strengthService) {
         final TridentConfig settings = plugin.getConfigHandler().getTridentConfig();
-        final int currentStrength = strengthService.getStrength(player);
+
+        if (settings == null || !settings.enabled || !settings.ultimate.enabled) {
+            final String disabledMsg = (settings != null && settings.ultimate != null && settings.ultimate.ultimateDisabledMessage != null)
+                ? settings.ultimate.ultimateDisabledMessage
+                : "<red>Trident ultimate ability is currently disabled!</red>";
+            player.sendMessage(ColorParser.of(disabledMsg).build());
+            return;
+        }
 
         // 1. Validate Weapon Held Requirement
         if (player.getInventory().getItemInMainHand().getType() != Material.TRIDENT) {
-            MessageUtil.send(player, settings.mustHoldTridentMessage);
+            player.sendMessage(ColorParser.of(settings.ultimate.mustHoldTridentMessage).build());
             return;
         }
 
         // 2. Validate Ground / Water Requirement (matching Poseidon Mod requirement)
         if (!player.isOnGround() && !player.isInWater()) {
-            MessageUtil.send(player, settings.mustBeOnGroundMessage);
+            player.sendMessage(ColorParser.of(settings.ultimate.mustBeOnGroundMessage).build());
             return;
         }
 
@@ -432,34 +439,42 @@ public final class AbilityCommand extends Command {
         final UUID uuid = player.getUniqueId();
         final long now = System.currentTimeMillis();
         final long lastUse = TridentAbilityListener.ultimateCooldowns.getOrDefault(uuid, 0L);
-        final long cooldownMillis = settings.ultimateCooldownSeconds * 1000L;
+        final long cooldownMillis = settings.ultimate.cooldownSeconds * 1000L;
         if (now - lastUse < cooldownMillis) {
             final long secondsLeft = (cooldownMillis - (now - lastUse)) / 1000L + 1;
-            MessageUtil.send(
-                player,
-                settings.ultimateCooldownMessage,
-                "seconds", String.valueOf(secondsLeft)
-            );
+            final String msg = settings.ultimate.ultimateCooldownMessage
+                .replace("<seconds>", String.valueOf(secondsLeft))
+                .replace("{seconds}", String.valueOf(secondsLeft));
+            player.sendMessage(ColorParser.of(msg).with("seconds", String.valueOf(secondsLeft)).build());
             return;
         }
 
         // 4. Validate Strength Requirement
-        if (currentStrength < settings.ultimateStrengthRequired) {
-            MessageUtil.send(
-                player,
-                settings.notEnoughStrengthMessage,
-                Map.of("req", String.valueOf(settings.ultimateStrengthRequired), "current", String.valueOf(currentStrength))
+        final int currentStrength = strengthService.getStrength(player);
+        if (currentStrength < settings.ultimate.strengthRequired) {
+            final String msg = settings.ultimate.notEnoughStrengthMessage
+                .replace("<req>", String.valueOf(settings.ultimate.strengthRequired))
+                .replace("<current>", String.valueOf(currentStrength));
+            player.sendMessage(
+                ColorParser.of(msg)
+                    .with("req", String.valueOf(settings.ultimate.strengthRequired))
+                    .with("current", String.valueOf(currentStrength))
+                    .build()
             );
             return;
         }
 
         // 5. Validate Hit Charge Requirement
         final int currentCharge = TridentAbilityListener.ultimateHits.getOrDefault(uuid, 0);
-        if (currentCharge < settings.ultimateHitsRequired) {
-            MessageUtil.send(
-                player,
-                settings.notChargedMessage,
-                Map.of("req", String.valueOf(settings.ultimateHitsRequired), "current", String.valueOf(currentCharge))
+        if (currentCharge < settings.ultimate.hitsRequired) {
+            final String msg = settings.ultimate.notChargedMessage
+                .replace("<req>", String.valueOf(settings.ultimate.hitsRequired))
+                .replace("<current>", String.valueOf(currentCharge));
+            player.sendMessage(
+                ColorParser.of(msg)
+                    .with("req", String.valueOf(settings.ultimate.hitsRequired))
+                    .with("current", String.valueOf(currentCharge))
+                    .build()
             );
             return;
         }
@@ -469,10 +484,10 @@ public final class AbilityCommand extends Command {
         TridentAbilityListener.ultimateCooldowns.put(uuid, now);
 
         // 7. Trigger Poseidon's Calling Ability Task
-        new TridentUltimateTask(player, settings)
+        new TridentUltimateTask(player, plugin, settings.ultimate)
             .runTaskTimer(plugin, 0L, 1L);
 
-        MessageUtil.send(player, settings.ultimateActivatedMessage);
+        player.sendMessage(ColorParser.of(settings.ultimate.ultimateActivatedMessage).build());
     }
 
     private void triggerBowUltimate(Player player, StrengthService strengthService) {
