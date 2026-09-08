@@ -82,6 +82,15 @@ public class SpearConfig implements VersionedConfig {
         @Comment("List of enchantments automatically applied to Spear during ultimate (Format: ENCHANTMENT_KEY:LEVEL).")
         public List<String> autoEnchantments = List.of("LUNGE:3", "SHARPENED:4");
 
+        @Comment("Message sent when Spear ultimate ability is disabled.")
+        public String ultimateDisabledMessage = "<red>Spear ultimate ability is currently disabled!</red>";
+
+        @Comment("Message sent when Spear ultimate is fully charged.")
+        public String ultimateChargedMessage = "<gold><bold>SPEAR ULTIMATE READY!</bold> Type /ability to activate!</gold>";
+
+        @Comment("Message sent indicating ultimate hit charge progress.")
+        public String ultimateChargeProgressMessage = "<gray>Spear Hit Charge: <gold><current>/<req></gold> hits</gray>";
+
         @Comment("Message sent when Spear ultimate is activated.")
         public String ultimateActivatedMessage = "<gold><bold>SPEAR ULTIMATE ACTIVATED!</bold> Auto-enchanted & zero hunger lunge for <duration>s!</gold>";
 

@@ -120,7 +120,10 @@ public final class AbilityCommand extends Command {
         final SpearConfig settings = plugin.getConfigHandler().getSpearConfig();
 
         if (settings == null || !settings.enabled || !settings.ultimate.enabled) {
-            player.sendMessage(ColorParser.of("<red>Spear ultimate ability is currently disabled!</red>").build());
+            final String disabledMsg = (settings != null && settings.ultimate != null && settings.ultimate.ultimateDisabledMessage != null)
+                ? settings.ultimate.ultimateDisabledMessage
+                : "<red>Spear ultimate ability is currently disabled!</red>";
+            player.sendMessage(ColorParser.of(disabledMsg).build());
             return;
         }
 

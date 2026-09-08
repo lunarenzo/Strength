@@ -109,7 +109,31 @@ public final class SpearAbilityListener implements Listener {
                 ultimateHits.put(uuid, newHits);
 
                 if (newHits == config.ultimate.hitsRequired) {
-                    player.sendActionBar(ColorParser.of("<gold><bold>SPEAR ULTIMATE READY!</bold> Type /ability to activate!</gold>").build());
+                    if (config.ultimate.ultimateChargedMessage != null && !config.ultimate.ultimateChargedMessage.isBlank()) {
+                        final String msg = config.ultimate.ultimateChargedMessage
+                            .replace("<current>", String.valueOf(newHits))
+                            .replace("{current}", String.valueOf(newHits))
+                            .replace("<req>", String.valueOf(config.ultimate.hitsRequired))
+                            .replace("{req}", String.valueOf(config.ultimate.hitsRequired))
+                            .replace("<charge>", String.valueOf(newHits))
+                            .replace("{charge}", String.valueOf(newHits))
+                            .replace("<target>", String.valueOf(config.ultimate.hitsRequired))
+                            .replace("{target}", String.valueOf(config.ultimate.hitsRequired));
+                        player.sendMessage(ColorParser.of(msg).build());
+                    }
+                } else {
+                    if (config.ultimate.ultimateChargeProgressMessage != null && !config.ultimate.ultimateChargeProgressMessage.isBlank()) {
+                        final String msg = config.ultimate.ultimateChargeProgressMessage
+                            .replace("<current>", String.valueOf(newHits))
+                            .replace("{current}", String.valueOf(newHits))
+                            .replace("<req>", String.valueOf(config.ultimate.hitsRequired))
+                            .replace("{req}", String.valueOf(config.ultimate.hitsRequired))
+                            .replace("<charge>", String.valueOf(newHits))
+                            .replace("{charge}", String.valueOf(newHits))
+                            .replace("<target>", String.valueOf(config.ultimate.hitsRequired))
+                            .replace("{target}", String.valueOf(config.ultimate.hitsRequired));
+                        player.sendMessage(ColorParser.of(msg).build());
+                    }
                 }
             }
         }
@@ -135,23 +159,7 @@ public final class SpearAbilityListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onItemHeld(PlayerItemHeldEvent event) {
         final Player player = event.getPlayer();
-        final String assigned = strengthService.getAssignedWeapon(player);
-        final boolean isSpearUser = assigned != null && "spear".equalsIgnoreCase(assigned);
-
-        final ItemStack nextItem = player.getInventory().getItem(event.getNewSlot());
-        final AttributeInstance speedAttr = player.getAttribute(Attribute.ATTACK_SPEED);
-
-        if (speedAttr != null) {
-            removeAttackSpeedModifier(speedAttr);
-            if (isSpearUser && isSpear(nextItem)) {
-                final SpearConfig config = plugin.getConfigHandler().getSpearConfig();
-                if (config != null && config.enabled && config.passive.enabled && config.passive.matchSwordAttackSpeed) {
-                    // Vanilla player base attack speed is 4.0. Vanilla sword has -2.4 modifier for net 1.6 attack speed.
-                    // Adding -2.4 modifier sets net spear attack speed to 1.6 (sword attack speed).
-                    speedAttr.addModifier(new AttributeModifier(ATTACK_SPEED_KEY, -2.4, AttributeModifier.Operation.ADD_NUMBER));
-                }
-            }
-        }
+        plugin.getServer().getScheduler().runTask(plugin, () -> updateAttackSpeed(player));
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -161,6 +169,8 @@ public final class SpearAbilityListener implements Listener {
     }
 
     public void updateAttackSpeed(@NotNull Player player) {
+        if (!player.isOnline()) return;
+
         final AttributeInstance speedAttr = player.getAttribute(Attribute.ATTACK_SPEED);
         if (speedAttr == null) return;
 
@@ -178,7 +188,12 @@ public final class SpearAbilityListener implements Listener {
 
         final SpearConfig config = plugin.getConfigHandler().getSpearConfig();
         if (config != null && config.enabled && config.passive.enabled && config.passive.matchSwordAttackSpeed) {
-            speedAttr.addModifier(new AttributeModifier(ATTACK_SPEED_KEY, -2.4, AttributeModifier.Operation.ADD_NUMBER));
+            final double currentSpeed = speedAttr.getValue();
+            final double targetSwordSpeed = 1.6;
+            final double diff = targetSwordSpeed - currentSpeed;
+            if (Math.abs(diff) > 0.0001) {
+                speedAttr.addModifier(new AttributeModifier(ATTACK_SPEED_KEY, diff, AttributeModifier.Operation.ADD_NUMBER));
+            }
         }
     }
 
@@ -303,6 +318,8 @@ public final class SpearAbilityListener implements Listener {
         if (settings != null) {
             stripTemporaryEnchantments(droppedItem.getItemStack(), settings.ultimate);
         }
+        final Player player = event.getPlayer();
+        plugin.getServer().getScheduler().runTask(plugin, () -> updateAttackSpeed(player));
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -311,6 +328,9 @@ public final class SpearAbilityListener implements Listener {
         if (settings != null) {
             stripTemporaryEnchantments(event.getCurrentItem(), settings.ultimate);
             stripTemporaryEnchantments(event.getCursor(), settings.ultimate);
+        }
+        if (event.getWhoClicked() instanceof Player player) {
+            plugin.getServer().getScheduler().runTask(plugin, () -> updateAttackSpeed(player));
         }
     }
 
