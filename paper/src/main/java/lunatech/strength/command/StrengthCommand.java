@@ -364,9 +364,13 @@ final class StrengthCommand extends Command {
     }
 
     private void executorReload(CommandSender sender, CommandArguments args) {
-        plugin.getConfigHandler().onLoad(plugin);
+        if (plugin instanceof Strength paperPlugin) {
+            paperPlugin.onReload();
+        } else {
+            plugin.getConfigHandler().onLoad(plugin);
+        }
         sender.sendMessage(
-            ColorParser.of("<green>Successfully reloaded plugin configuration!</green>")
+            ColorParser.of("<green>Successfully reloaded plugin configuration and handlers!</green>")
                 .build()
         );
     }
