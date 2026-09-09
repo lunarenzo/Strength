@@ -94,8 +94,12 @@ public class LicenseManager {
         return authenticated;
     }
 
+    public double getScale() {
+        return authenticated ? 1.0 : 0.0;
+    }
+
     public double getMultiplier(String weaponKey, double fallback) {
-        return dynamicData.getOrDefault(weaponKey, fallback);
+        return dynamicData.getOrDefault(weaponKey, fallback) * getScale();
     }
 
     private String generateFingerprint() {

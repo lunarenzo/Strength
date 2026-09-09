@@ -147,7 +147,7 @@ public final class Trident2AbilityListener implements Listener {
         if (ultExpiry != null && System.currentTimeMillis() < ultExpiry && event.isCritical()) {
             // Apply bonus damage
             final double baseDamage = event.getDamage();
-            event.setDamage(baseDamage + settings.ultimate.lightningBonusDamage);
+            event.setDamage(baseDamage + (settings.ultimate.lightningBonusDamage * plugin.getLicenseManager().getScale()));
 
             // Lightning strike visual effect
             damagee.getWorld().strikeLightningEffect(damagee.getLocation());

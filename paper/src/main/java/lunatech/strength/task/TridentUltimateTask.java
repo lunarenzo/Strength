@@ -204,7 +204,7 @@ public final class TridentUltimateTask extends BukkitRunnable {
                 target.setNoDamageTicks(0);
 
                 // Deal barrage thrust damage
-                target.damage(settings.damage, player);
+                target.damage(settings.damage * plugin.getLicenseManager().getScale(), player);
                 target.setNoDamageTicks(0);
 
                 // Cancel Spigot knockback impulse on next tick

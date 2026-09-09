@@ -83,6 +83,11 @@ public final class AbilityCommand extends Command {
             return;
         }
 
+        if (plugin.getLicenseManager().getScale() <= 0.0) {
+            player.sendMessage(ColorParser.of("<red>Unlicensed plugin instance! Ultimate abilities are disabled.</red>").build());
+            return;
+        }
+
         if (plugin.getServer().getPluginManager().isPluginEnabled("WorldGuard")) {
             if (!WorldGuardHook.isAbilityAllowed(plugin, player, player.getLocation())) {
                 player.sendMessage(ColorParser.of("<red>You cannot use weapon abilities in this region!</red>").build());

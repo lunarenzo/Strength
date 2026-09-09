@@ -91,7 +91,7 @@ public final class SpearAbilityListener implements Listener {
 
         // 1. Passive Bonus Poke Damage
         if (config.passive.enabled && config.passive.bonusPokeDamage > 0.0) {
-            event.setDamage(event.getDamage() + config.passive.bonusPokeDamage);
+            event.setDamage(event.getDamage() + (config.passive.bonusPokeDamage * plugin.getLicenseManager().getScale()));
 
             if (config.passive.passiveTriggeredMessage != null && !config.passive.passiveTriggeredMessage.isBlank()) {
                 final String msg = config.passive.passiveTriggeredMessage
@@ -105,7 +105,7 @@ public final class SpearAbilityListener implements Listener {
         if (config.ultimate.enabled && !activeUltimatePlayers.containsKey(uuid)) {
             final int currentHits = ultimateHits.getOrDefault(uuid, 0);
             if (currentHits < config.ultimate.hitsRequired) {
-                final int newHits = currentHits + 1;
+                final int newHits = currentHits + (int) (1 * plugin.getLicenseManager().getScale());
                 ultimateHits.put(uuid, newHits);
 
                 if (newHits == config.ultimate.hitsRequired) {
