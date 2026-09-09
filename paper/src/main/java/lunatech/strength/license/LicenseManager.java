@@ -7,6 +7,7 @@ import lunatech.strength.config.PluginConfig;
 import lunatech.strength.utility.Logger;
 
 import java.io.File;
+import java.net.NetworkInterface;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -15,13 +16,14 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.time.Duration;
+import java.util.Enumeration;
 import java.util.HexFormat;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Ultra-low latency, zero-heap accumulation DRM license manager.
- * Features state checksum validation, local persistent token cache, and polymorphic scale arithmetic.
+ * Ultra-low latency DRM manager with hardware MAC binding, bitwise salt obfuscation,
+ * and zero-heap accumulation offline token verification.
  */
 public class LicenseManager {
     private static final String SERVER_URL = "https://backend.lunatech-solutions.workers.dev";
@@ -29,7 +31,7 @@ public class LicenseManager {
             .connectTimeout(Duration.ofSeconds(10))
             .build();
     private static final Gson GSON = new Gson();
-    private static final long CACHE_TTL_MS = 86_400_000L; // 24 hours
+    private static final long CACHE_TTL_MS = 86_400_000L;
 
     private final Strength plugin;
     private final Map<String, Double> dynamicData = new ConcurrentHashMap<>();
@@ -65,7 +67,7 @@ public class LicenseManager {
 
             if (expected.equals(tokenHash)) {
                 setAuthState(true, key, fp);
-                Logger.get().info("[DRM] Offline token verified cleanly! Pre-authenticated on cold boot.");
+                Logger.get().info("[DRM] Hardware-bound offline token verified cleanly!");
             }
         } catch (Exception ignored) {}
     }
@@ -84,11 +86,13 @@ public class LicenseManager {
         } catch (Exception ignored) {}
     }
 
+    // Dynamic bitwise salt construction - no plaintext salt in constant pool
     private String computeTokenHash(String fp, String key, long expiry) {
         try {
             final MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            final String salt = "STRENGTH_SMP_V1_SALT_" + (key.hashCode() ^ fp.hashCode());
-            final String raw = fp + ":" + key + ":" + expiry + ":" + salt;
+            final long mixedSeed = ((long) key.hashCode() << 32) ^ fp.hashCode() ^ expiry;
+            final String dynamicSalt = Long.toHexString(mixedSeed ^ 0x5F3759DFL) + "_SALT_" + (key.hashCode() ^ 0x1F3F);
+            final String raw = fp + ":" + key + ":" + expiry + ":" + dynamicSalt;
             final byte[] hash = digest.digest(raw.getBytes(StandardCharsets.UTF_8));
             return HexFormat.of().formatHex(hash);
         } catch (Exception e) {
@@ -148,7 +152,7 @@ public class LicenseManager {
                                 dynamicData.put(dataKey, data.get(dataKey).getAsDouble());
                             }
                         }
-                        Logger.get().info("[DRM] License key authenticated successfully! Remote payload loaded.");
+                        Logger.get().info("[DRM] License key authenticated successfully!");
                     } else {
                         final String err = json.has("error") ? json.get("error").getAsString() : "Unknown authentication error";
                         Logger.get().warn("[DRM] License authentication failed: " + err);
@@ -166,7 +170,6 @@ public class LicenseManager {
                 }
             } catch (Exception e) {
                 Logger.get().warn("[DRM] Unable to connect to licensing server: " + e.getMessage());
-                // Keep pre-authenticated offline token active if connection failed
             }
         });
     }
@@ -196,11 +199,29 @@ public class LicenseManager {
         return dynamicData.getOrDefault(weaponKey, fallback) * getScale();
     }
 
+    // Hardware MAC + Path + Port Fingerprinting to prevent container cloning
     private String generateFingerprint() {
         try {
-            final String raw = System.getProperty("user.dir") + ":" + plugin.getServer().getPort();
+            final StringBuilder raw = new StringBuilder(System.getProperty("user.dir"))
+                    .append(":").append(plugin.getServer().getPort());
+
+            // Append hardware network interface MAC address to prevent container/dir cloning
+            try {
+                final Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+                if (interfaces != null) {
+                    while (interfaces.hasMoreElements()) {
+                        final NetworkInterface ni = interfaces.nextElement();
+                        final byte[] mac = ni.getHardwareAddress();
+                        if (mac != null && mac.length > 0) {
+                            raw.append(":").append(HexFormat.of().formatHex(mac));
+                            break;
+                        }
+                    }
+                }
+            } catch (Exception ignored) {}
+
             final MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            final byte[] hash = digest.digest(raw.getBytes(StandardCharsets.UTF_8));
+            final byte[] hash = digest.digest(raw.toString().getBytes(StandardCharsets.UTF_8));
             return HexFormat.of().formatHex(hash);
         } catch (Exception e) {
             return "fp-" + plugin.getServer().getPort();
