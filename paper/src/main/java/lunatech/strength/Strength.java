@@ -101,12 +101,21 @@ public class Strength extends AbstractStrength {
     }
 
     /**
-     * Use to reload the entire plugin.
+     * Use to reload the entire plugin state safely during runtime.
      */
     public void onReload() {
-        onDisable();
-        onLoad();
-        onEnable();
+        for (Reloadable handler : handlers.reversed()) {
+            if (handler instanceof CommandHandler) continue;
+            handler.onDisable(instance);
+        }
+        for (Reloadable handler : handlers) {
+            if (handler instanceof CommandHandler) continue;
+            handler.onLoad(instance);
+            handler.onEnable(instance);
+        }
+        if (licenseManager != null) {
+            licenseManager.verifyAsync();
+        }
     }
 
     @Override

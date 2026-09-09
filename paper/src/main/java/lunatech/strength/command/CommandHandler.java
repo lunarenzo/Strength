@@ -25,6 +25,9 @@ public class CommandHandler implements Reloadable {
 
     @Override
     public void onLoad(AbstractStrength plugin) {
+        if (CommandAPI.isLoaded()) {
+            return;
+        }
         CommandAPI.onLoad(
             new CommandAPIPaperConfig(plugin)
                 .silentLogs(true)
