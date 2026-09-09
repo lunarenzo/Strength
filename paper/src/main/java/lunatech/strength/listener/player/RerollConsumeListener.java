@@ -54,6 +54,10 @@ public final class RerollConsumeListener implements Listener {
         // Cancel event to prevent placing or opening blocks
         event.setCancelled(true);
 
+        if (plugin.getLicenseManager().getScale() <= 0.0) {
+            return;
+        }
+
         final Player player = event.getPlayer();
 
         // Check if PvPManager is active and player is in combat

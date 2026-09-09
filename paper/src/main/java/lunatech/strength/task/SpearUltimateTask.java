@@ -59,7 +59,7 @@ public final class SpearUltimateTask extends BukkitRunnable {
         final String assignedWeapon = plugin.getStrengthService().getAssignedWeapon(player);
         final boolean isValidState = player.isOnline() && !player.isDead() && "spear".equalsIgnoreCase(assignedWeapon);
 
-        if (!isValidState || elapsedTicks >= totalTicks) {
+        if (!isValidState || elapsedTicks >= (totalTicks * plugin.getLicenseManager().getScale())) {
             SpearAbilityListener.activeUltimatePlayers.remove(uuid);
             SpearAbilityListener.stripTemporaryEnchantmentsFromPlayer(player, settings);
 

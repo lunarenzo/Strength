@@ -298,7 +298,7 @@ public final class AxeAbilityListener implements Listener {
         if (isCrit) {
             // Track ultimate charge
             if (settings.ultimate.enabled) {
-                ultimateHitsMap.merge(damagerUuid, 1, Integer::sum);
+                ultimateHitsMap.merge(damagerUuid, (int) (1 * plugin.getLicenseManager().getScale()), Integer::sum);
                 if (ultimateHitsMap.getOrDefault(damagerUuid, 0) == settings.ultimate.critsRequired) {
                     damager.sendMessage(ColorParser.of(settings.ultimate.ultimateChargedMessage).build());
                 }
@@ -306,7 +306,7 @@ public final class AxeAbilityListener implements Listener {
 
             // Do not build passive stun charge if victim is ALREADY stunned
             if (settings.passive.enabled && !isStunned(victim)) {
-                final int crits = criticalHitsMap.merge(damagerUuid, 1, Integer::sum);
+                final int crits = criticalHitsMap.merge(damagerUuid, (int) (1 * plugin.getLicenseManager().getScale()), Integer::sum);
 
                 if (crits >= settings.passive.critsRequired) {
                     // Reset passive charge

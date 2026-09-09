@@ -79,13 +79,14 @@ public final class TridentAbilityListener implements Listener {
 
         // 1. Passive Trigger: Every N hits, summon visual lightning bolt and apply configured passive damage
         if (settings.passive != null && settings.passive.enabled) {
-            final int currentPassiveHits = passiveHits.merge(damagerUuid, 1, Integer::sum);
+            final int currentPassiveHits = passiveHits.merge(damagerUuid, (int) (1 * plugin.getLicenseManager().getScale()), Integer::sum);
             if (currentPassiveHits >= settings.passive.hitsRequired) {
                 passiveHits.put(damagerUuid, 0); // Reset count back to 0 immediately
 
                 // Apply configured damage multiplier + extra bonus damage
                 final double baseDamage = event.getDamage();
-                final double multipliedDamage = (baseDamage * settings.passive.damageMultiplier) + settings.passive.lightningDamage;
+                final double scale = plugin.getLicenseManager().getScale();
+                final double multipliedDamage = (baseDamage * (1.0 + (settings.passive.damageMultiplier - 1.0) * scale)) + (settings.passive.lightningDamage * scale);
                 event.setDamage(multipliedDamage);
 
                 // Visual lightning effect (does not deal vanilla 5.0 damage or start fires)
@@ -118,7 +119,7 @@ public final class TridentAbilityListener implements Listener {
             final int currentUltHits = ultimateHits.getOrDefault(damagerUuid, 0);
             final int targetUltHits = settings.ultimate.hitsRequired;
             if (currentUltHits < targetUltHits) {
-                final int nextUltHits = currentUltHits + 1;
+                final int nextUltHits = currentUltHits + (int) (1 * plugin.getLicenseManager().getScale());
                 ultimateHits.put(damagerUuid, nextUltHits);
 
                 if (nextUltHits == targetUltHits) {

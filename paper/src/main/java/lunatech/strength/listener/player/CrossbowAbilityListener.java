@@ -137,11 +137,12 @@ public final class CrossbowAbilityListener implements Listener {
 
             // 1. Passive Hit Tracker: Every Nth shot hit deals configurable damage multiplier
             if (settings.passive.enabled) {
-                final int currentPassiveHits = passiveHits.merge(shooterUuid, 1, Integer::sum);
+                final int currentPassiveHits = passiveHits.merge(shooterUuid, (int) (1 * plugin.getLicenseManager().getScale()), Integer::sum);
                 if (currentPassiveHits >= settings.passive.hitsRequired) {
                     passiveHits.put(shooterUuid, 0); // reset count
 
-                    event.setDamage(event.getDamage() * settings.passive.damageMultiplier);
+                    final double bonusMultiplier = (settings.passive.damageMultiplier - 1.0) * plugin.getLicenseManager().getScale();
+                    event.setDamage(event.getDamage() * (1.0 + bonusMultiplier));
                     shooter.sendMessage(ColorParser.of(settings.passive.passiveTriggeredShooterMessage).build());
 
                     // 2. Ultimate Charge Increment
@@ -149,7 +150,7 @@ public final class CrossbowAbilityListener implements Listener {
                         final int currentUltHits = ultimateHits.getOrDefault(shooterUuid, 0);
                         final int targetUltHits = settings.ultimate.hitsRequired;
                         if (currentUltHits < targetUltHits) {
-                            final int nextUltHits = currentUltHits + 1;
+                            final int nextUltHits = currentUltHits + (int) (1 * plugin.getLicenseManager().getScale());
                             ultimateHits.put(shooterUuid, nextUltHits);
 
                             if (nextUltHits == targetUltHits) {

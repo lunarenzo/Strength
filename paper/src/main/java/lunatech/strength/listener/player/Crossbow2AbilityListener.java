@@ -120,7 +120,7 @@ public final class Crossbow2AbilityListener implements Listener {
             // 2. Chance-based Flame/Burn Effect
             if (config.passive.flameChance > 0.0) {
                 final double roll = ThreadLocalRandom.current().nextDouble(100.0);
-                if (roll < config.passive.flameChance) {
+                if (roll < (config.passive.flameChance * plugin.getLicenseManager().getScale())) {
                     target.setFireTicks(config.passive.burnDurationSeconds * 20);
 
                     if (target.getWorld() != null) {

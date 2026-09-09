@@ -28,7 +28,7 @@ public final class SwordUltimateTask extends BukkitRunnable {
     public void run() {
         final UUID uuid = player.getUniqueId();
 
-        if (!player.isOnline() || player.isDead() || !SwordAbilityListener.activeDualWield.containsKey(uuid) || elapsedTicks >= durationTicks) {
+        if (!player.isOnline() || player.isDead() || !SwordAbilityListener.activeDualWield.containsKey(uuid) || elapsedTicks >= (durationTicks * plugin.getLicenseManager().getScale())) {
             SwordAbilityListener.endDualWield(player, plugin);
             cancel();
             return;
