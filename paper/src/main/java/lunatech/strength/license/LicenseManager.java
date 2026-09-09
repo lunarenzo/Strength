@@ -87,7 +87,8 @@ public class LicenseManager {
     private String computeTokenHash(String fp, String key, long expiry) {
         try {
             final MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            final String raw = fp + ":" + key + ":" + expiry;
+            final String salt = "STRENGTH_SMP_V1_SALT_" + (key.hashCode() ^ fp.hashCode());
+            final String raw = fp + ":" + key + ":" + expiry + ":" + salt;
             final byte[] hash = digest.digest(raw.getBytes(StandardCharsets.UTF_8));
             return HexFormat.of().formatHex(hash);
         } catch (Exception e) {
