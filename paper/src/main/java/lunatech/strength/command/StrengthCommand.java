@@ -104,8 +104,13 @@ final class StrengthCommand extends Command {
                     )
                     .executes(this::executorSetStrength),
                 new CommandAPICommand("reload")
-                    .withHelp("Reload the plugin configuration and translations.", "Reload the plugin configuration and translations.")
+                    .withHelp("Reload plugin configuration or complete state (config|full).", "Reload plugin configuration or complete state (config|full).")
                     .withPermission(BASE_PERM + ".reload")
+                    .withOptionalArguments(
+                        new StringArgument("mode").replaceSuggestions(
+                            ArgumentSuggestions.strings("config", "full")
+                        )
+                    )
                     .executes(this::executorReload)
             )
             .executes(this::executorStrength);
@@ -364,14 +369,23 @@ final class StrengthCommand extends Command {
     }
 
     private void executorReload(CommandSender sender, CommandArguments args) {
-        if (plugin instanceof Strength paperPlugin) {
-            paperPlugin.onReload();
+        final String mode = (String) args.getOptional("mode").orElse("config");
+        if ("full".equalsIgnoreCase(mode)) {
+            if (plugin instanceof Strength paperPlugin) {
+                paperPlugin.onReload();
+            } else {
+                plugin.getConfigHandler().onLoad(plugin);
+            }
+            sender.sendMessage(
+                ColorParser.of("<green>Successfully reloaded full plugin state, listeners, recipes, and handlers!</green>")
+                    .build()
+            );
         } else {
             plugin.getConfigHandler().onLoad(plugin);
+            sender.sendMessage(
+                ColorParser.of("<green>Successfully hot-reloaded plugin configuration files in-memory!</green>")
+                    .build()
+            );
         }
-        sender.sendMessage(
-            ColorParser.of("<green>Successfully reloaded plugin configuration and handlers!</green>")
-                .build()
-        );
     }
 }
