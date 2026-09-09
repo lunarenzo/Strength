@@ -92,7 +92,7 @@ public final class PlayerKillListener implements Listener {
                 // Prevent duplication: if item is dropped on death, do not also auto-grant base strength unless explicitly enabled
                 if (!settings.dropItemOnDeath || settings.giveDirectRewardWhenItemDropped) {
                     final int killerOldStrength = strengthService.getStrength(killer);
-                    final int rewardAmount = (int) (settings.killReward * plugin.getLicenseManager().getScale());
+                    final int rewardAmount = plugin.getLicenseManager().scaleInt((int) settings.killReward);
                     final int killerNewStrength = Math.min(settings.maxStrength, killerOldStrength + rewardAmount);
                     strengthService.setStrength(killer, killerNewStrength);
 
