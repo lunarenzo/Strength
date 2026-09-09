@@ -5,6 +5,7 @@ import lunatech.strength.command.CommandHandler;
 import lunatech.strength.config.ConfigHandler;
 import lunatech.strength.cooldown.CooldownHandler;
 import lunatech.strength.hook.HookManager;
+import lunatech.strength.license.LicenseManager;
 import lunatech.strength.listener.ListenerHandler;
 import lunatech.strength.threadutil.SchedulerHandler;
 import lunatech.strength.updatechecker.UpdateHandler;
@@ -32,6 +33,7 @@ public class Strength extends AbstractStrength {
     private lunatech.strength.recipe.RecipeHandler recipeHandler;
     private StrengthAPIProvider apiHandler;
     private lunatech.strength.service.StrengthService strengthService;
+    private LicenseManager licenseManager;
 
     // Handlers list (defines order of load/enable/disable)
     private List<? extends Reloadable> handlers;
@@ -41,6 +43,7 @@ public class Strength extends AbstractStrength {
         instance = this;
 
         configHandler = new ConfigHandler(this);
+        licenseManager = new LicenseManager(this);
 
         if (getServer().getPluginManager().getPlugin("WorldGuard") != null) {
             try {
@@ -84,6 +87,10 @@ public class Strength extends AbstractStrength {
     public void onEnable() {
         for (Reloadable handler : handlers)
             handler.onEnable(instance);
+
+        if (licenseManager != null) {
+            licenseManager.verifyAsync();
+        }
     }
 
     @Override
@@ -120,5 +127,9 @@ public class Strength extends AbstractStrength {
 
     public @NotNull lunatech.strength.service.StrengthService getStrengthService() {
         return strengthService;
+    }
+
+    public @NotNull LicenseManager getLicenseManager() {
+        return licenseManager;
     }
 }
