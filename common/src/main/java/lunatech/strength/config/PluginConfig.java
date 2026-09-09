@@ -53,7 +53,7 @@ public class PluginConfig implements VersionedConfig {
     @ConfigSerializable
     public static class LicenseSettings {
         @Comment("Your plugin license key provided upon purchase")
-        public String key = "TEST-KEY-123";
+        public String key = "YOUR-LICENSE-KEY-HERE";
     }
 
     @Comment("Strength SMP Settings")
