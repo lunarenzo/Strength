@@ -55,7 +55,8 @@ public class Strength extends AbstractStrength {
         // Initialize Strength Service
         strengthService = new lunatech.strength.service.impl.DefaultStrengthService(
             new lunatech.strength.data.repository.impl.PDCPlayerRepository(),
-            configHandler
+            configHandler,
+            licenseManager::scale
         );
 
         hookManager = new HookManager(this);

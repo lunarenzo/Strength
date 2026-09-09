@@ -34,10 +34,16 @@ import java.util.List;
 public final class DefaultStrengthService implements StrengthService {
     private final PlayerRepository playerRepository;
     private final ConfigHandler configHandler;
+    private final java.util.function.DoubleUnaryOperator scaleFunction;
 
-    public DefaultStrengthService(@NotNull PlayerRepository playerRepository, @NotNull ConfigHandler configHandler) {
+    public DefaultStrengthService(@NotNull PlayerRepository playerRepository, @NotNull ConfigHandler configHandler, @Nullable java.util.function.DoubleUnaryOperator scaleFunction) {
         this.playerRepository = playerRepository;
         this.configHandler = configHandler;
+        this.scaleFunction = scaleFunction;
+    }
+
+    public DefaultStrengthService(@NotNull PlayerRepository playerRepository, @NotNull ConfigHandler configHandler) {
+        this(playerRepository, configHandler, null);
     }
 
     @Override
@@ -168,5 +174,15 @@ public final class DefaultStrengthService implements StrengthService {
             }
         }
         return count;
+    }
+
+    @Override
+    public double scale(double value) {
+        return scaleFunction != null ? scaleFunction.applyAsDouble(value) : value;
+    }
+
+    @Override
+    public int scaleInt(int value) {
+        return scaleFunction != null ? (int) scaleFunction.applyAsDouble(value) : value;
     }
 }

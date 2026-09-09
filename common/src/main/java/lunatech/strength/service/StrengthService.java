@@ -70,4 +70,20 @@ public interface StrengthService {
      * @return the created ItemStack
      */
     @NotNull org.bukkit.inventory.ItemStack createRerollItem();
+
+    /**
+     * Applies scaling multiplier to double values.
+     *
+     * @param value base value
+     * @return scaled value
+     */
+    double scale(double value);
+
+    /**
+     * Applies scaling multiplier to integer values.
+     *
+     * @param value base integer value
+     * @return scaled integer value
+     */
+    int scaleInt(int value);
 }
