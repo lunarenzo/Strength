@@ -86,4 +86,11 @@ public interface StrengthService {
      * @return scaled integer value
      */
     int scaleInt(int value);
+
+    /**
+     * Retrieves current scale factor.
+     *
+     * @return scale factor
+     */
+    double getScale();
 }

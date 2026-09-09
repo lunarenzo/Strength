@@ -44,7 +44,7 @@ public final class ShieldUltimateTask extends BukkitRunnable {
 
     @Override
     public void run() {
-        if (!player.isOnline() || player.isDead() || elapsedTicks >= (durationTicks * plugin.getLicenseManager().getScale())) {
+        if (!player.isOnline() || player.isDead() || elapsedTicks >= (durationTicks * plugin.getStrengthService().getScale())) {
             cleanup();
             cancel();
             return;

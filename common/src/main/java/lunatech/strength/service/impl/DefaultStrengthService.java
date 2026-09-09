@@ -185,4 +185,9 @@ public final class DefaultStrengthService implements StrengthService {
     public int scaleInt(int value) {
         return scaleFunction != null ? (int) scaleFunction.applyAsDouble(value) : value;
     }
+
+    @Override
+    public double getScale() {
+        return scale(1.0);
+    }
 }

@@ -88,7 +88,7 @@ public final class ArmorsAbilityListener implements Listener {
         }
 
         // 2. Process Equipped Item (New Item)
-        if (isArmors && newItem != null && newItem.getType() != Material.AIR && plugin.getLicenseManager().getScale() > 0.0) {
+        if (isArmors && newItem != null && newItem.getType() != Material.AIR && strengthService.getScale() > 0.0) {
             upgradeArmorPieceIfEligible(player, event.getSlot(), newItem, config.passive);
         }
     }
@@ -109,7 +109,7 @@ public final class ArmorsAbilityListener implements Listener {
 
         final ItemStack item = event.getItem();
         if (item.getType() == Material.GOLDEN_APPLE) {
-            final int amp = (int) (config.ultimate.goldenAppleAbsorptionAmplifier * plugin.getLicenseManager().getScale());
+            final int amp = strengthService.scaleInt(config.ultimate.goldenAppleAbsorptionAmplifier);
             final int durationTicks = config.ultimate.goldenAppleAbsorptionDurationSeconds * 20;
 
             // Apply upgraded Golden Apple Absorption effect

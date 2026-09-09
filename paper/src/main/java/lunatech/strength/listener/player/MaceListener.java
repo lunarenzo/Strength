@@ -188,7 +188,7 @@ public final class MaceListener implements Listener {
                     } else if (isMacePlayer && maceAbilityConfig.enabled && maceAbilityConfig.passive.enabled) {
                         // Passive Active: Reduced smash cooldown
                         final double baseSec = config.cooldown.cooldownSeconds;
-                        final double reductionPct = maceAbilityConfig.passive.cooldownReductionPercent * plugin.getLicenseManager().getScale();
+                        final double reductionPct = plugin.getStrengthService().scale(maceAbilityConfig.passive.cooldownReductionPercent);
                         final double finalSec = Math.max(0.0, baseSec * (1.0 - (reductionPct / 100.0)));
                         final int ticks = (int) Math.round(finalSec * 20.0);
                         player.setCooldown(Material.MACE, ticks);

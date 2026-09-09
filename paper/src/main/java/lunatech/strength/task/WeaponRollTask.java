@@ -122,7 +122,7 @@ public final class WeaponRollTask {
             Bukkit.getScheduler().runTaskLater(plugin, this::runNextFrame, Math.max(1L, nextDelay));
         } else {
             // Final weapon assignment phase - uses selectedWeapon!
-            if (plugin.getLicenseManager().getScale() > 0.0) {
+            if (strengthService.getScale() > 0.0) {
                 strengthService.setAssignedWeapon(player, selectedWeapon);
             }
 

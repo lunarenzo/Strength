@@ -83,7 +83,7 @@ public final class AbilityCommand extends Command {
             return;
         }
 
-        if (plugin.getLicenseManager().getScale() <= 0.0) {
+        if (strengthService.getScale() <= 0.0) {
             player.sendMessage(ColorParser.of("<red>Unlicensed plugin instance! Ultimate abilities are disabled.</red>").build());
             return;
         }

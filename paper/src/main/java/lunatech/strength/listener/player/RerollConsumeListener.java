@@ -54,7 +54,7 @@ public final class RerollConsumeListener implements Listener {
         // Cancel event to prevent placing or opening blocks
         event.setCancelled(true);
 
-        if (plugin.getLicenseManager().getScale() <= 0.0) {
+        if (plugin.getStrengthService().getScale() <= 0.0) {
             return;
         }
 

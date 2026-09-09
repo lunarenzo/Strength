@@ -179,7 +179,7 @@ public final class SwordAbilityListener implements Listener {
 
         if (combo >= settings.passive.comboHitsRequired) {
             comboCounts.put(uuid, 0);
-            final double bonusMultiplier = (settings.passive.critDamageMultiplier - 1.0) * plugin.getLicenseManager().getScale();
+            final double bonusMultiplier = (settings.passive.critDamageMultiplier - 1.0) * strengthService.getScale();
             finalDamage = baseDamage * (1.0 + Math.max(0.0, bonusMultiplier));
 
             victim.getWorld().spawnParticle(Particle.CRIT, victim.getLocation().add(0, 1.0, 0), 15, 0.3, 0.5, 0.3, 0.1);
@@ -192,7 +192,7 @@ public final class SwordAbilityListener implements Listener {
                 final int currentUltHits = ultimateHits.getOrDefault(uuid, 0);
                 final int targetUltHits = settings.ultimate.hitsRequired;
                 if (currentUltHits < targetUltHits) {
-                    final int nextUltHits = currentUltHits + (int) (1 * plugin.getLicenseManager().getScale());
+                    final int nextUltHits = currentUltHits + strengthService.scaleInt(1);
                     ultimateHits.put(uuid, nextUltHits);
 
                     if (nextUltHits == targetUltHits) {

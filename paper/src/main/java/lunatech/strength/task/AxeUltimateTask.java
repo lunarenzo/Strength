@@ -86,7 +86,7 @@ public final class AxeUltimateTask extends BukkitRunnable {
                     continue;
                 }
 
-                final double total = entry.getValue() * settings.ultimate.damageMultiplier * plugin.getLicenseManager().getScale();
+                final double total = entry.getValue() * settings.ultimate.damageMultiplier * plugin.getStrengthService().getScale();
                 final String msg = settings.ultimate.pendingDamageActionbarMessage.replace("{amount}", String.format("%.1f", total));
                 target.sendActionBar(ColorParser.of(msg).build());
 

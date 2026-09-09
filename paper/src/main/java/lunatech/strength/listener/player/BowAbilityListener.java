@@ -355,7 +355,7 @@ public final class BowAbilityListener implements Listener {
         } else {
             // 1. Passive hit tracking: Increment hits (ONLY for normal non-passive bow hits)
             if (settings.passive.enabled) {
-                final int currentPassiveHits = passiveHits.merge(shooterUuid, (int) (1 * plugin.getLicenseManager().getScale()), Integer::sum);
+                final int currentPassiveHits = passiveHits.merge(shooterUuid, strengthService.scaleInt(1), Integer::sum);
                 if (currentPassiveHits >= settings.passive.hitsRequired) {
                     passiveHits.put(shooterUuid, 0); // Reset count
                     bowPassiveReady.put(shooterUuid, true); // Next valid shot will trap the target in a cobweb
@@ -370,7 +370,7 @@ public final class BowAbilityListener implements Listener {
                 final int currentUltHits = ultimateHits.getOrDefault(shooterUuid, 0);
                 final int targetUltHits = settings.ultimate.hitsRequired;
                 if (currentUltHits < targetUltHits) {
-                    final int nextUltHits = currentUltHits + (int) (1 * plugin.getLicenseManager().getScale());
+                    final int nextUltHits = currentUltHits + strengthService.scaleInt(1);
                     ultimateHits.put(shooterUuid, nextUltHits);
 
                     if (nextUltHits == targetUltHits) {

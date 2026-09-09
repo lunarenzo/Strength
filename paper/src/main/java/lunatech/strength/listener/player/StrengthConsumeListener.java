@@ -59,8 +59,7 @@ public final class StrengthConsumeListener implements Listener {
 
         // Add strength to player's base
         final int currentStrength = strengthService.getStrength(player);
-        final double scale = ((lunatech.strength.Strength) lunatech.strength.Strength.getInstance()).getLicenseManager().getScale();
-        strengthService.setStrength(player, currentStrength + (int) (strengthAmount * scale));
+        strengthService.setStrength(player, currentStrength + strengthService.scaleInt(strengthAmount));
 
         // Play visual and audio effects
         player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.2f);

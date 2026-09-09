@@ -122,7 +122,7 @@ public final class BowBeamTask extends BukkitRunnable {
                             continue;
                         }
                         if (damaged.add(living)) {
-                            living.damage(settings.ultimate.damage * ((Strength) Strength.getInstance()).getLicenseManager().getScale(), player);
+                            living.damage(settings.ultimate.damage * ((Strength) Strength.getInstance()).getStrengthService().getScale(), player);
                             living.getWorld().playSound(living.getLocation(), Sound.ENTITY_GENERIC_HURT, 1.0f, 1.0f);
                         }
                     }

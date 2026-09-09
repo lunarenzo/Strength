@@ -38,7 +38,7 @@ public final class Trident2UltimateTask extends BukkitRunnable {
     public void run() {
         final UUID uuid = player.getUniqueId();
 
-        if (!player.isOnline() || player.isDead() || elapsedTicks >= (durationTicks * plugin.getLicenseManager().getScale())) {
+        if (!player.isOnline() || player.isDead() || elapsedTicks >= (durationTicks * plugin.getStrengthService().getScale())) {
             // Restore weather state upon expiration
             world.setThundering(false);
             world.setStorm(false);

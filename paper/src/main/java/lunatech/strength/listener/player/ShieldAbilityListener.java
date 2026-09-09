@@ -109,7 +109,7 @@ public final class ShieldAbilityListener implements Listener {
 
         // Passive Ability: Configurable damage reduction when shield is disabled/broken or on cooldown
         if (now < expiry || victim.hasCooldown(Material.SHIELD)) {
-            final double reduction = (settings.passive.damageReductionPercentage / 100.0) * plugin.getLicenseManager().getScale();
+            final double reduction = strengthService.scale(settings.passive.damageReductionPercentage / 100.0);
             final double multiplier = Math.max(0.0, 1.0 - reduction);
             event.setDamage(event.getDamage() * multiplier);
         }
@@ -172,7 +172,7 @@ public final class ShieldAbilityListener implements Listener {
             final int targetCharge = settings.ultimate.hitsRequired;
 
             if (currentCharge < targetCharge) {
-                final int nextCharge = currentCharge + (int) (1 * plugin.getLicenseManager().getScale());
+                final int nextCharge = currentCharge + strengthService.scaleInt(1);
                 ultimateHits.put(uuid, nextCharge);
 
                 if (nextCharge == targetCharge) {
