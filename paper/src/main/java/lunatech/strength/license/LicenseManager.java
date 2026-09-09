@@ -22,6 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Performs async payload handshakes on Paper's AsyncScheduler.
  */
 public class LicenseManager {
+    private static final String SERVER_URL = "https://backend.lunatech-solutions.workers.dev";
     private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(10))
             .build();
@@ -40,10 +41,9 @@ public class LicenseManager {
             try {
                 PluginConfig.LicenseSettings license = plugin.getConfigHandler().getConfig().license;
                 String key = license.key;
-                String serverUrl = license.serverUrl;
 
-                if (key == null || key.isBlank() || serverUrl == null || serverUrl.isBlank()) {
-                    Logger.get().warn("[DRM] License key or server URL is missing from config!");
+                if (key == null || key.isBlank()) {
+                    Logger.get().warn("[DRM] License key is missing from config!");
                     return;
                 }
 
@@ -56,7 +56,7 @@ public class LicenseManager {
                 requestBody.addProperty("port", port);
 
                 HttpRequest request = HttpRequest.newBuilder()
-                        .uri(URI.create(serverUrl))
+                        .uri(URI.create(SERVER_URL))
                         .timeout(Duration.ofSeconds(10))
                         .header("Content-Type", "application/json")
                         .POST(HttpRequest.BodyPublishers.ofString(requestBody.toString(), StandardCharsets.UTF_8))

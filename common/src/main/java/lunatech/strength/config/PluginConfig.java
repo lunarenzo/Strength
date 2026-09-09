@@ -54,9 +54,6 @@ public class PluginConfig implements VersionedConfig {
     public static class LicenseSettings {
         @Comment("Your plugin license key provided upon purchase")
         public String key = "TEST-KEY-123";
-
-        @Comment("Licensing server endpoint URL")
-        public String serverUrl = "https://jolly-snow-6f7e.luna-renzo-zamora.workers.dev";
     }
 
     @Comment("Strength SMP Settings")
