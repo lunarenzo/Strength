@@ -1,6 +1,7 @@
 package lunatech.strength.hook.placeholderapi;
 
 import lunatech.strength.Strength;
+import lunatech.strength.utility.ItemResolver;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -60,7 +61,9 @@ public class PAPIExpansion extends PlaceholderExpansion {
             }
             case "weapon", "assigned_weapon" -> {
                 final String weapon = plugin.getStrengthService().getAssignedWeapon(player);
-                yield (weapon != null && !weapon.isBlank()) ? weapon.toUpperCase() : plugin.getConfigHandler().getConfig().messages.unassignedWeaponMessage;
+                yield (weapon != null && !weapon.isBlank())
+                    ? ItemResolver.resolveWeaponDisplayName(weapon, plugin.getConfigHandler().getConfig().weapons.weaponCustomMessages)
+                    : plugin.getConfigHandler().getConfig().messages.unassignedWeaponMessage;
             }
             default -> null;
         };

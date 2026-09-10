@@ -39,6 +39,7 @@ import lunatech.strength.task.SpearUltimateTask;
 import lunatech.strength.task.SwordUltimateTask;
 import lunatech.strength.task.Trident2UltimateTask;
 import lunatech.strength.task.TridentUltimateTask;
+import lunatech.strength.utility.ItemResolver;
 import lunatech.strength.utility.MessageUtil;
 
 import org.bukkit.Material;
@@ -118,10 +119,11 @@ public final class AbilityCommand extends Command {
         } else if ("crossbow2".equalsIgnoreCase(assignedWeapon)) {
             triggerCrossbow2Ultimate(player, strengthService);
         } else {
+            final String formattedWeapon = ItemResolver.resolveWeaponDisplayName(assignedWeapon, plugin.getConfigHandler().getConfig().weapons.weaponCustomMessages);
             MessageUtil.send(
                 player,
                 messages.weaponNoUltimateMessage,
-                "weapon", assignedWeapon.toUpperCase()
+                "weapon", formattedWeapon
             );
         }
     }

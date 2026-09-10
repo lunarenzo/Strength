@@ -4,6 +4,7 @@ import lunatech.strength.Strength;
 import lunatech.strength.config.RulesConfig.MaceRules;
 import lunatech.strength.config.PluginConfig.WeaponSettings;
 import lunatech.strength.service.StrengthService;
+import lunatech.strength.utility.ItemResolver;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.title.Title;
@@ -241,11 +242,7 @@ public final class WeaponRollTask {
     }
 
     private String getWeaponDisplayString(String weaponKey) {
-        final Map<String, String> customMap = settings.weaponCustomMessages;
-        if (customMap != null && customMap.containsKey(weaponKey)) {
-            return customMap.get(weaponKey);
-        }
-        return weaponKey.toUpperCase();
+        return ItemResolver.resolveWeaponDisplayName(weaponKey, settings.weaponCustomMessages);
     }
 
     private void playConfiguredSound(Player p, String soundName, float volume, float pitch) {

@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
+import java.util.Map;
 
 /**
  * High-performance resolver for item configurations supporting Bukkit Materials, CustomModelData,
@@ -159,5 +160,29 @@ public final class ItemResolver {
         } catch (Exception ignored) {
         }
         return null;
+    }
+
+    /**
+     * Resolves the configured display name for a weapon key from weaponCustomMessages.
+     * Uses case-insensitive key lookup so 'sword', 'Sword', or 'SWORD' matches 'Sword' in config.
+     *
+     * @param weaponKey raw weapon name or key
+     * @param customMessages weaponCustomMessages map from config
+     * @return resolved display name or uppercase weaponKey if not configured
+     */
+    @NotNull
+    public static String resolveWeaponDisplayName(@Nullable String weaponKey, @Nullable Map<String, String> customMessages) {
+        if (weaponKey == null || weaponKey.trim().isEmpty()) {
+            return "None";
+        }
+        final String trimmed = weaponKey.trim();
+        if (customMessages != null && !customMessages.isEmpty()) {
+            for (Map.Entry<String, String> entry : customMessages.entrySet()) {
+                if (entry.getKey().equalsIgnoreCase(trimmed)) {
+                    return entry.getValue();
+                }
+            }
+        }
+        return trimmed.toUpperCase();
     }
 }

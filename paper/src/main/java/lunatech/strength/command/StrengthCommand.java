@@ -12,6 +12,7 @@ import lunatech.strength.config.PluginConfig;
 import lunatech.strength.config.RulesConfig.MaceRules;
 import lunatech.strength.gui.WeaponsGui;
 import lunatech.strength.service.StrengthService;
+import lunatech.strength.utility.ItemResolver;
 import lunatech.strength.utility.MessageUtil;
 import io.github.milkdrinkers.colorparser.paper.ColorParser;
 import org.bukkit.command.CommandSender;
@@ -134,12 +135,7 @@ final class StrengthCommand extends Command {
 
             String weaponDisplay = messages.unassignedWeaponMessage;
             if (assignedRaw != null && !assignedRaw.isEmpty()) {
-                final Map<String, String> customMap = config.weapons.weaponCustomMessages;
-                if (customMap != null && customMap.containsKey(assignedRaw)) {
-                    weaponDisplay = customMap.get(assignedRaw);
-                } else {
-                    weaponDisplay = assignedRaw.toUpperCase();
-                }
+                weaponDisplay = ItemResolver.resolveWeaponDisplayName(assignedRaw, config.weapons.weaponCustomMessages);
             }
 
             MessageUtil.send(
@@ -306,11 +302,12 @@ final class StrengthCommand extends Command {
     private void executorChangeWeapon(CommandSender sender, CommandArguments args) {
         final Player target = (Player) args.get("target");
         final String weapon = ((String) args.get("weapon")).toLowerCase();
-        final List<String> availableWeapons = plugin.getConfigHandler().getConfig().weapons.availableWeapons
+        final PluginConfig config = plugin.getConfigHandler().getConfig();
+        final List<String> availableWeapons = config.weapons.availableWeapons
             .stream()
             .map(String::toLowerCase)
             .toList();
-        final PluginConfig.MessagesConfig messages = plugin.getConfigHandler().getConfig().messages;
+        final PluginConfig.MessagesConfig messages = config.messages;
 
         if (target == null) {
             MessageUtil.send(sender, messages.targetNotFoundMessage);
@@ -349,16 +346,18 @@ final class StrengthCommand extends Command {
 
         strengthService.setAssignedWeapon(target, weapon);
 
+        final String formattedWeapon = ItemResolver.resolveWeaponDisplayName(weapon, config.weapons.weaponCustomMessages);
+
         MessageUtil.send(
             sender,
             messages.changeWeaponSuccessSenderMessage,
-            Map.of("target", target.getName(), "weapon", weapon.toUpperCase())
+            Map.of("target", target.getName(), "weapon", formattedWeapon)
         );
 
         MessageUtil.send(
             target,
             messages.changeWeaponSuccessTargetMessage,
-            "weapon", weapon.toUpperCase()
+            "weapon", formattedWeapon
         );
     }
 
