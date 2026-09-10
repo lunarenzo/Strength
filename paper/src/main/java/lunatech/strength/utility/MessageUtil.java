@@ -19,14 +19,32 @@ public final class MessageUtil {
     }
 
     /**
+     * Checks if a message template string is null, empty, blank, or set to a disabled key ("none", "disabled", "''", "\"\"").
+     *
+     * @param message the template string to evaluate
+     * @return true if the message should be suppressed, false otherwise
+     */
+    public static boolean isNullOrEmpty(@Nullable String message) {
+        if (message == null) {
+            return true;
+        }
+        final String trimmed = message.trim();
+        return trimmed.isEmpty() 
+            || "none".equalsIgnoreCase(trimmed) 
+            || "disabled".equalsIgnoreCase(trimmed) 
+            || "''".equals(trimmed) 
+            || "\"\"".equals(trimmed);
+    }
+
+    /**
      * Sends a parsed ColorParser message to a recipient.
-     * If message is null or empty, no message is sent.
+     * If message is null, empty, or disabled, no message is sent to chat.
      *
      * @param sender the recipient
      * @param message the raw template string
      */
     public static void send(@NotNull CommandSender sender, @Nullable String message) {
-        if (message == null || message.trim().isEmpty()) {
+        if (isNullOrEmpty(message)) {
             return;
         }
         sender.sendMessage(ColorParser.of(message).build());
@@ -35,6 +53,7 @@ public final class MessageUtil {
     /**
      * Sends a parsed ColorParser message with a single placeholder pair to a recipient.
      * Supports both {placeholder} and <placeholder> formats.
+     * If message is null, empty, or disabled, no message is sent to chat.
      *
      * @param sender the recipient
      * @param message the raw template string
@@ -42,7 +61,7 @@ public final class MessageUtil {
      * @param value the replacement value
      */
     public static void send(@NotNull CommandSender sender, @Nullable String message, @NotNull String placeholder, @NotNull String value) {
-        if (message == null || message.trim().isEmpty()) {
+        if (isNullOrEmpty(message)) {
             return;
         }
         final String formatted = message
@@ -54,13 +73,14 @@ public final class MessageUtil {
     /**
      * Sends a parsed ColorParser message with key-value placeholders to a recipient.
      * Supports both {placeholder} and <placeholder> formats.
+     * If message is null, empty, or disabled, no message is sent to chat.
      *
      * @param sender the recipient
      * @param message the raw template string
      * @param placeholders key-value replacement mapping
      */
     public static void send(@NotNull CommandSender sender, @Nullable String message, @NotNull Map<String, String> placeholders) {
-        if (message == null || message.trim().isEmpty()) {
+        if (isNullOrEmpty(message)) {
             return;
         }
         String formatted = message;

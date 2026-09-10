@@ -3,7 +3,7 @@ package lunatech.strength.task;
 import lunatech.strength.Strength;
 import lunatech.strength.config.ArmorsConfig;
 import lunatech.strength.listener.player.ArmorsAbilityListener;
-import io.github.milkdrinkers.colorparser.paper.ColorParser;
+import lunatech.strength.utility.MessageUtil;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
@@ -49,14 +49,7 @@ public final class ArmorsUltimateTask extends BukkitRunnable {
         }
 
         player.playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_NETHERITE, 1.0f, 1.0f);
-        if (settings.ultimateActivatedMessage != null && !settings.ultimateActivatedMessage.isBlank()) {
-            player.sendMessage(
-                ColorParser.of(settings.ultimateActivatedMessage
-                    .replace("<duration>", String.valueOf(settings.durationSeconds)))
-                    .with("duration", String.valueOf(settings.durationSeconds))
-                    .build()
-            );
-        }
+        MessageUtil.send(player, settings.ultimateActivatedMessage, "duration", String.valueOf(settings.durationSeconds));
 
         // Run timer every 20 ticks (1s) to eliminate per-tick scheduling overhead (95% CPU savings)
         runTaskTimer(plugin, 0L, CHECK_INTERVAL_TICKS);
@@ -85,9 +78,7 @@ public final class ArmorsUltimateTask extends BukkitRunnable {
         }
 
         if (player.isOnline() && !player.isDead()) {
-            if (settings.ultimateExpiredMessage != null && !settings.ultimateExpiredMessage.isBlank()) {
-                player.sendMessage(ColorParser.of(settings.ultimateExpiredMessage).build());
-            }
+            MessageUtil.send(player, settings.ultimateExpiredMessage);
         }
     }
 

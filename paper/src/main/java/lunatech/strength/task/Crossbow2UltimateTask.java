@@ -1,6 +1,6 @@
 package lunatech.strength.task;
 
-import io.github.milkdrinkers.colorparser.paper.ColorParser;
+import lunatech.strength.utility.MessageUtil;
 import lunatech.strength.Strength;
 import lunatech.strength.config.Crossbow2Config;
 import lunatech.strength.listener.player.Crossbow2AbilityListener;
@@ -41,12 +41,7 @@ public final class Crossbow2UltimateTask extends BukkitRunnable {
             loc.getWorld().spawnParticle(Particle.CRIT, loc.clone().add(0, 1.0, 0), 10, 0.4, 0.4, 0.4, 0.1);
         }
 
-        if (settings.ultimateActivatedMessage != null && !settings.ultimateActivatedMessage.isBlank()) {
-            final String msg = settings.ultimateActivatedMessage
-                .replace("{duration}", String.valueOf(settings.durationSeconds))
-                .replace("<duration>", String.valueOf(settings.durationSeconds));
-            player.sendMessage(ColorParser.of(msg).build());
-        }
+        MessageUtil.send(player, settings.ultimateActivatedMessage, "duration", String.valueOf(settings.durationSeconds));
 
         runTaskTimer(plugin, 1L, 1L);
     }
@@ -63,8 +58,8 @@ public final class Crossbow2UltimateTask extends BukkitRunnable {
             Crossbow2AbilityListener.activeUltimatePlayers.remove(uuid);
             Crossbow2AbilityListener.stripTemporaryEnchantmentsFromPlayer(player, settings);
 
-            if (player.isOnline() && settings.ultimateExpiredMessage != null && !settings.ultimateExpiredMessage.isBlank()) {
-                player.sendMessage(ColorParser.of(settings.ultimateExpiredMessage).build());
+            if (player.isOnline()) {
+                MessageUtil.send(player, settings.ultimateExpiredMessage);
             }
 
             cancel();

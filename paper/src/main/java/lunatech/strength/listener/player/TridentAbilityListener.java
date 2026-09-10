@@ -6,7 +6,6 @@ import lunatech.strength.hook.betterteams.BetterTeamsHook;
 import lunatech.strength.integration.WorldGuardHook;
 import lunatech.strength.service.StrengthService;
 import lunatech.strength.utility.MessageUtil;
-import io.github.milkdrinkers.colorparser.paper.ColorParser;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -106,7 +105,7 @@ public final class TridentAbilityListener implements Listener {
                 );
 
                 damagee.playSound(damagee.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 0.8f, 1.0f);
-                damager.sendMessage(ColorParser.of(settings.passive.passiveTriggeredMessage).build());
+                MessageUtil.send(damager, settings.passive.passiveTriggeredMessage);
             }
         }
 
@@ -123,19 +122,13 @@ public final class TridentAbilityListener implements Listener {
                 ultimateHits.put(damagerUuid, nextUltHits);
 
                 if (nextUltHits == targetUltHits) {
-                    damager.sendMessage(ColorParser.of(settings.ultimate.ultimateChargedMessage).build());
+                    MessageUtil.send(damager, settings.ultimate.ultimateChargedMessage);
                     damager.playSound(damager.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.2f);
                 } else {
-                    final String msg = settings.ultimate.ultimateChargeProgressMessage
-                        .replace("<charge>", String.valueOf(nextUltHits))
-                        .replace("{charge}", String.valueOf(nextUltHits))
-                        .replace("<target>", String.valueOf(targetUltHits))
-                        .replace("{target}", String.valueOf(targetUltHits));
-                    damager.sendMessage(
-                        ColorParser.of(msg)
-                            .with("charge", String.valueOf(nextUltHits))
-                            .with("target", String.valueOf(targetUltHits))
-                            .build()
+                    MessageUtil.send(
+                        damager,
+                        settings.ultimate.ultimateChargeProgressMessage,
+                        Map.of("charge", String.valueOf(nextUltHits), "target", String.valueOf(targetUltHits))
                     );
                 }
             }

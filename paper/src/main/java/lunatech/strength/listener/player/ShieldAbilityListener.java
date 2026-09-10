@@ -4,7 +4,7 @@ import lunatech.strength.Strength;
 import lunatech.strength.config.ShieldConfig;
 import lunatech.strength.integration.WorldGuardHook;
 import lunatech.strength.service.StrengthService;
-import io.github.milkdrinkers.colorparser.paper.ColorParser;
+import lunatech.strength.utility.MessageUtil;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.LivingEntity;
@@ -177,19 +177,13 @@ public final class ShieldAbilityListener implements Listener {
                 ultimateHits.put(uuid, nextCharge);
 
                 if (nextCharge == targetCharge) {
-                    victim.sendMessage(ColorParser.of(settings.ultimate.ultimateChargedMessage).build());
+                    MessageUtil.send(victim, settings.ultimate.ultimateChargedMessage);
                     victim.playSound(victim.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.2f);
                 } else {
-                    final String msg = settings.ultimate.ultimateChargeProgressMessage
-                        .replace("<charge>", String.valueOf(nextCharge))
-                        .replace("{charge}", String.valueOf(nextCharge))
-                        .replace("<target>", String.valueOf(targetCharge))
-                        .replace("{target}", String.valueOf(targetCharge));
-                    victim.sendMessage(
-                        ColorParser.of(msg)
-                            .with("charge", String.valueOf(nextCharge))
-                            .with("target", String.valueOf(targetCharge))
-                            .build()
+                    MessageUtil.send(
+                        victim,
+                        settings.ultimate.ultimateChargeProgressMessage,
+                        Map.of("charge", String.valueOf(nextCharge), "target", String.valueOf(targetCharge))
                     );
                 }
             }
@@ -210,16 +204,13 @@ public final class ShieldAbilityListener implements Listener {
         final long expiry = System.currentTimeMillis() + (settings.passive.durationSeconds * 1000L);
         passiveProtectionExpiry.put(player.getUniqueId(), expiry);
 
-        final String msg = settings.passive.passiveActivatedMessage
-            .replace("<seconds>", String.valueOf(settings.passive.durationSeconds))
-            .replace("{seconds}", String.valueOf(settings.passive.durationSeconds))
-            .replace("<reduction>", String.valueOf((int) settings.passive.damageReductionPercentage))
-            .replace("{reduction}", String.valueOf((int) settings.passive.damageReductionPercentage));
-        player.sendMessage(
-            ColorParser.of(msg)
-                .with("seconds", String.valueOf(settings.passive.durationSeconds))
-                .with("reduction", String.valueOf((int) settings.passive.damageReductionPercentage))
-                .build()
+        MessageUtil.send(
+            player,
+            settings.passive.passiveActivatedMessage,
+            Map.of(
+                "seconds", String.valueOf(settings.passive.durationSeconds),
+                "reduction", String.valueOf((int) settings.passive.damageReductionPercentage)
+            )
         );
         player.playSound(player.getLocation(), Sound.ITEM_SHIELD_BREAK, 1.0f, 0.8f);
     }

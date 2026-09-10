@@ -3,6 +3,7 @@ package lunatech.strength.listener.player;
 import lunatech.strength.Strength;
 import lunatech.strength.config.CrossbowConfig;
 import lunatech.strength.service.StrengthService;
+import lunatech.strength.utility.MessageUtil;
 import lunatech.strength.task.CrossbowImmobilizeTask;
 import io.github.milkdrinkers.colorparser.paper.ColorParser;
 import org.bukkit.Location;
@@ -144,7 +145,7 @@ public final class CrossbowAbilityListener implements Listener {
 
                     final double bonusMultiplier = (settings.passive.damageMultiplier - 1.0) * strengthService.getScale();
                     event.setDamage(event.getDamage() * (1.0 + bonusMultiplier));
-                    shooter.sendMessage(ColorParser.of(settings.passive.passiveTriggeredShooterMessage).build());
+                    MessageUtil.send(shooter, settings.passive.passiveTriggeredShooterMessage);
 
                     // 2. Ultimate Charge Increment
                     if (settings.ultimate.enabled) {
@@ -155,19 +156,13 @@ public final class CrossbowAbilityListener implements Listener {
                             ultimateHits.put(shooterUuid, nextUltHits);
 
                             if (nextUltHits == targetUltHits) {
-                                shooter.sendMessage(ColorParser.of(settings.ultimate.ultimateChargedMessage).build());
+                                MessageUtil.send(shooter, settings.ultimate.ultimateChargedMessage);
                                 shooter.playSound(shooter.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.2f);
                             } else {
-                                final String msg = settings.ultimate.ultimateChargeProgressMessage
-                                    .replace("<charge>", String.valueOf(nextUltHits))
-                                    .replace("{charge}", String.valueOf(nextUltHits))
-                                    .replace("<target>", String.valueOf(targetUltHits))
-                                    .replace("{target}", String.valueOf(targetUltHits));
-                                shooter.sendMessage(
-                                    ColorParser.of(msg)
-                                        .with("charge", String.valueOf(nextUltHits))
-                                        .with("target", String.valueOf(targetUltHits))
-                                        .build()
+                                MessageUtil.send(
+                                    shooter,
+                                    settings.ultimate.ultimateChargeProgressMessage,
+                                    Map.of("charge", String.valueOf(nextUltHits), "target", String.valueOf(targetUltHits))
                                 );
                             }
                         }
@@ -208,8 +203,8 @@ public final class CrossbowAbilityListener implements Listener {
                 .runTaskTimer(plugin, 0L, 1L);
 
             victim.getWorld().playSound(victim.getLocation(), Sound.ITEM_CROSSBOW_HIT, 1.0f, 0.5f);
-            victim.sendMessage(ColorParser.of(settings.ultimate.immobilizedVictimMessage).build());
-            shooter.sendMessage(ColorParser.of(settings.ultimate.immobilizedShooterMessage).build());
+            MessageUtil.send(victim, settings.ultimate.immobilizedVictimMessage);
+            MessageUtil.send(shooter, settings.ultimate.immobilizedShooterMessage);
         }
     }
 
@@ -244,7 +239,7 @@ public final class CrossbowAbilityListener implements Listener {
         if (immobilizedPlayers.containsKey(uuid)) {
             event.setCancelled(true);
             final CrossbowConfig settings = plugin.getConfigHandler().getCrossbowConfig();
-            event.getPlayer().sendMessage(ColorParser.of(settings.ultimate.trapEscapeBlockedMessage).build());
+            MessageUtil.send(event.getPlayer(), settings.ultimate.trapEscapeBlockedMessage);
         }
     }
 

@@ -68,7 +68,7 @@ public final class TotemRuleListener implements Listener {
         if (totemRules.preventInCombat && isCombat) {
             event.setCancelled(true);
             scheduleInventoryUpdate(player);
-            player.sendMessage(ColorParser.of(totemRules.totemInCombatMessage).build());
+            lunatech.strength.utility.MessageUtil.send(player, totemRules.totemInCombatMessage);
             return;
         }
 
@@ -83,10 +83,10 @@ public final class TotemRuleListener implements Listener {
                 scheduleInventoryUpdate(player);
 
                 final long remainingMillis = cooldownUntil - now;
-                player.sendMessage(
-                    ColorParser.of(totemRules.totemOnCooldownMessage)
-                        .with("time", formatTime(remainingMillis))
-                        .build()
+                lunatech.strength.utility.MessageUtil.send(
+                    player,
+                    totemRules.totemOnCooldownMessage,
+                    "time", formatTime(remainingMillis)
                 );
                 return;
             }
@@ -113,10 +113,10 @@ public final class TotemRuleListener implements Listener {
                 setTotemCooldownUntil(player, expireTime);
                 setTotemPopCount(player, 0);
 
-                player.sendMessage(
-                    ColorParser.of(totemRules.quotaExhaustedMessage)
-                        .with("time", formatTime(durationMillis))
-                        .build()
+                lunatech.strength.utility.MessageUtil.send(
+                    player,
+                    totemRules.quotaExhaustedMessage,
+                    "time", formatTime(durationMillis)
                 );
             } else {
                 setTotemPopCount(player, pops);
@@ -202,10 +202,10 @@ public final class TotemRuleListener implements Listener {
             final int pickupAmount = event.getItem().getItemStack().getAmount();
             if (currentTotems + pickupAmount > totemRules.maxInInventory) {
                 event.setCancelled(true);
-                player.sendMessage(
-                    ColorParser.of(totemRules.maxLimitReachedMessage)
-                        .with("count", String.valueOf(totemRules.maxInInventory))
-                        .build()
+                lunatech.strength.utility.MessageUtil.send(
+                    player,
+                    totemRules.maxLimitReachedMessage,
+                    "count", String.valueOf(totemRules.maxInInventory)
                 );
             }
         }
@@ -241,7 +241,7 @@ public final class TotemRuleListener implements Listener {
 
         if (totemRules.preventInCombat && isCombat) {
             event.setCancelled(true);
-            player.sendMessage(ColorParser.of(totemRules.totemInCombatMessage).build());
+            lunatech.strength.utility.MessageUtil.send(player, totemRules.totemInCombatMessage);
             return;
         }
 
@@ -249,10 +249,10 @@ public final class TotemRuleListener implements Listener {
         if (now < getTotemCooldownUntil(player)) {
             if (!totemRules.quotaOnlyInCombat || isCombat) {
                 event.setCancelled(true);
-                player.sendMessage(
-                    ColorParser.of(totemRules.totemOnCooldownMessage)
-                        .with("time", formatTime(getTotemCooldownUntil(player) - now))
-                        .build()
+                lunatech.strength.utility.MessageUtil.send(
+                    player,
+                    totemRules.totemOnCooldownMessage,
+                    "time", formatTime(getTotemCooldownUntil(player) - now)
                 );
                 return;
             }
@@ -266,10 +266,10 @@ public final class TotemRuleListener implements Listener {
                 final int amount = current != null ? current.getAmount() : 1;
                 if (currentTotems + amount > totemRules.maxInInventory) {
                     event.setCancelled(true);
-                    player.sendMessage(
-                        ColorParser.of(totemRules.maxLimitReachedMessage)
-                            .with("count", String.valueOf(totemRules.maxInInventory))
-                            .build()
+                    lunatech.strength.utility.MessageUtil.send(
+                        player,
+                        totemRules.maxLimitReachedMessage,
+                        "count", String.valueOf(totemRules.maxInInventory)
                     );
                     return;
                 }
@@ -280,10 +280,10 @@ public final class TotemRuleListener implements Listener {
                 if (event.getClickedInventory() == player.getInventory()) {
                     if (currentTotems + cursor.getAmount() > totemRules.maxInInventory) {
                         event.setCancelled(true);
-                        player.sendMessage(
-                            ColorParser.of(totemRules.maxLimitReachedMessage)
-                                .with("count", String.valueOf(totemRules.maxInInventory))
-                                .build()
+                        lunatech.strength.utility.MessageUtil.send(
+                            player,
+                            totemRules.maxLimitReachedMessage,
+                            "count", String.valueOf(totemRules.maxInInventory)
                         );
                     }
                 }
@@ -331,10 +331,10 @@ public final class TotemRuleListener implements Listener {
             final int currentTotems = countPlayerInventoryTotems(player);
             if (currentTotems + oldCursor.getAmount() > totemRules.maxInInventory) {
                 event.setCancelled(true);
-                player.sendMessage(
-                    ColorParser.of(totemRules.maxLimitReachedMessage)
-                        .with("count", String.valueOf(totemRules.maxInInventory))
-                        .build()
+                lunatech.strength.utility.MessageUtil.send(
+                    player,
+                    totemRules.maxLimitReachedMessage,
+                    "count", String.valueOf(totemRules.maxInInventory)
                 );
             }
         }

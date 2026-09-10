@@ -6,7 +6,6 @@ import lunatech.strength.hook.betterteams.BetterTeamsHook;
 import lunatech.strength.integration.WorldGuardHook;
 import lunatech.strength.service.StrengthService;
 import lunatech.strength.utility.MessageUtil;
-import io.github.milkdrinkers.colorparser.paper.ColorParser;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
@@ -55,8 +54,8 @@ public final class Trident2AbilityListener implements Listener {
         final UUID uuid = player.getUniqueId();
         if (activeUltimatePlayers.remove(uuid) != null) {
             final Trident2Config settings = plugin.getConfigHandler().getTrident2Config();
-            if (player.isOnline() && settings.ultimate.ultimateExpiredMessage != null && !settings.ultimate.ultimateExpiredMessage.isBlank()) {
-                player.sendMessage(ColorParser.of(settings.ultimate.ultimateExpiredMessage).build());
+            if (player.isOnline()) {
+                MessageUtil.send(player, settings.ultimate.ultimateExpiredMessage);
             }
         }
     }
@@ -130,15 +129,8 @@ public final class Trident2AbilityListener implements Listener {
                 new ItemStack(Material.SHIELD)
             );
 
-            if (settings.passive.shieldStunMessage != null && !settings.passive.shieldStunMessage.isBlank()) {
-                damager.sendMessage(ColorParser.of(settings.passive.shieldStunMessage
-                    .replace("<target>", damagee.getName())
-                    .replace("{target}", damagee.getName())).build());
-            }
-
-            if (settings.passive.shieldStaggeredMessage != null && !settings.passive.shieldStaggeredMessage.isBlank()) {
-                damagee.sendMessage(ColorParser.of(settings.passive.shieldStaggeredMessage).build());
-            }
+            MessageUtil.send(damager, settings.passive.shieldStunMessage, "target", damagee.getName());
+            MessageUtil.send(damagee, settings.passive.shieldStaggeredMessage);
         }
 
         // 2. Ultimate: Lightning strike on critical hit during active Thunderstorm Ultimate

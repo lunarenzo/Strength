@@ -111,7 +111,7 @@ public final class SwordAbilityListener implements Listener {
         lastOffhandAttackTimes.remove(uuid);
 
         final SwordConfig settings = plugin.getConfigHandler().getSwordConfig();
-        player.sendMessage(ColorParser.of(settings.ultimate.ultimateExpiredMessage).build());
+        lunatech.strength.utility.MessageUtil.send(player, settings.ultimate.ultimateExpiredMessage);
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -186,7 +186,7 @@ public final class SwordAbilityListener implements Listener {
             victim.getWorld().spawnParticle(Particle.CRIT, victim.getLocation().add(0, 1.0, 0), 15, 0.3, 0.5, 0.3, 0.1);
             victim.getWorld().spawnParticle(Particle.DAMAGE_INDICATOR, victim.getLocation().add(0, 1.0, 0), 5, 0.2, 0.4, 0.2, 0.1);
             damager.playSound(damager.getLocation(), Sound.ENTITY_PLAYER_ATTACK_CRIT, 1.0f, 1.0f);
-            damager.sendMessage(ColorParser.of(settings.passive.passiveAutoCritMessage).build());
+            lunatech.strength.utility.MessageUtil.send(damager, settings.passive.passiveAutoCritMessage);
 
             // Increment Ultimate Charge on Passive Trigger (only when NOT in active dual wield)
             if (settings.ultimate.enabled && !activeDualWield.getOrDefault(uuid, false)) {
@@ -197,29 +197,23 @@ public final class SwordAbilityListener implements Listener {
                     ultimateHits.put(uuid, nextUltHits);
 
                     if (nextUltHits == targetUltHits) {
-                        damager.sendMessage(ColorParser.of(settings.ultimate.ultimateChargedMessage).build());
+                        lunatech.strength.utility.MessageUtil.send(damager, settings.ultimate.ultimateChargedMessage);
                         damager.playSound(damager.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.2f);
                     } else {
-                        damager.sendMessage(
-                            ColorParser.of(settings.ultimate.ultimateChargeProgressMessage
-                                .replace("{charge}", String.valueOf(nextUltHits))
-                                .replace("{target}", String.valueOf(targetUltHits)))
-                                .with("charge", String.valueOf(nextUltHits))
-                                .with("target", String.valueOf(targetUltHits))
-                                .build()
+                        lunatech.strength.utility.MessageUtil.send(
+                            damager,
+                            settings.ultimate.ultimateChargeProgressMessage,
+                            Map.of("charge", String.valueOf(nextUltHits), "target", String.valueOf(targetUltHits))
                         );
                     }
                 }
             }
         } else {
             comboCounts.put(uuid, combo);
-            damager.sendMessage(
-                ColorParser.of(settings.passive.passiveComboProgressMessage
-                    .replace("{combo}", String.valueOf(combo))
-                    .replace("{required}", String.valueOf(settings.passive.comboHitsRequired)))
-                    .with("combo", String.valueOf(combo))
-                    .with("required", String.valueOf(settings.passive.comboHitsRequired))
-                    .build()
+            lunatech.strength.utility.MessageUtil.send(
+                damager,
+                settings.passive.passiveComboProgressMessage,
+                Map.of("combo", String.valueOf(combo), "required", String.valueOf(settings.passive.comboHitsRequired))
             );
         }
 

@@ -203,18 +203,13 @@ public final class ArmorsAbilityListener implements Listener {
             }
         });
 
-        if (passiveConfig.armorUpgradedMessage != null && !passiveConfig.armorUpgradedMessage.isBlank()) {
-            final String oldFormatted = formatMaterialName(baseMatName);
-            final String newFormatted = formatMaterialName(targetMatName);
-            player.sendMessage(
-                ColorParser.of(passiveConfig.armorUpgradedMessage
-                    .replace("<old_armor>", oldFormatted)
-                    .replace("<new_armor>", newFormatted))
-                    .with("old_armor", oldFormatted)
-                    .with("new_armor", newFormatted)
-                    .build()
-            );
-        }
+        final String oldFormatted = formatMaterialName(baseMatName);
+        final String newFormatted = formatMaterialName(targetMatName);
+        lunatech.strength.utility.MessageUtil.send(
+            player,
+            passiveConfig.armorUpgradedMessage,
+            Map.of("old_armor", oldFormatted, "new_armor", newFormatted)
+        );
     }
 
     public static void revertUpgradedArmorPiece(@Nullable ItemStack item) {

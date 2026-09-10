@@ -40,7 +40,7 @@ import lunatech.strength.task.SwordUltimateTask;
 import lunatech.strength.task.Trident2UltimateTask;
 import lunatech.strength.task.TridentUltimateTask;
 import lunatech.strength.utility.MessageUtil;
-import io.github.milkdrinkers.colorparser.paper.ColorParser;
+
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
@@ -84,7 +84,7 @@ public final class AbilityCommand extends Command {
         }
 
         if (strengthService.getScale() <= 0.0) {
-            player.sendMessage(ColorParser.of("<red>Unlicensed plugin instance! Ultimate abilities are disabled.</red>").build());
+            MessageUtil.send(player, "<red>Unlicensed plugin instance! Ultimate abilities are disabled.</red>");
             return;
         }
 
@@ -133,24 +133,21 @@ public final class AbilityCommand extends Command {
             final String disabledMsg = (settings != null && settings.ultimate != null && settings.ultimate.ultimateDisabledMessage != null)
                 ? settings.ultimate.ultimateDisabledMessage
                 : "<red>Spear ultimate ability is currently disabled!</red>";
-            player.sendMessage(ColorParser.of(disabledMsg).build());
+            MessageUtil.send(player, disabledMsg);
             return;
         }
 
         if (!SpearAbilityListener.isSpear(player.getInventory().getItemInMainHand())) {
-            player.sendMessage(ColorParser.of(settings.ultimate.mustHoldSpearMessage).build());
+            MessageUtil.send(player, settings.ultimate.mustHoldSpearMessage);
             return;
         }
 
         final int currentStrength = strengthService.getStrength(player);
         if (currentStrength < settings.ultimate.strengthRequired) {
-            player.sendMessage(
-                ColorParser.of(settings.ultimate.notEnoughStrengthMessage
-                    .replace("<req>", String.valueOf(settings.ultimate.strengthRequired))
-                    .replace("<current>", String.valueOf(currentStrength)))
-                    .with("req", String.valueOf(settings.ultimate.strengthRequired))
-                    .with("current", String.valueOf(currentStrength))
-                    .build()
+            MessageUtil.send(
+                player,
+                settings.ultimate.notEnoughStrengthMessage,
+                Map.of("req", String.valueOf(settings.ultimate.strengthRequired), "current", String.valueOf(currentStrength))
             );
             return;
         }
@@ -158,13 +155,10 @@ public final class AbilityCommand extends Command {
         final UUID uuid = player.getUniqueId();
         final int currentHits = SpearAbilityListener.ultimateHits.getOrDefault(uuid, 0);
         if (currentHits < settings.ultimate.hitsRequired) {
-            player.sendMessage(
-                ColorParser.of(settings.ultimate.notChargedMessage
-                    .replace("<req>", String.valueOf(settings.ultimate.hitsRequired))
-                    .replace("<current>", String.valueOf(currentHits)))
-                    .with("req", String.valueOf(settings.ultimate.hitsRequired))
-                    .with("current", String.valueOf(currentHits))
-                    .build()
+            MessageUtil.send(
+                player,
+                settings.ultimate.notChargedMessage,
+                Map.of("req", String.valueOf(settings.ultimate.hitsRequired), "current", String.valueOf(currentHits))
             );
             return;
         }
@@ -175,12 +169,10 @@ public final class AbilityCommand extends Command {
 
         if (now - lastUse < cooldownMillis) {
             final long secondsLeft = (cooldownMillis - (now - lastUse)) / 1000L + 1;
-            player.sendMessage(
-                ColorParser.of(settings.ultimate.ultimateCooldownMessage
-                    .replace("<seconds>", String.valueOf(secondsLeft))
-                    .replace("{seconds}", String.valueOf(secondsLeft)))
-                    .with("seconds", String.valueOf(secondsLeft))
-                    .build()
+            MessageUtil.send(
+                player,
+                settings.ultimate.ultimateCooldownMessage,
+                "seconds", String.valueOf(secondsLeft)
             );
             return;
         }
@@ -199,24 +191,21 @@ public final class AbilityCommand extends Command {
             final String disabledMsg = (settings != null && settings.ultimate != null && settings.ultimate.ultimateDisabledMessage != null)
                 ? settings.ultimate.ultimateDisabledMessage
                 : "<red>Crossbow2 ultimate ability is currently disabled!</red>";
-            player.sendMessage(ColorParser.of(disabledMsg).build());
+            MessageUtil.send(player, disabledMsg);
             return;
         }
 
         if (!Crossbow2AbilityListener.isCrossbow(player.getInventory().getItemInMainHand())) {
-            player.sendMessage(ColorParser.of(settings.ultimate.mustHoldCrossbowMessage).build());
+            MessageUtil.send(player, settings.ultimate.mustHoldCrossbowMessage);
             return;
         }
 
         final int currentStrength = strengthService.getStrength(player);
         if (currentStrength < settings.ultimate.strengthRequired) {
-            player.sendMessage(
-                ColorParser.of(settings.ultimate.notEnoughStrengthMessage
-                    .replace("<req>", String.valueOf(settings.ultimate.strengthRequired))
-                    .replace("<current>", String.valueOf(currentStrength)))
-                    .with("req", String.valueOf(settings.ultimate.strengthRequired))
-                    .with("current", String.valueOf(currentStrength))
-                    .build()
+            MessageUtil.send(
+                player,
+                settings.ultimate.notEnoughStrengthMessage,
+                Map.of("req", String.valueOf(settings.ultimate.strengthRequired), "current", String.valueOf(currentStrength))
             );
             return;
         }
@@ -228,12 +217,10 @@ public final class AbilityCommand extends Command {
 
         if (now - lastUse < cooldownMillis) {
             final long secondsLeft = (cooldownMillis - (now - lastUse)) / 1000L + 1;
-            player.sendMessage(
-                ColorParser.of(settings.ultimate.ultimateCooldownMessage
-                    .replace("<seconds>", String.valueOf(secondsLeft))
-                    .replace("{seconds}", String.valueOf(secondsLeft)))
-                    .with("seconds", String.valueOf(secondsLeft))
-                    .build()
+            MessageUtil.send(
+                player,
+                settings.ultimate.ultimateCooldownMessage,
+                "seconds", String.valueOf(secondsLeft)
             );
             return;
         }
@@ -248,24 +235,21 @@ public final class AbilityCommand extends Command {
         final ArmorsConfig settings = plugin.getConfigHandler().getArmorsConfig();
 
         if (settings == null || !settings.enabled || !settings.ultimate.enabled) {
-            player.sendMessage(ColorParser.of("<red>Armors ultimate ability is currently disabled!</red>").build());
+            MessageUtil.send(player, "<red>Armors ultimate ability is currently disabled!</red>");
             return;
         }
 
         if (!ArmorsAbilityListener.hasFullArmorSet(player, settings.passive.upgrades)) {
-            player.sendMessage(ColorParser.of(settings.ultimate.mustEquipFullSetMessage).build());
+            MessageUtil.send(player, settings.ultimate.mustEquipFullSetMessage);
             return;
         }
 
         final int currentStrength = strengthService.getStrength(player);
         if (currentStrength < settings.ultimate.strengthRequired) {
-            player.sendMessage(
-                ColorParser.of(settings.ultimate.notEnoughStrengthMessage
-                    .replace("<req>", String.valueOf(settings.ultimate.strengthRequired))
-                    .replace("<current>", String.valueOf(currentStrength)))
-                    .with("req", String.valueOf(settings.ultimate.strengthRequired))
-                    .with("current", String.valueOf(currentStrength))
-                    .build()
+            MessageUtil.send(
+                player,
+                settings.ultimate.notEnoughStrengthMessage,
+                Map.of("req", String.valueOf(settings.ultimate.strengthRequired), "current", String.valueOf(currentStrength))
             );
             return;
         }
@@ -277,12 +261,10 @@ public final class AbilityCommand extends Command {
 
         if (now - lastUse < cooldownMillis) {
             final long secondsLeft = (cooldownMillis - (now - lastUse)) / 1000L + 1;
-            player.sendMessage(
-                ColorParser.of(settings.ultimate.ultimateCooldownMessage
-                    .replace("<seconds>", String.valueOf(secondsLeft))
-                    .replace("{seconds}", String.valueOf(secondsLeft)))
-                    .with("seconds", String.valueOf(secondsLeft))
-                    .build()
+            MessageUtil.send(
+                player,
+                settings.ultimate.ultimateCooldownMessage,
+                "seconds", String.valueOf(secondsLeft)
             );
             return;
         }
@@ -296,25 +278,22 @@ public final class AbilityCommand extends Command {
     private void triggerMaceUltimate(Player player, StrengthService strengthService) {
         final MaceConfig settings = plugin.getConfigHandler().getMaceConfig();
 
-        if (!settings.enabled || !settings.ultimate.enabled) {
-            player.sendMessage(ColorParser.of("<red>Mace ultimate ability is currently disabled!</red>").build());
+        if (settings == null || !settings.enabled || !settings.ultimate.enabled) {
+            MessageUtil.send(player, "<red>Mace ultimate ability is currently disabled!</red>");
             return;
         }
 
         if (player.getInventory().getItemInMainHand().getType() != Material.MACE) {
-            player.sendMessage(ColorParser.of(settings.ultimate.mustHoldMaceMessage).build());
+            MessageUtil.send(player, settings.ultimate.mustHoldMaceMessage);
             return;
         }
 
         final int currentStrength = strengthService.getStrength(player);
         if (currentStrength < settings.ultimate.strengthRequired) {
-            player.sendMessage(
-                ColorParser.of(settings.ultimate.notEnoughStrengthMessage
-                    .replace("<req>", String.valueOf(settings.ultimate.strengthRequired))
-                    .replace("<current>", String.valueOf(currentStrength)))
-                    .with("req", String.valueOf(settings.ultimate.strengthRequired))
-                    .with("current", String.valueOf(currentStrength))
-                    .build()
+            MessageUtil.send(
+                player,
+                settings.ultimate.notEnoughStrengthMessage,
+                Map.of("req", String.valueOf(settings.ultimate.strengthRequired), "current", String.valueOf(currentStrength))
             );
             return;
         }
@@ -327,12 +306,10 @@ public final class AbilityCommand extends Command {
 
         if (now - lastUse < cooldownMillis) {
             final long secondsLeft = (cooldownMillis - (now - lastUse)) / 1000L + 1;
-            player.sendMessage(
-                ColorParser.of(settings.ultimate.ultimateCooldownMessage
-                    .replace("<seconds>", String.valueOf(secondsLeft))
-                    .replace("{seconds}", String.valueOf(secondsLeft)))
-                    .with("seconds", String.valueOf(secondsLeft))
-                    .build()
+            MessageUtil.send(
+                player,
+                settings.ultimate.ultimateCooldownMessage,
+                "seconds", String.valueOf(secondsLeft)
             );
             return;
         }
@@ -349,20 +326,17 @@ public final class AbilityCommand extends Command {
             final String disabledMsg = (settings != null && settings.ultimate != null && settings.ultimate.ultimateDisabledMessage != null)
                 ? settings.ultimate.ultimateDisabledMessage
                 : "<red>Axe ultimate ability is currently disabled!</red>";
-            player.sendMessage(ColorParser.of(disabledMsg).build());
+            MessageUtil.send(player, disabledMsg);
             return;
         }
 
         final int currentStrength = strengthService.getStrength(player);
 
         if (currentStrength < settings.ultimate.strengthRequired) {
-            player.sendMessage(
-                ColorParser.of(settings.ultimate.notEnoughStrengthMessage
-                    .replace("{req}", String.valueOf(settings.ultimate.strengthRequired))
-                    .replace("{current}", String.valueOf(currentStrength)))
-                    .with("req", String.valueOf(settings.ultimate.strengthRequired))
-                    .with("current", String.valueOf(currentStrength))
-                    .build()
+            MessageUtil.send(
+                player,
+                settings.ultimate.notEnoughStrengthMessage,
+                Map.of("req", String.valueOf(settings.ultimate.strengthRequired), "current", String.valueOf(currentStrength))
             );
             return;
         }
@@ -376,25 +350,20 @@ public final class AbilityCommand extends Command {
 
         if (now - lastUse < cooldownMillis) {
             final long secondsLeft = (cooldownMillis - (now - lastUse)) / 1000L + 1;
-            player.sendMessage(
-                ColorParser.of(settings.ultimate.ultimateCooldownMessage
-                    .replace("<seconds>", String.valueOf(secondsLeft))
-                    .replace("{seconds}", String.valueOf(secondsLeft)))
-                    .with("seconds", String.valueOf(secondsLeft))
-                    .build()
+            MessageUtil.send(
+                player,
+                settings.ultimate.ultimateCooldownMessage,
+                "seconds", String.valueOf(secondsLeft)
             );
             return;
         }
 
         final int currentCharge = AxeAbilityListener.ultimateHitsMap.getOrDefault(uuid, 0);
         if (currentCharge < settings.ultimate.critsRequired) {
-            player.sendMessage(
-                ColorParser.of(settings.ultimate.notChargedMessage
-                    .replace("{req}", String.valueOf(settings.ultimate.critsRequired))
-                    .replace("{current}", String.valueOf(currentCharge)))
-                    .with("req", String.valueOf(settings.ultimate.critsRequired))
-                    .with("current", String.valueOf(currentCharge))
-                    .build()
+            MessageUtil.send(
+                player,
+                settings.ultimate.notChargedMessage,
+                Map.of("req", String.valueOf(settings.ultimate.critsRequired), "current", String.valueOf(currentCharge))
             );
             return;
         }
@@ -417,9 +386,8 @@ public final class AbilityCommand extends Command {
 
         MessageUtil.send(
             player,
-            settings.ultimate.ultimateActivatedMessage
-                .replace("{seconds}", String.valueOf(settings.ultimate.durationSeconds))
-                .replace("{multiplier}", String.valueOf(settings.ultimate.damageMultiplier))
+            settings.ultimate.ultimateActivatedMessage,
+            Map.of("seconds", String.valueOf(settings.ultimate.durationSeconds), "multiplier", String.valueOf(settings.ultimate.damageMultiplier))
         );
 
         new AxeUltimateTask(player, plugin, settings.ultimate.durationSeconds).runTaskTimer(plugin, 0L, 1L);
@@ -432,19 +400,19 @@ public final class AbilityCommand extends Command {
             final String disabledMsg = (settings != null && settings.ultimate != null && settings.ultimate.ultimateDisabledMessage != null)
                 ? settings.ultimate.ultimateDisabledMessage
                 : "<red>Trident ultimate ability is currently disabled!</red>";
-            player.sendMessage(ColorParser.of(disabledMsg).build());
+            MessageUtil.send(player, disabledMsg);
             return;
         }
 
         // 1. Validate Weapon Held Requirement
         if (player.getInventory().getItemInMainHand().getType() != Material.TRIDENT) {
-            player.sendMessage(ColorParser.of(settings.ultimate.mustHoldTridentMessage).build());
+            MessageUtil.send(player, settings.ultimate.mustHoldTridentMessage);
             return;
         }
 
         // 2. Validate Ground / Water Requirement (matching Poseidon Mod requirement)
         if (!player.isOnGround() && !player.isInWater()) {
-            player.sendMessage(ColorParser.of(settings.ultimate.mustBeOnGroundMessage).build());
+            MessageUtil.send(player, settings.ultimate.mustBeOnGroundMessage);
             return;
         }
 
@@ -455,24 +423,21 @@ public final class AbilityCommand extends Command {
         final long cooldownMillis = settings.ultimate.cooldownSeconds * 1000L;
         if (now - lastUse < cooldownMillis) {
             final long secondsLeft = (cooldownMillis - (now - lastUse)) / 1000L + 1;
-            final String msg = settings.ultimate.ultimateCooldownMessage
-                .replace("<seconds>", String.valueOf(secondsLeft))
-                .replace("{seconds}", String.valueOf(secondsLeft));
-            player.sendMessage(ColorParser.of(msg).with("seconds", String.valueOf(secondsLeft)).build());
+            MessageUtil.send(
+                player,
+                settings.ultimate.ultimateCooldownMessage,
+                "seconds", String.valueOf(secondsLeft)
+            );
             return;
         }
 
         // 4. Validate Strength Requirement
         final int currentStrength = strengthService.getStrength(player);
         if (currentStrength < settings.ultimate.strengthRequired) {
-            final String msg = settings.ultimate.notEnoughStrengthMessage
-                .replace("<req>", String.valueOf(settings.ultimate.strengthRequired))
-                .replace("<current>", String.valueOf(currentStrength));
-            player.sendMessage(
-                ColorParser.of(msg)
-                    .with("req", String.valueOf(settings.ultimate.strengthRequired))
-                    .with("current", String.valueOf(currentStrength))
-                    .build()
+            MessageUtil.send(
+                player,
+                settings.ultimate.notEnoughStrengthMessage,
+                Map.of("req", String.valueOf(settings.ultimate.strengthRequired), "current", String.valueOf(currentStrength))
             );
             return;
         }
@@ -480,14 +445,10 @@ public final class AbilityCommand extends Command {
         // 5. Validate Hit Charge Requirement
         final int currentCharge = TridentAbilityListener.ultimateHits.getOrDefault(uuid, 0);
         if (currentCharge < settings.ultimate.hitsRequired) {
-            final String msg = settings.ultimate.notChargedMessage
-                .replace("<req>", String.valueOf(settings.ultimate.hitsRequired))
-                .replace("<current>", String.valueOf(currentCharge));
-            player.sendMessage(
-                ColorParser.of(msg)
-                    .with("req", String.valueOf(settings.ultimate.hitsRequired))
-                    .with("current", String.valueOf(currentCharge))
-                    .build()
+            MessageUtil.send(
+                player,
+                settings.ultimate.notChargedMessage,
+                Map.of("req", String.valueOf(settings.ultimate.hitsRequired), "current", String.valueOf(currentCharge))
             );
             return;
         }
@@ -500,7 +461,7 @@ public final class AbilityCommand extends Command {
         new TridentUltimateTask(player, plugin, settings.ultimate)
             .runTaskTimer(plugin, 0L, 1L);
 
-        player.sendMessage(ColorParser.of(settings.ultimate.ultimateActivatedMessage).build());
+        MessageUtil.send(player, settings.ultimate.ultimateActivatedMessage);
     }
 
     private void triggerBowUltimate(Player player, StrengthService strengthService) {
@@ -509,7 +470,7 @@ public final class AbilityCommand extends Command {
             final String disabledMsg = (settings != null && settings.ultimate != null && settings.ultimate.ultimateDisabledMessage != null)
                 ? settings.ultimate.ultimateDisabledMessage
                 : "<red>Bow ultimate ability is currently disabled!</red>";
-            player.sendMessage(ColorParser.of(disabledMsg).build());
+            MessageUtil.send(player, disabledMsg);
             return;
         }
 
@@ -575,14 +536,14 @@ public final class AbilityCommand extends Command {
             final String disabledMsg = (settings != null && settings.ultimate != null && settings.ultimate.ultimateDisabledMessage != null)
                 ? settings.ultimate.ultimateDisabledMessage
                 : "<red>Shield ultimate ability is currently disabled!</red>";
-            player.sendMessage(ColorParser.of(disabledMsg).build());
+            MessageUtil.send(player, disabledMsg);
             return;
         }
 
         // 1. Validate Weapon Held Requirement (Main hand or Offhand)
         if (player.getInventory().getItemInMainHand().getType() != Material.SHIELD
             && player.getInventory().getItemInOffHand().getType() != Material.SHIELD) {
-            player.sendMessage(ColorParser.of(settings.ultimate.mustHoldShieldMessage).build());
+            MessageUtil.send(player, settings.ultimate.mustHoldShieldMessage);
             return;
         }
 
@@ -593,24 +554,21 @@ public final class AbilityCommand extends Command {
         final long cooldownMillis = settings.ultimate.cooldownSeconds * 1000L;
         if (now - lastUse < cooldownMillis) {
             final long secondsLeft = (cooldownMillis - (now - lastUse)) / 1000L + 1;
-            final String msg = settings.ultimate.ultimateCooldownMessage
-                .replace("<seconds>", String.valueOf(secondsLeft))
-                .replace("{seconds}", String.valueOf(secondsLeft));
-            player.sendMessage(ColorParser.of(msg).with("seconds", String.valueOf(secondsLeft)).build());
+            MessageUtil.send(
+                player,
+                settings.ultimate.ultimateCooldownMessage,
+                "seconds", String.valueOf(secondsLeft)
+            );
             return;
         }
 
         // 3. Validate Strength Requirement
         final int currentStrength = strengthService.getStrength(player);
         if (currentStrength < settings.ultimate.strengthRequired) {
-            final String msg = settings.ultimate.notEnoughStrengthMessage
-                .replace("<req>", String.valueOf(settings.ultimate.strengthRequired))
-                .replace("<current>", String.valueOf(currentStrength));
-            player.sendMessage(
-                ColorParser.of(msg)
-                    .with("req", String.valueOf(settings.ultimate.strengthRequired))
-                    .with("current", String.valueOf(currentStrength))
-                    .build()
+            MessageUtil.send(
+                player,
+                settings.ultimate.notEnoughStrengthMessage,
+                Map.of("req", String.valueOf(settings.ultimate.strengthRequired), "current", String.valueOf(currentStrength))
             );
             return;
         }
@@ -618,14 +576,10 @@ public final class AbilityCommand extends Command {
         // 4. Validate Hit Charge Requirement
         final int currentCharge = ShieldAbilityListener.ultimateHits.getOrDefault(uuid, 0);
         if (currentCharge < settings.ultimate.hitsRequired) {
-            final String msg = settings.ultimate.notChargedMessage
-                .replace("<req>", String.valueOf(settings.ultimate.hitsRequired))
-                .replace("<current>", String.valueOf(currentCharge));
-            player.sendMessage(
-                ColorParser.of(msg)
-                    .with("req", String.valueOf(settings.ultimate.hitsRequired))
-                    .with("current", String.valueOf(currentCharge))
-                    .build()
+            MessageUtil.send(
+                player,
+                settings.ultimate.notChargedMessage,
+                Map.of("req", String.valueOf(settings.ultimate.hitsRequired), "current", String.valueOf(currentCharge))
             );
             return;
         }
@@ -638,7 +592,7 @@ public final class AbilityCommand extends Command {
         new ShieldUltimateTask(player, plugin, settings.ultimate)
             .runTaskTimer(plugin, 0L, 1L);
 
-        player.sendMessage(ColorParser.of(settings.ultimate.ultimateActivatedMessage).build());
+        MessageUtil.send(player, settings.ultimate.ultimateActivatedMessage);
     }
 
     private void triggerCrossbowUltimate(Player player, StrengthService strengthService) {
@@ -647,7 +601,7 @@ public final class AbilityCommand extends Command {
             final String disabledMsg = (settings != null && settings.ultimate != null && settings.ultimate.ultimateDisabledMessage != null)
                 ? settings.ultimate.ultimateDisabledMessage
                 : "<red>Crossbow ultimate ability is currently disabled!</red>";
-            player.sendMessage(ColorParser.of(disabledMsg).build());
+            MessageUtil.send(player, disabledMsg);
             return;
         }
 
@@ -712,7 +666,7 @@ public final class AbilityCommand extends Command {
             final String disabledMsg = (settings != null && settings.ultimate != null && settings.ultimate.ultimateDisabledMessage != null)
                 ? settings.ultimate.ultimateDisabledMessage
                 : "<red>Sword ultimate ability is currently disabled!</red>";
-            player.sendMessage(ColorParser.of(disabledMsg).build());
+            MessageUtil.send(player, disabledMsg);
             return;
         }
 
@@ -793,7 +747,8 @@ public final class AbilityCommand extends Command {
 
     private void triggerTrident2Ultimate(Player player, StrengthService strengthService) {
         final Trident2Config settings = plugin.getConfigHandler().getTrident2Config();
-        if (!settings.enabled || !settings.ultimate.enabled) {
+        if (settings == null || !settings.enabled || !settings.ultimate.enabled) {
+            MessageUtil.send(player, "<red>Trident2 ultimate ability is currently disabled!</red>");
             return;
         }
 

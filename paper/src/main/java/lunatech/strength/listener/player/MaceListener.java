@@ -192,13 +192,11 @@ public final class MaceListener implements Listener {
                         final double finalSec = Math.max(0.0, baseSec * (1.0 - (reductionPct / 100.0)));
                         final int ticks = (int) Math.round(finalSec * 20.0);
                         player.setCooldown(Material.MACE, ticks);
-                        if (maceAbilityConfig.passive.passiveTriggeredMessage != null && !maceAbilityConfig.passive.passiveTriggeredMessage.isBlank()) {
-                            player.sendMessage(io.github.milkdrinkers.colorparser.paper.ColorParser.of(
-                                maceAbilityConfig.passive.passiveTriggeredMessage
-                                    .replace("{percent}", String.format("%.0f", reductionPct))
-                                    .replace("<percent>", String.format("%.0f", reductionPct))
-                            ).build());
-                        }
+                        lunatech.strength.utility.MessageUtil.send(
+                            player,
+                            maceAbilityConfig.passive.passiveTriggeredMessage,
+                            "percent", String.format("%.0f", reductionPct)
+                        );
                     } else {
                         // Normal full smash cooldown
                         player.setCooldown(Material.MACE, config.cooldown.cooldownSeconds * 20);

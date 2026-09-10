@@ -78,10 +78,10 @@ public final class PlayerKillListener implements Listener {
         // Award kill reward to the killer in PvP
         if (isPvp) {
             if (!allowNakedReward) {
-                killer.sendMessage(
-                    ColorParser.of(nakedRules.nakedKillNoRewardMessage)
-                        .with("victim", victim.getName())
-                        .build()
+                lunatech.strength.utility.MessageUtil.send(
+                    killer,
+                    nakedRules.nakedKillNoRewardMessage,
+                    "victim", victim.getName()
                 );
                 return;
             }

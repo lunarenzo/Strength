@@ -320,12 +320,11 @@ final class StrengthCommand extends Command {
                 if (!"mace".equalsIgnoreCase(currentAssigned)) {
                     final int count = strengthService.countAssignedPlayers("mace");
                     if (count >= maceRules.assignmentLimit.maxAssignedPlayers) {
-                        final String limitMsg = maceRules.assignmentLimit.limitReachedMessage
-                            .replace("<count>", String.valueOf(count))
-                            .replace("<max>", String.valueOf(maceRules.assignmentLimit.maxAssignedPlayers))
-                            .replace("{count}", String.valueOf(count))
-                            .replace("{max}", String.valueOf(maceRules.assignmentLimit.maxAssignedPlayers));
-                        sender.sendMessage(ColorParser.of(limitMsg).build());
+                        lunatech.strength.utility.MessageUtil.send(
+                            sender,
+                            maceRules.assignmentLimit.limitReachedMessage,
+                            Map.of("count", String.valueOf(count), "max", String.valueOf(maceRules.assignmentLimit.maxAssignedPlayers))
+                        );
                         return;
                     }
                 }

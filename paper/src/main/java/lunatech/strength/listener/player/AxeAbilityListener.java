@@ -3,6 +3,7 @@ package lunatech.strength.listener.player;
 import lunatech.strength.Strength;
 import lunatech.strength.config.AxeConfig;
 import lunatech.strength.service.StrengthService;
+import lunatech.strength.utility.MessageUtil;
 import io.github.milkdrinkers.colorparser.paper.ColorParser;
 import org.jetbrains.annotations.NotNull;
 import org.bukkit.Location;
@@ -301,7 +302,7 @@ public final class AxeAbilityListener implements Listener {
             if (settings.ultimate.enabled) {
                 ultimateHitsMap.merge(damagerUuid, strengthService.scaleInt(1), Integer::sum);
                 if (ultimateHitsMap.getOrDefault(damagerUuid, 0) == settings.ultimate.critsRequired) {
-                    damager.sendMessage(ColorParser.of(settings.ultimate.ultimateChargedMessage).build());
+                    MessageUtil.send(damager, settings.ultimate.ultimateChargedMessage);
                 }
             }
 
@@ -325,8 +326,10 @@ public final class AxeAbilityListener implements Listener {
                     victim.playSound(victim.getLocation(), Sound.ENTITY_ZOMBIE_VILLAGER_CURE, 1.0f, 1.0f);
 
                     // Messages
-                    damager.sendMessage(ColorParser.of(settings.passive.passiveTriggeredAttackerMessage.replace("{seconds}", String.valueOf(settings.passive.stunDurationSeconds))).build());
-                    victim.sendActionBar(ColorParser.of(settings.passive.stunActionbarMessage.replace("{seconds}", String.valueOf(settings.passive.stunDurationSeconds))).build());
+                    MessageUtil.send(damager, settings.passive.passiveTriggeredAttackerMessage, "seconds", String.valueOf(settings.passive.stunDurationSeconds));
+                    if (!MessageUtil.isNullOrEmpty(settings.passive.stunActionbarMessage)) {
+                        victim.sendActionBar(ColorParser.of(settings.passive.stunActionbarMessage.replace("{seconds}", String.valueOf(settings.passive.stunDurationSeconds))).build());
+                    }
                 }
             }
         }

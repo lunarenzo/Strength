@@ -202,9 +202,10 @@ public final class BowAbilityListener implements Listener {
         new lunatech.strength.task.BowBeamTask(shooter, settings, activeSpiral)
             .runTaskTimer(plugin, 0L, 1L);
 
-        shooter.sendMessage(ColorParser.of(
+        lunatech.strength.utility.MessageUtil.send(
+            shooter,
             "<gold><bold>Fired Bow Beam!</bold> (" + Math.max(0, left) + "/" + settings.ultimate.beams + " shots remaining)</gold>"
-        ).build());
+        );
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -275,7 +276,7 @@ public final class BowAbilityListener implements Listener {
                 }
             }.runTaskTimer(plugin, 0L, 1L);
 
-            shooter.sendMessage(ColorParser.of(settings.passive.passiveTriggeredShooterMessage).build());
+            lunatech.strength.utility.MessageUtil.send(shooter, settings.passive.passiveTriggeredShooterMessage);
             shooter.playSound(shooter.getLocation(), Sound.ENTITY_LLAMA_SPIT, 1.0f, 1.0f);
         }
     }
@@ -344,7 +345,7 @@ public final class BowAbilityListener implements Listener {
                     activeCobwebs.put(blockLoc, originalData);
                     chestBlock.setType(Material.COBWEB);
 
-                    victim.sendMessage(ColorParser.of(settings.passive.passiveTrappedVictimMessage).build());
+                    lunatech.strength.utility.MessageUtil.send(victim, settings.passive.passiveTrappedVictimMessage);
                     victim.playSound(victimLoc, Sound.ENTITY_SPIDER_DEATH, 1.0f, 0.8f);
 
                     // Schedule automatic cobweb removal and block state restoration
@@ -361,7 +362,7 @@ public final class BowAbilityListener implements Listener {
                     passiveHits.put(shooterUuid, 0); // Reset count
                     bowPassiveReady.put(shooterUuid, true); // Next valid shot will trap the target in a cobweb
 
-                    shooter.sendMessage(ColorParser.of(settings.passive.passiveReadyShooterMessage).build());
+                    lunatech.strength.utility.MessageUtil.send(shooter, settings.passive.passiveReadyShooterMessage);
                     shooter.playSound(shooter.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
                 }
             }
@@ -375,16 +376,13 @@ public final class BowAbilityListener implements Listener {
                     ultimateHits.put(shooterUuid, nextUltHits);
 
                     if (nextUltHits == targetUltHits) {
-                        shooter.sendMessage(ColorParser.of(settings.ultimate.ultimateChargedMessage).build());
+                        lunatech.strength.utility.MessageUtil.send(shooter, settings.ultimate.ultimateChargedMessage);
                         shooter.playSound(shooter.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.2f);
                     } else {
-                        shooter.sendMessage(
-                            ColorParser.of(settings.ultimate.ultimateChargeProgressMessage
-                                .replace("<charge>", String.valueOf(nextUltHits))
-                                .replace("<target>", String.valueOf(targetUltHits)))
-                                .with("charge", String.valueOf(nextUltHits))
-                                .with("target", String.valueOf(targetUltHits))
-                                .build()
+                        lunatech.strength.utility.MessageUtil.send(
+                            shooter,
+                            settings.ultimate.ultimateChargeProgressMessage,
+                            Map.of("charge", String.valueOf(nextUltHits), "target", String.valueOf(targetUltHits))
                         );
                     }
                 }

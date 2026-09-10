@@ -1,6 +1,7 @@
 package lunatech.strength.listener.player;
 
 import io.github.milkdrinkers.colorparser.paper.ColorParser;
+import lunatech.strength.utility.MessageUtil;
 import lunatech.strength.Strength;
 import lunatech.strength.config.SpearConfig;
 import lunatech.strength.constant.PDCKeys;
@@ -101,7 +102,7 @@ public final class SpearAbilityListener implements Listener {
         if (config.passive.enabled && config.passive.bonusPokeDamage > 0.0) {
             event.setDamage(event.getDamage() + strengthService.scale(config.passive.bonusPokeDamage));
 
-            if (config.passive.passiveTriggeredMessage != null && !config.passive.passiveTriggeredMessage.isBlank()) {
+            if (!MessageUtil.isNullOrEmpty(config.passive.passiveTriggeredMessage)) {
                 final String msg = config.passive.passiveTriggeredMessage
                     .replace("<damage>", String.valueOf(config.passive.bonusPokeDamage))
                     .replace("{damage}", String.valueOf(config.passive.bonusPokeDamage));
@@ -117,31 +118,27 @@ public final class SpearAbilityListener implements Listener {
                 ultimateHits.put(uuid, newHits);
 
                 if (newHits == config.ultimate.hitsRequired) {
-                    if (config.ultimate.ultimateChargedMessage != null && !config.ultimate.ultimateChargedMessage.isBlank()) {
-                        final String msg = config.ultimate.ultimateChargedMessage
-                            .replace("<current>", String.valueOf(newHits))
-                            .replace("{current}", String.valueOf(newHits))
-                            .replace("<req>", String.valueOf(config.ultimate.hitsRequired))
-                            .replace("{req}", String.valueOf(config.ultimate.hitsRequired))
-                            .replace("<charge>", String.valueOf(newHits))
-                            .replace("{charge}", String.valueOf(newHits))
-                            .replace("<target>", String.valueOf(config.ultimate.hitsRequired))
-                            .replace("{target}", String.valueOf(config.ultimate.hitsRequired));
-                        player.sendMessage(ColorParser.of(msg).build());
-                    }
+                    MessageUtil.send(
+                        player,
+                        config.ultimate.ultimateChargedMessage,
+                        Map.of(
+                            "current", String.valueOf(newHits),
+                            "req", String.valueOf(config.ultimate.hitsRequired),
+                            "charge", String.valueOf(newHits),
+                            "target", String.valueOf(config.ultimate.hitsRequired)
+                        )
+                    );
                 } else {
-                    if (config.ultimate.ultimateChargeProgressMessage != null && !config.ultimate.ultimateChargeProgressMessage.isBlank()) {
-                        final String msg = config.ultimate.ultimateChargeProgressMessage
-                            .replace("<current>", String.valueOf(newHits))
-                            .replace("{current}", String.valueOf(newHits))
-                            .replace("<req>", String.valueOf(config.ultimate.hitsRequired))
-                            .replace("{req}", String.valueOf(config.ultimate.hitsRequired))
-                            .replace("<charge>", String.valueOf(newHits))
-                            .replace("{charge}", String.valueOf(newHits))
-                            .replace("<target>", String.valueOf(config.ultimate.hitsRequired))
-                            .replace("{target}", String.valueOf(config.ultimate.hitsRequired));
-                        player.sendMessage(ColorParser.of(msg).build());
-                    }
+                    MessageUtil.send(
+                        player,
+                        config.ultimate.ultimateChargeProgressMessage,
+                        Map.of(
+                            "current", String.valueOf(newHits),
+                            "req", String.valueOf(config.ultimate.hitsRequired),
+                            "charge", String.valueOf(newHits),
+                            "target", String.valueOf(config.ultimate.hitsRequired)
+                        )
+                    );
                 }
             }
         }

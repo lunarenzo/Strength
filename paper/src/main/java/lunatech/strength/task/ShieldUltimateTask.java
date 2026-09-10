@@ -3,7 +3,7 @@ package lunatech.strength.task;
 import lunatech.strength.Strength;
 import lunatech.strength.config.ShieldConfig;
 import lunatech.strength.listener.player.ShieldAbilityListener;
-import io.github.milkdrinkers.colorparser.paper.ColorParser;
+import lunatech.strength.utility.MessageUtil;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -111,9 +111,7 @@ public final class ShieldUltimateTask extends BukkitRunnable {
         }
 
         if (player.isOnline()) {
-            if (settings.ultimateExpiredMessage != null && !settings.ultimateExpiredMessage.isBlank()) {
-                player.sendMessage(ColorParser.of(settings.ultimateExpiredMessage).build());
-            }
+            MessageUtil.send(player, settings.ultimateExpiredMessage);
             player.playSound(player.getLocation(), Sound.BLOCK_BEACON_DEACTIVATE, 1.0f, 1.0f);
         }
     }

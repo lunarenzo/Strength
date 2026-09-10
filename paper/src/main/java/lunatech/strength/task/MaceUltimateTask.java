@@ -3,7 +3,7 @@ package lunatech.strength.task;
 import lunatech.strength.Strength;
 import lunatech.strength.config.MaceConfig;
 import lunatech.strength.listener.player.MaceAbilityListener;
-import io.github.milkdrinkers.colorparser.paper.ColorParser;
+import lunatech.strength.utility.MessageUtil;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -42,12 +42,7 @@ public final class MaceUltimateTask extends BukkitRunnable {
             loc.getWorld().spawnParticle(Particle.EXPLOSION, loc.clone().add(0, 1.0, 0), 5, 0.3, 0.3, 0.3, 0.05);
         }
 
-        if (settings.ultimateActivatedMessage != null && !settings.ultimateActivatedMessage.isBlank()) {
-            final String msg = settings.ultimateActivatedMessage
-                .replace("{duration}", String.valueOf(settings.durationSeconds))
-                .replace("<duration>", String.valueOf(settings.durationSeconds));
-            player.sendMessage(ColorParser.of(msg).build());
-        }
+        MessageUtil.send(player, settings.ultimateActivatedMessage, "duration", String.valueOf(settings.durationSeconds));
 
         runTaskTimer(plugin, 1L, 1L);
     }
@@ -64,8 +59,8 @@ public final class MaceUltimateTask extends BukkitRunnable {
             MaceAbilityListener.activeUltimatePlayers.remove(uuid);
             MaceAbilityListener.stripTemporaryEnchantmentsFromPlayer(player, settings);
 
-            if (player.isOnline() && settings.ultimateExpiredMessage != null && !settings.ultimateExpiredMessage.isBlank()) {
-                player.sendMessage(ColorParser.of(settings.ultimateExpiredMessage).build());
+            if (player.isOnline()) {
+                MessageUtil.send(player, settings.ultimateExpiredMessage);
             }
 
             cancel();
