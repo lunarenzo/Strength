@@ -84,6 +84,9 @@ public final class DefaultStrengthService implements StrengthService {
         final AttributeInstance ai = player.getAttribute(Attribute.ATTACK_DAMAGE);
         if (ai != null) {
             ai.removeModifier(PDCKeys.STRENGTH);
+            if (!configHandler.getConfig().strength.enabled) {
+                return;
+            }
             final int scaledStrength = scaleInt(strength);
             if (scaledStrength > 0) {
                 final AttributeModifier modifier = new AttributeModifier(

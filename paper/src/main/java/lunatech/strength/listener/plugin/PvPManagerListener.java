@@ -24,7 +24,7 @@ public final class PvPManagerListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerCombatLog(@NotNull PlayerCombatLogEvent event) {
-        if (!plugin.getConfigHandler().getConfig().pvpmanager.enabled) {
+        if (!plugin.getConfigHandler().getConfig().strength.enabled || !plugin.getConfigHandler().getConfig().pvpmanager.enabled) {
             return;
         }
 

@@ -12,6 +12,7 @@ import lunatech.strength.updatechecker.UpdateHandler;
 import lunatech.strength.utility.Logger;
 import io.github.milkdrinkers.colorparser.paper.ColorParser;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -112,6 +113,9 @@ public class Strength extends AbstractStrength {
             if (handler instanceof CommandHandler) continue;
             handler.onLoad(instance);
             handler.onEnable(instance);
+        }
+        for (Player player : getServer().getOnlinePlayers()) {
+            strengthService.applyAttributeModifier(player, strengthService.getStrength(player));
         }
         if (licenseManager != null) {
             licenseManager.verifyAsync();
