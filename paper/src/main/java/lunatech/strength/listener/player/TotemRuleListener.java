@@ -2,6 +2,7 @@ package lunatech.strength.listener.player;
 
 import lunatech.strength.Strength;
 import lunatech.strength.config.RulesConfig;
+import lunatech.strength.utility.MessageUtil;
 import io.github.milkdrinkers.colorparser.paper.ColorParser;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -68,7 +69,7 @@ public final class TotemRuleListener implements Listener {
         if (totemRules.preventInCombat && isCombat) {
             event.setCancelled(true);
             scheduleInventoryUpdate(player);
-            lunatech.strength.utility.MessageUtil.send(player, totemRules.totemInCombatMessage);
+            MessageUtil.send(player, totemRules.totemInCombatMessage);
             return;
         }
 
@@ -83,7 +84,7 @@ public final class TotemRuleListener implements Listener {
                 scheduleInventoryUpdate(player);
 
                 final long remainingMillis = cooldownUntil - now;
-                lunatech.strength.utility.MessageUtil.send(
+                MessageUtil.send(
                     player,
                     totemRules.totemOnCooldownMessage,
                     "time", formatTime(remainingMillis)
@@ -113,7 +114,7 @@ public final class TotemRuleListener implements Listener {
                 setTotemCooldownUntil(player, expireTime);
                 setTotemPopCount(player, 0);
 
-                lunatech.strength.utility.MessageUtil.send(
+                MessageUtil.send(
                     player,
                     totemRules.quotaExhaustedMessage,
                     "time", formatTime(durationMillis)
@@ -202,7 +203,7 @@ public final class TotemRuleListener implements Listener {
             final int pickupAmount = event.getItem().getItemStack().getAmount();
             if (currentTotems + pickupAmount > totemRules.maxInInventory) {
                 event.setCancelled(true);
-                lunatech.strength.utility.MessageUtil.send(
+                MessageUtil.send(
                     player,
                     totemRules.maxLimitReachedMessage,
                     "count", String.valueOf(totemRules.maxInInventory)
@@ -241,7 +242,7 @@ public final class TotemRuleListener implements Listener {
 
         if (totemRules.preventInCombat && isCombat) {
             event.setCancelled(true);
-            lunatech.strength.utility.MessageUtil.send(player, totemRules.totemInCombatMessage);
+            MessageUtil.send(player, totemRules.totemInCombatMessage);
             return;
         }
 
@@ -249,7 +250,7 @@ public final class TotemRuleListener implements Listener {
         if (now < getTotemCooldownUntil(player)) {
             if (!totemRules.quotaOnlyInCombat || isCombat) {
                 event.setCancelled(true);
-                lunatech.strength.utility.MessageUtil.send(
+                MessageUtil.send(
                     player,
                     totemRules.totemOnCooldownMessage,
                     "time", formatTime(getTotemCooldownUntil(player) - now)
@@ -266,7 +267,7 @@ public final class TotemRuleListener implements Listener {
                 final int amount = current != null ? current.getAmount() : 1;
                 if (currentTotems + amount > totemRules.maxInInventory) {
                     event.setCancelled(true);
-                    lunatech.strength.utility.MessageUtil.send(
+                    MessageUtil.send(
                         player,
                         totemRules.maxLimitReachedMessage,
                         "count", String.valueOf(totemRules.maxInInventory)
@@ -280,7 +281,7 @@ public final class TotemRuleListener implements Listener {
                 if (event.getClickedInventory() == player.getInventory()) {
                     if (currentTotems + cursor.getAmount() > totemRules.maxInInventory) {
                         event.setCancelled(true);
-                        lunatech.strength.utility.MessageUtil.send(
+                        MessageUtil.send(
                             player,
                             totemRules.maxLimitReachedMessage,
                             "count", String.valueOf(totemRules.maxInInventory)
@@ -331,7 +332,7 @@ public final class TotemRuleListener implements Listener {
             final int currentTotems = countPlayerInventoryTotems(player);
             if (currentTotems + oldCursor.getAmount() > totemRules.maxInInventory) {
                 event.setCancelled(true);
-                lunatech.strength.utility.MessageUtil.send(
+                MessageUtil.send(
                     player,
                     totemRules.maxLimitReachedMessage,
                     "count", String.valueOf(totemRules.maxInInventory)

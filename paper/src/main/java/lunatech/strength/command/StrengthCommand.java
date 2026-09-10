@@ -12,6 +12,7 @@ import lunatech.strength.config.PluginConfig;
 import lunatech.strength.config.RulesConfig.MaceRules;
 import lunatech.strength.gui.WeaponsGui;
 import lunatech.strength.service.StrengthService;
+import lunatech.strength.utility.MessageUtil;
 import io.github.milkdrinkers.colorparser.paper.ColorParser;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -141,7 +142,7 @@ final class StrengthCommand extends Command {
                 }
             }
 
-            lunatech.strength.utility.MessageUtil.send(
+            MessageUtil.send(
                 player,
                 messages.strengthCheckMessage,
                 Map.of("strength", String.valueOf(strength), "weapon", weaponDisplay)
@@ -162,7 +163,7 @@ final class StrengthCommand extends Command {
         final PluginConfig.MessagesConfig messages = plugin.getConfigHandler().getConfig().messages;
 
         if (target == null) {
-            lunatech.strength.utility.MessageUtil.send(sender, messages.targetNotFoundMessage);
+            MessageUtil.send(sender, messages.targetNotFoundMessage);
             return;
         }
 
@@ -176,7 +177,7 @@ final class StrengthCommand extends Command {
             }
         }
 
-        lunatech.strength.utility.MessageUtil.send(
+        MessageUtil.send(
             sender,
             messages.giveStrengthItemSuccessSenderMessage,
             Map.of(
@@ -187,7 +188,7 @@ final class StrengthCommand extends Command {
         );
 
         if (!target.equals(sender)) {
-            lunatech.strength.utility.MessageUtil.send(
+            MessageUtil.send(
                 target,
                 messages.giveStrengthItemSuccessTargetMessage,
                 Map.of(
@@ -204,7 +205,7 @@ final class StrengthCommand extends Command {
         final PluginConfig.MessagesConfig messages = plugin.getConfigHandler().getConfig().messages;
 
         if (target == null) {
-            lunatech.strength.utility.MessageUtil.send(sender, messages.targetNotFoundMessage);
+            MessageUtil.send(sender, messages.targetNotFoundMessage);
             return;
         }
 
@@ -218,7 +219,7 @@ final class StrengthCommand extends Command {
             }
         }
 
-        lunatech.strength.utility.MessageUtil.send(
+        MessageUtil.send(
             sender,
             messages.giveRollItemSuccessSenderMessage,
             Map.of(
@@ -228,7 +229,7 @@ final class StrengthCommand extends Command {
         );
 
         if (!target.equals(sender)) {
-            lunatech.strength.utility.MessageUtil.send(
+            MessageUtil.send(
                 target,
                 messages.giveRollItemSuccessTargetMessage,
                 "amount", String.valueOf(amount)
@@ -249,7 +250,7 @@ final class StrengthCommand extends Command {
                 try {
                     final me.chancesd.pvpmanager.player.CombatPlayer pvpPlayer = me.chancesd.pvpmanager.PvPManager.getInstance().getPlayerManager().get(player);
                     if (pvpPlayer != null && pvpPlayer.isInCombat()) {
-                        lunatech.strength.utility.MessageUtil.send(player, messages.cannotWithdrawInCombatMessage);
+                        MessageUtil.send(player, messages.cannotWithdrawInCombatMessage);
                         return;
                     }
                 } catch (Throwable ignored) {
@@ -258,7 +259,7 @@ final class StrengthCommand extends Command {
         }
 
         if (currentStrength - amount < minStrength) {
-            lunatech.strength.utility.MessageUtil.send(
+            MessageUtil.send(
                 player,
                 messages.withdrawNotEnoughMessage,
                 Map.of("amount", String.valueOf(amount), "min", String.valueOf(minStrength), "current", String.valueOf(currentStrength))
@@ -267,7 +268,7 @@ final class StrengthCommand extends Command {
         }
 
         if (player.getInventory().firstEmpty() == -1) {
-            lunatech.strength.utility.MessageUtil.send(
+            MessageUtil.send(
                 player,
                 messages.withdrawFullInventoryMessage
             );
@@ -281,7 +282,7 @@ final class StrengthCommand extends Command {
         final ItemStack strengthItem = strengthService.createStrengthItem(amount);
         player.getInventory().addItem(strengthItem);
 
-        lunatech.strength.utility.MessageUtil.send(
+        MessageUtil.send(
             player,
             messages.withdrawSuccessMessage,
             "amount", String.valueOf(amount)
@@ -298,12 +299,12 @@ final class StrengthCommand extends Command {
         final PluginConfig.MessagesConfig messages = plugin.getConfigHandler().getConfig().messages;
 
         if (target == null) {
-            lunatech.strength.utility.MessageUtil.send(sender, messages.targetNotFoundMessage);
+            MessageUtil.send(sender, messages.targetNotFoundMessage);
             return;
         }
 
         if (!availableWeapons.contains(weapon)) {
-            lunatech.strength.utility.MessageUtil.send(
+            MessageUtil.send(
                 sender,
                 messages.changeWeaponInvalidMessage,
                 "list", String.join(", ", availableWeapons)
@@ -320,7 +321,7 @@ final class StrengthCommand extends Command {
                 if (!"mace".equalsIgnoreCase(currentAssigned)) {
                     final int count = strengthService.countAssignedPlayers("mace");
                     if (count >= maceRules.assignmentLimit.maxAssignedPlayers) {
-                        lunatech.strength.utility.MessageUtil.send(
+                        MessageUtil.send(
                             sender,
                             maceRules.assignmentLimit.limitReachedMessage,
                             Map.of("count", String.valueOf(count), "max", String.valueOf(maceRules.assignmentLimit.maxAssignedPlayers))
@@ -333,13 +334,13 @@ final class StrengthCommand extends Command {
 
         strengthService.setAssignedWeapon(target, weapon);
 
-        lunatech.strength.utility.MessageUtil.send(
+        MessageUtil.send(
             sender,
             messages.changeWeaponSuccessSenderMessage,
             Map.of("target", target.getName(), "weapon", weapon.toUpperCase())
         );
 
-        lunatech.strength.utility.MessageUtil.send(
+        MessageUtil.send(
             target,
             messages.changeWeaponSuccessTargetMessage,
             "weapon", weapon.toUpperCase()
@@ -352,7 +353,7 @@ final class StrengthCommand extends Command {
         final PluginConfig.MessagesConfig messages = plugin.getConfigHandler().getConfig().messages;
 
         if (target == null) {
-            lunatech.strength.utility.MessageUtil.send(sender, messages.targetNotFoundMessage);
+            MessageUtil.send(sender, messages.targetNotFoundMessage);
             return;
         }
 
@@ -360,7 +361,7 @@ final class StrengthCommand extends Command {
         final int oldStrength = strengthService.getStrength(target);
         strengthService.setStrength(target, amount);
 
-        lunatech.strength.utility.MessageUtil.send(
+        MessageUtil.send(
             sender,
             messages.setStrengthSuccessMessage,
             Map.of("target", target.getName(), "old", String.valueOf(oldStrength), "amount", String.valueOf(amount))

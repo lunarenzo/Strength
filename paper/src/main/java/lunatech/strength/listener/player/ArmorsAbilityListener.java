@@ -6,6 +6,7 @@ import lunatech.strength.Strength;
 import lunatech.strength.config.ArmorsConfig;
 import lunatech.strength.constant.PDCKeys;
 import lunatech.strength.service.StrengthService;
+import lunatech.strength.utility.MessageUtil;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -205,7 +206,7 @@ public final class ArmorsAbilityListener implements Listener {
 
         final String oldFormatted = formatMaterialName(baseMatName);
         final String newFormatted = formatMaterialName(targetMatName);
-        lunatech.strength.utility.MessageUtil.send(
+        MessageUtil.send(
             player,
             passiveConfig.armorUpgradedMessage,
             Map.of("old_armor", oldFormatted, "new_armor", newFormatted)

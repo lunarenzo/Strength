@@ -3,6 +3,7 @@ package lunatech.strength.listener.player;
 import lunatech.strength.Strength;
 import lunatech.strength.config.SwordConfig;
 import lunatech.strength.service.StrengthService;
+import lunatech.strength.utility.MessageUtil;
 import lunatech.strength.task.SwordUltimateTask;
 import io.github.milkdrinkers.colorparser.paper.ColorParser;
 import org.bukkit.Location;
@@ -111,7 +112,7 @@ public final class SwordAbilityListener implements Listener {
         lastOffhandAttackTimes.remove(uuid);
 
         final SwordConfig settings = plugin.getConfigHandler().getSwordConfig();
-        lunatech.strength.utility.MessageUtil.send(player, settings.ultimate.ultimateExpiredMessage);
+        MessageUtil.send(player, settings.ultimate.ultimateExpiredMessage);
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -151,7 +152,7 @@ public final class SwordAbilityListener implements Listener {
         // WorldGuard region check for weapon ability
         if (plugin.getServer().getPluginManager().isPluginEnabled("WorldGuard")) {
             if (!lunatech.strength.integration.WorldGuardHook.isAbilityAllowed(plugin, damager, victim.getLocation())) {
-                lunatech.strength.utility.MessageUtil.send(damager, plugin.getConfigHandler().getConfig().messages.cannotUseAbilityInRegionMessage);
+                MessageUtil.send(damager, plugin.getConfigHandler().getConfig().messages.cannotUseAbilityInRegionMessage);
                 return;
             }
         }
@@ -186,7 +187,7 @@ public final class SwordAbilityListener implements Listener {
             victim.getWorld().spawnParticle(Particle.CRIT, victim.getLocation().add(0, 1.0, 0), 15, 0.3, 0.5, 0.3, 0.1);
             victim.getWorld().spawnParticle(Particle.DAMAGE_INDICATOR, victim.getLocation().add(0, 1.0, 0), 5, 0.2, 0.4, 0.2, 0.1);
             damager.playSound(damager.getLocation(), Sound.ENTITY_PLAYER_ATTACK_CRIT, 1.0f, 1.0f);
-            lunatech.strength.utility.MessageUtil.send(damager, settings.passive.passiveAutoCritMessage);
+            MessageUtil.send(damager, settings.passive.passiveAutoCritMessage);
 
             // Increment Ultimate Charge on Passive Trigger (only when NOT in active dual wield)
             if (settings.ultimate.enabled && !activeDualWield.getOrDefault(uuid, false)) {
@@ -197,10 +198,10 @@ public final class SwordAbilityListener implements Listener {
                     ultimateHits.put(uuid, nextUltHits);
 
                     if (nextUltHits == targetUltHits) {
-                        lunatech.strength.utility.MessageUtil.send(damager, settings.ultimate.ultimateChargedMessage);
+                        MessageUtil.send(damager, settings.ultimate.ultimateChargedMessage);
                         damager.playSound(damager.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1.0f, 1.2f);
                     } else {
-                        lunatech.strength.utility.MessageUtil.send(
+                        MessageUtil.send(
                             damager,
                             settings.ultimate.ultimateChargeProgressMessage,
                             Map.of("charge", String.valueOf(nextUltHits), "target", String.valueOf(targetUltHits))
@@ -210,7 +211,7 @@ public final class SwordAbilityListener implements Listener {
             }
         } else {
             comboCounts.put(uuid, combo);
-            lunatech.strength.utility.MessageUtil.send(
+            MessageUtil.send(
                 damager,
                 settings.passive.passiveComboProgressMessage,
                 Map.of("combo", String.valueOf(combo), "required", String.valueOf(settings.passive.comboHitsRequired))

@@ -1,6 +1,7 @@
 package lunatech.strength.utility;
 
 import io.github.milkdrinkers.colorparser.paper.ColorParser;
+import io.github.milkdrinkers.colorparser.paper.PaperComponentBuilder;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -25,12 +26,11 @@ public final class MessageUtil {
      * @return true if the message should be suppressed, false otherwise
      */
     public static boolean isNullOrEmpty(@Nullable String message) {
-        if (message == null) {
+        if (message == null || message.isBlank()) {
             return true;
         }
         final String trimmed = message.trim();
-        return trimmed.isEmpty() 
-            || "none".equalsIgnoreCase(trimmed) 
+        return "none".equalsIgnoreCase(trimmed) 
             || "disabled".equalsIgnoreCase(trimmed) 
             || "''".equals(trimmed) 
             || "\"\"".equals(trimmed);
@@ -71,6 +71,30 @@ public final class MessageUtil {
     }
 
     /**
+     * Sends a parsed ColorParser message with two placeholder pairs to a recipient.
+     * Supports both {placeholder} and <placeholder> formats.
+     * If message is null, empty, or disabled, no message is sent to chat.
+     *
+     * @param sender the recipient
+     * @param message the raw template string
+     * @param k1 first placeholder key
+     * @param v1 first replacement value
+     * @param k2 second placeholder key
+     * @param v2 second replacement value
+     */
+    public static void send(@NotNull CommandSender sender, @Nullable String message, @NotNull String k1, @NotNull String v1, @NotNull String k2, @NotNull String v2) {
+        if (isNullOrEmpty(message)) {
+            return;
+        }
+        final String formatted = message
+            .replace("{" + k1 + "}", v1)
+            .replace("<" + k1 + ">", v1)
+            .replace("{" + k2 + "}", v2)
+            .replace("<" + k2 + ">", v2);
+        sender.sendMessage(ColorParser.of(formatted).with(k1, v1).with(k2, v2).build());
+    }
+
+    /**
      * Sends a parsed ColorParser message with key-value placeholders to a recipient.
      * Supports both {placeholder} and <placeholder> formats.
      * If message is null, empty, or disabled, no message is sent to chat.
@@ -91,7 +115,7 @@ public final class MessageUtil {
                     .replace("<" + entry.getKey() + ">", entry.getValue());
             }
         }
-        io.github.milkdrinkers.colorparser.paper.PaperComponentBuilder builder = ColorParser.of(formatted);
+        PaperComponentBuilder builder = ColorParser.of(formatted);
         for (Map.Entry<String, String> entry : placeholders.entrySet()) {
             if (entry.getKey() != null && entry.getValue() != null) {
                 builder = builder.with(entry.getKey(), entry.getValue());

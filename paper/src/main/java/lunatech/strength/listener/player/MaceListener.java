@@ -192,7 +192,7 @@ public final class MaceListener implements Listener {
                         final double finalSec = Math.max(0.0, baseSec * (1.0 - (reductionPct / 100.0)));
                         final int ticks = (int) Math.round(finalSec * 20.0);
                         player.setCooldown(Material.MACE, ticks);
-                        lunatech.strength.utility.MessageUtil.send(
+                        MessageUtil.send(
                             player,
                             maceAbilityConfig.passive.passiveTriggeredMessage,
                             "percent", String.format("%.0f", reductionPct)
