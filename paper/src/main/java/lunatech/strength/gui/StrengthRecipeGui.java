@@ -25,6 +25,11 @@ public final class StrengthRecipeGui {
     }
 
     public static void open(@NotNull Strength plugin, @NotNull Player player) {
+        if (!plugin.getConfigHandler().getConfig().strength.enabled) {
+            lunatech.strength.utility.MessageUtil.send(player, plugin.getConfigHandler().getConfig().messages.strengthDisabledMessage);
+            return;
+        }
+
         final StrengthRecipeGuiHolder holder = new StrengthRecipeGuiHolder();
         final lunatech.strength.config.WeaponsGuiConfig.GuiSlotItemConfig strengthCfg = plugin.getConfigHandler().getWeaponsGuiConfig().strengthItem;
         final String rawTitle = (strengthCfg != null && strengthCfg.recipeGuiTitle != null && !strengthCfg.recipeGuiTitle.trim().isEmpty())

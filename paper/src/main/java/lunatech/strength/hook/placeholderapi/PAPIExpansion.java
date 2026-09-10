@@ -3,6 +3,7 @@ package lunatech.strength.hook.placeholderapi;
 import lunatech.strength.Strength;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -41,9 +42,26 @@ public class PAPIExpansion extends PlaceholderExpansion {
 
     @Override
     public @Nullable String onRequest(OfflinePlayer p, @NotNull String params) {
-        return switch (params) {
-            case "strength" -> "placeholder text";
-            case "strength2" -> "placeholder text2";
+        if (p == null || !p.isOnline()) {
+            return "";
+        }
+
+        final Player player = p.getPlayer();
+        if (player == null) {
+            return "";
+        }
+
+        return switch (params.toLowerCase()) {
+            case "strength", "level", "amount" -> {
+                if (!plugin.getConfigHandler().getConfig().strength.enabled) {
+                    yield "N/A";
+                }
+                yield String.valueOf(plugin.getStrengthService().getStrength(player));
+            }
+            case "weapon", "assigned_weapon" -> {
+                final String weapon = plugin.getStrengthService().getAssignedWeapon(player);
+                yield (weapon != null && !weapon.isBlank()) ? weapon.toUpperCase() : plugin.getConfigHandler().getConfig().messages.unassignedWeaponMessage;
+            }
             default -> null;
         };
     }

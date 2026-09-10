@@ -82,7 +82,7 @@ public final class WorldGuardHook {
     }
 
     public static boolean isPvPLossAllowed(@NotNull Strength plugin, @Nullable Player victim, @NotNull Location loc) {
-        if (!plugin.getConfigHandler().getConfig().worldguard.enabled || !plugin.getConfigHandler().getConfig().worldguard.preventStrengthLossInSafezone) {
+        if (!plugin.getConfigHandler().getConfig().strength.enabled || !plugin.getConfigHandler().getConfig().worldguard.enabled || !plugin.getConfigHandler().getConfig().worldguard.preventStrengthLossInSafezone) {
             return true;
         }
         if (!plugin.getServer().getPluginManager().isPluginEnabled("WorldGuard")) {

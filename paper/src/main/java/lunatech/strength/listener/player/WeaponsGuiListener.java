@@ -34,7 +34,11 @@ public final class WeaponsGuiListener implements Listener {
                     RerollRecipeGui.open(plugin, player);
                 } else if (config.strengthItem != null && event.getSlot() == config.strengthItem.slot) {
                     player.closeInventory();
-                    lunatech.strength.gui.StrengthRecipeGui.open(plugin, player);
+                    if (!plugin.getConfigHandler().getConfig().strength.enabled) {
+                        lunatech.strength.utility.MessageUtil.send(player, plugin.getConfigHandler().getConfig().messages.strengthDisabledMessage);
+                    } else {
+                        lunatech.strength.gui.StrengthRecipeGui.open(plugin, player);
+                    }
                 }
             }
         }
