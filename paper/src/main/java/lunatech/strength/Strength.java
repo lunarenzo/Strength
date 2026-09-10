@@ -118,7 +118,7 @@ public class Strength extends AbstractStrength {
             strengthService.applyAttributeModifier(player, strengthService.getStrength(player));
         }
         if (licenseManager != null) {
-            licenseManager.verifyAsync();
+            licenseManager.verifyIfKeyChanged();
         }
     }
 

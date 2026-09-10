@@ -53,6 +53,7 @@ final class StrengthCommand extends Command {
                     .executes(this::executorStrength),
                 new CommandAPICommand("withdraw")
                     .withHelp("Withdraw strength into a physical item.", "Withdraw strength into a physical item.")
+                    .withPermission(BASE_PERM)
                     .withArguments(new IntegerArgument("amount", 1))
                     .executesPlayer(this::executorWithdraw),
                 new CommandAPICommand("give")

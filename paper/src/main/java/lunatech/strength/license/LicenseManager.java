@@ -174,6 +174,30 @@ public class LicenseManager {
         });
     }
 
+    /**
+     * Called on plugin reload. Only fires a fresh network authentication request when either:
+     * <ol>
+     *   <li>The license key in config changed since the last successful authentication, or</li>
+     *   <li>The plugin is currently not authenticated (auth state lost).</li>
+     * </ol>
+     * Skipping unnecessary re-auth prevents the backend from flagging this server instance
+     * as a duplicate ("license actively in use on another server") during routine hot-reloads.
+     */
+    public void verifyIfKeyChanged() {
+        final String currentKey = plugin.getConfigHandler().getConfig().license.key;
+        if (currentKey == null || currentKey.isBlank()) {
+            Logger.get().warn("[DRM] License key is missing from config!");
+            setAuthState(false, "", "");
+            return;
+        }
+        // Skip network round-trip if key is unchanged and auth state is still valid
+        if (isAuthenticated() && currentKey.hashCode() == keyHash) {
+            Logger.get().info("[DRM] License unchanged — skipping re-authentication.");
+            return;
+        }
+        verifyAsync();
+    }
+
     public boolean isAuthenticated() {
         return authenticated && ((stateChecksum ^ keyHash ^ fpHash) == 0);
     }
