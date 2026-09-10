@@ -90,7 +90,7 @@ public final class AbilityCommand extends Command {
 
         if (plugin.getServer().getPluginManager().isPluginEnabled("WorldGuard")) {
             if (!WorldGuardHook.isAbilityAllowed(plugin, player, player.getLocation())) {
-                player.sendMessage(ColorParser.of("<red>You cannot use weapon abilities in this region!</red>").build());
+                MessageUtil.send(player, messages.cannotUseAbilityInRegionMessage);
                 return;
             }
         }

@@ -79,6 +79,14 @@ public final class Crossbow2AbilityListener implements Listener {
             return;
         }
 
+        // WorldGuard region check for weapon ability
+        if (plugin.getServer().getPluginManager().isPluginEnabled("WorldGuard")) {
+            if (!lunatech.strength.integration.WorldGuardHook.isAbilityAllowed(plugin, player, player.getLocation())) {
+                lunatech.strength.utility.MessageUtil.send(player, plugin.getConfigHandler().getConfig().messages.cannotUseAbilityInRegionMessage);
+                return;
+            }
+        }
+
         final Entity projectile = event.getProjectile();
         if (projectile instanceof AbstractArrow arrow) {
             if (config.passive.shieldPiercing) {
