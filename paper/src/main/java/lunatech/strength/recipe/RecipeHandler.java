@@ -38,7 +38,7 @@ public class RecipeHandler implements Reloadable {
 
     private void registerStrengthRecipe() {
         final RecipeSettings recipeSettings = plugin.getConfigHandler().getConfig().recipe;
-        if (!recipeSettings.enabled) {
+        if (!plugin.getConfigHandler().getConfig().strength.enabled || !recipeSettings.enabled) {
             return;
         }
 

@@ -157,10 +157,17 @@ final class StrengthCommand extends Command {
     }
 
     private void executorGiveStrengthItem(CommandSender sender, CommandArguments args) {
+        final PluginConfig config = plugin.getConfigHandler().getConfig();
+        final PluginConfig.MessagesConfig messages = config.messages;
+
+        if (!config.strength.enabled) {
+            MessageUtil.send(sender, messages.strengthDisabledMessage);
+            return;
+        }
+
         final Player target = (Player) args.get("target");
         final int amount = (int) args.get("amount");
         final int strengthAmount = (int) args.get("strength_amount");
-        final PluginConfig.MessagesConfig messages = plugin.getConfigHandler().getConfig().messages;
 
         if (target == null) {
             MessageUtil.send(sender, messages.targetNotFoundMessage);
@@ -238,11 +245,18 @@ final class StrengthCommand extends Command {
     }
 
     private void executorWithdraw(Player player, CommandArguments args) {
+        final PluginConfig config = plugin.getConfigHandler().getConfig();
+        final PluginConfig.MessagesConfig messages = config.messages;
+
+        if (!config.strength.enabled) {
+            MessageUtil.send(player, messages.strengthDisabledMessage);
+            return;
+        }
+
         final int amount = (int) args.get("amount");
         final StrengthService strengthService = plugin.getStrengthService();
         final int currentStrength = strengthService.getStrength(player);
-        final int minStrength = plugin.getConfigHandler().getConfig().strength.minStrength;
-        final PluginConfig.MessagesConfig messages = plugin.getConfigHandler().getConfig().messages;
+        final int minStrength = config.strength.minStrength;
 
         // Check if PvPManager is active and player is in combat
         if (plugin.getConfigHandler().getConfig().pvpmanager.enabled && plugin.getConfigHandler().getConfig().pvpmanager.preventWithdrawInCombat) {
@@ -349,9 +363,16 @@ final class StrengthCommand extends Command {
     }
 
     private void executorSetStrength(CommandSender sender, CommandArguments args) {
+        final PluginConfig config = plugin.getConfigHandler().getConfig();
+        final PluginConfig.MessagesConfig messages = config.messages;
+
+        if (!config.strength.enabled) {
+            MessageUtil.send(sender, messages.strengthDisabledMessage);
+            return;
+        }
+
         final Player target = (Player) args.get("target");
         final int amount = (int) args.get("amount");
-        final PluginConfig.MessagesConfig messages = plugin.getConfigHandler().getConfig().messages;
 
         if (target == null) {
             MessageUtil.send(sender, messages.targetNotFoundMessage);

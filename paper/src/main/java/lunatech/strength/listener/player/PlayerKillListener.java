@@ -36,6 +36,10 @@ public final class PlayerKillListener implements Listener {
         final Player victim = event.getEntity();
         final Player killer = victim.getKiller();
         final StrengthSettings settings = configHandler.getConfig().strength;
+        if (!settings.enabled) {
+            return;
+        }
+
         final MessagesConfig messages = configHandler.getConfig().messages;
 
         final boolean isPvp = killer != null && !killer.getUniqueId().equals(victim.getUniqueId());

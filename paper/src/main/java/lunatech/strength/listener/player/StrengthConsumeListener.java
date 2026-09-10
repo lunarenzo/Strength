@@ -54,6 +54,10 @@ public final class StrengthConsumeListener implements Listener {
         event.setCancelled(true);
 
         final Player player = event.getPlayer();
+        if (!configHandler.getConfig().strength.enabled) {
+            MessageUtil.send(player, configHandler.getConfig().messages.strengthDisabledMessage);
+            return;
+        }
 
         // Consume one item from the stack
         item.setAmount(item.getAmount() - 1);

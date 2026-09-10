@@ -61,6 +61,9 @@ public class PluginConfig implements VersionedConfig {
 
     @ConfigSerializable
     public static class StrengthSettings {
+        @Comment("Enable or disable the Strength leveling & economy system. Set to false to run in Weapons & Abilities Only mode.")
+        public boolean enabled = true;
+
         @Comment("Amount of strength awarded to the killer on player kill")
         public int killReward = 1;
 
@@ -404,6 +407,9 @@ public class PluginConfig implements VersionedConfig {
 
     @ConfigSerializable
     public static class MessagesConfig {
+        @Comment("Message sent when attempting to use strength features while strength module is disabled")
+        public String strengthDisabledMessage = "<red>Strength leveling and economy features are disabled on this server!</red>";
+
         @Comment("Message sent to victim when losing strength on death")
         public String deathLossMessage = "<red>You lost <loss> Strength on death. (New Strength: <strength>)</red>";
 
