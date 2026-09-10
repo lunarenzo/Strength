@@ -67,4 +67,13 @@ public class PotionConfig implements VersionedConfig {
         "INCREASE_DAMAGE",
         "minecraft:strength"
     );
+
+    @Comment("Message sent when drinking/consuming/using a blacklisted potion is blocked. Set to '', 'none', 'disabled', or leave empty to disable message.")
+    public String potionBlockedMessage = "<red>Consuming Strength potions is disabled on this server!</red>";
+
+    @Comment("Message sent when brewing a blacklisted potion is blocked. Set to '', 'none', 'disabled', or leave empty to disable message.")
+    public String potionBrewingBlockedMessage = "<red>Brewing Strength potions is forbidden on this server!</red>";
+
+    @Comment("Message sent when a blacklisted potion effect is blocked or removed. Set to '', 'none', 'disabled', or leave empty to disable message.")
+    public String potionEffectRemovedMessage = "<red>The <effect> potion effect is restricted on this server!</red>";
 }

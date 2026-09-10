@@ -2,10 +2,10 @@ package lunatech.strength.listener.player;
 
 import lunatech.strength.Strength;
 import lunatech.strength.config.PotionConfig;
-import lunatech.strength.config.PluginConfig.MessagesConfig;
 import lunatech.strength.utility.MessageUtil;
 import org.bukkit.Material;
 import org.bukkit.block.BrewingStand;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.ThrownPotion;
@@ -39,10 +39,6 @@ public final class PotionListener implements Listener {
         return plugin.getConfigHandler().getPotionConfig();
     }
 
-    private MessagesConfig getMessages() {
-        return plugin.getConfigHandler().getConfig().messages;
-    }
-
     /* =========================================================================
      * 1. Entity Potion Effect Application Guard
      * ========================================================================= */
@@ -66,7 +62,7 @@ public final class PotionListener implements Listener {
         if (isEffectRestricted(newEffect.getType(), config)) {
             event.setCancelled(true);
             final String effectName = getFriendlyEffectName(newEffect.getType());
-            MessageUtil.send(player, getMessages().potionEffectRemovedMessage, "effect", effectName);
+            MessageUtil.send(player, config.potionEffectRemovedMessage, "effect", effectName);
         }
     }
 
@@ -89,7 +85,7 @@ public final class PotionListener implements Listener {
         if (item.getItemMeta() instanceof PotionMeta potionMeta) {
             if (isPotionMetaRestricted(potionMeta, config)) {
                 event.setCancelled(true);
-                MessageUtil.send(event.getPlayer(), getMessages().potionBlockedMessage);
+                MessageUtil.send(event.getPlayer(), config.potionBlockedMessage);
             }
         }
     }
@@ -111,7 +107,7 @@ public final class PotionListener implements Listener {
                 for (LivingEntity entity : event.getAffectedEntities()) {
                     if (entity instanceof Player player) {
                         event.setIntensity(player, 0.0);
-                        MessageUtil.send(player, getMessages().potionBlockedMessage);
+                        MessageUtil.send(player, config.potionBlockedMessage);
                     }
                 }
             }
@@ -129,6 +125,9 @@ public final class PotionListener implements Listener {
         if (potion.getItem().getItemMeta() instanceof PotionMeta potionMeta) {
             if (isPotionMetaRestricted(potionMeta, config)) {
                 event.setCancelled(true);
+                if (potion.getShooter() instanceof Player shooter) {
+                    MessageUtil.send(shooter, config.potionBlockedMessage);
+                }
             }
         }
     }
@@ -154,6 +153,11 @@ public final class PotionListener implements Listener {
                 final ItemStack potion = inv.getItem(i);
                 if (isBrewingRestricted(ingredient, potion, config)) {
                     event.setBrewingTime(0);
+                    for (HumanEntity viewer : inv.getViewers()) {
+                        if (viewer instanceof Player player) {
+                            MessageUtil.send(player, config.potionBrewingBlockedMessage);
+                        }
+                    }
                     return;
                 }
             }
@@ -176,6 +180,13 @@ public final class PotionListener implements Listener {
             final ItemStack potion = inv.getItem(i);
             if (isBrewingRestricted(ingredient, potion, config)) {
                 event.setCancelled(true);
+                if (event.getBlock().getState() instanceof BrewingStand stand) {
+                    for (HumanEntity viewer : stand.getInventory().getViewers()) {
+                        if (viewer instanceof Player player) {
+                            MessageUtil.send(player, config.potionBrewingBlockedMessage);
+                        }
+                    }
+                }
                 return;
             }
         }
