@@ -4,7 +4,9 @@ import lunatech.strength.Strength;
 import lunatech.strength.config.ConfigHandler;
 import lunatech.strength.config.PluginConfig.MessagesConfig;
 import lunatech.strength.config.PluginConfig.StrengthSettings;
+import lunatech.strength.config.RulesConfig.NakedPlayerRules;
 import lunatech.strength.service.StrengthService;
+import lunatech.strength.utility.MessageUtil;
 import io.github.milkdrinkers.colorparser.paper.ColorParser;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -45,7 +47,7 @@ public final class PlayerKillListener implements Listener {
             }
         }
 
-        final lunatech.strength.config.RulesConfig.NakedPlayerRules nakedRules = configHandler.getRulesConfig().nakedPlayer;
+        final NakedPlayerRules nakedRules = configHandler.getRulesConfig().nakedPlayer;
         final boolean isVictimNaked = isPvp && isNakedPlayer(victim, nakedRules);
         final boolean allowNakedReward = !isVictimNaked || nakedRules.allowNakedKillReward;
 
@@ -67,7 +69,7 @@ public final class PlayerKillListener implements Listener {
                     event.getDrops().add(strengthService.createStrengthItem(actualLoss));
                 }
 
-                lunatech.strength.utility.MessageUtil.send(
+                MessageUtil.send(
                     victim,
                     messages.deathLossMessage,
                     Map.of("loss", String.valueOf(actualLoss), "strength", String.valueOf(victimNewStrength))
@@ -78,7 +80,7 @@ public final class PlayerKillListener implements Listener {
         // Award kill reward to the killer in PvP
         if (isPvp) {
             if (!allowNakedReward) {
-                lunatech.strength.utility.MessageUtil.send(
+                MessageUtil.send(
                     killer,
                     nakedRules.nakedKillNoRewardMessage,
                     "victim", victim.getName()
@@ -96,20 +98,20 @@ public final class PlayerKillListener implements Listener {
                     final int killerNewStrength = Math.min(settings.maxStrength, killerOldStrength + rewardAmount);
                     strengthService.setStrength(killer, killerNewStrength);
 
-                    lunatech.strength.utility.MessageUtil.send(
+                    MessageUtil.send(
                         killer,
                         messages.killRewardMessage,
                         Map.of("reward", String.valueOf(settings.killReward), "victim", victim.getName(), "strength", String.valueOf(killerNewStrength))
                     );
                 } else {
-                    lunatech.strength.utility.MessageUtil.send(
+                    MessageUtil.send(
                         killer,
                         messages.killDroppedItemMessage,
                         Map.of("victim", victim.getName())
                     );
                 }
             } else {
-                lunatech.strength.utility.MessageUtil.send(
+                MessageUtil.send(
                     killer,
                     messages.killNoStrengthMessage,
                     Map.of("victim", victim.getName())
@@ -118,7 +120,7 @@ public final class PlayerKillListener implements Listener {
         }
     }
 
-    private static boolean isNakedPlayer(@NotNull Player player, @NotNull lunatech.strength.config.RulesConfig.NakedPlayerRules rules) {
+    private static boolean isNakedPlayer(@NotNull Player player, @NotNull NakedPlayerRules rules) {
         if (!rules.enabled) {
             return false;
         }

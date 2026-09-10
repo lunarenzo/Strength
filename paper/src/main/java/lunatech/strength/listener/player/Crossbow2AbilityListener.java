@@ -5,6 +5,7 @@ import lunatech.strength.Strength;
 import lunatech.strength.config.Crossbow2Config;
 import lunatech.strength.constant.PDCKeys;
 import lunatech.strength.service.StrengthService;
+import lunatech.strength.utility.MessageUtil;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
@@ -82,7 +83,7 @@ public final class Crossbow2AbilityListener implements Listener {
         // WorldGuard region check for weapon ability
         if (plugin.getServer().getPluginManager().isPluginEnabled("WorldGuard")) {
             if (!lunatech.strength.integration.WorldGuardHook.isAbilityAllowed(plugin, player, player.getLocation())) {
-                lunatech.strength.utility.MessageUtil.send(player, plugin.getConfigHandler().getConfig().messages.cannotUseAbilityInRegionMessage);
+                MessageUtil.send(player, plugin.getConfigHandler().getConfig().messages.cannotUseAbilityInRegionMessage);
                 return;
             }
         }

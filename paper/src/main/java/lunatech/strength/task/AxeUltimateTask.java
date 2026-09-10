@@ -3,6 +3,7 @@ package lunatech.strength.task;
 import lunatech.strength.Strength;
 import lunatech.strength.config.AxeConfig;
 import lunatech.strength.listener.player.AxeAbilityListener;
+import lunatech.strength.utility.MessageUtil;
 import io.github.milkdrinkers.colorparser.paper.ColorParser;
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.destroystokyo.paper.profile.ProfileProperty;
@@ -232,7 +233,7 @@ public final class AxeUltimateTask extends BukkitRunnable {
         }
 
         if (attacker.isOnline()) {
-            lunatech.strength.utility.MessageUtil.send(attacker, settings.ultimate.ultimateExpiredMessage);
+            MessageUtil.send(attacker, settings.ultimate.ultimateExpiredMessage);
         }
     }
 }

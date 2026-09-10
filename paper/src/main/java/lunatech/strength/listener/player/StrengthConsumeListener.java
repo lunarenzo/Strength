@@ -2,6 +2,7 @@ package lunatech.strength.listener.player;
 
 import lunatech.strength.constant.PDCKeys;
 import lunatech.strength.service.StrengthService;
+import lunatech.strength.utility.MessageUtil;
 import io.github.milkdrinkers.colorparser.paper.ColorParser;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -65,7 +66,7 @@ public final class StrengthConsumeListener implements Listener {
         player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.2f);
         player.spawnParticle(Particle.HAPPY_VILLAGER, player.getLocation().add(0, 1.0, 0), 12, 0.5, 0.5, 0.5, 0.1);
 
-        lunatech.strength.utility.MessageUtil.send(
+        MessageUtil.send(
             player,
             configHandler.getConfig().messages.consumeShardMessage,
             "amount", String.valueOf(strengthAmount)

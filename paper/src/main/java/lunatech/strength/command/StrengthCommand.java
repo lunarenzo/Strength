@@ -324,7 +324,8 @@ final class StrengthCommand extends Command {
                         MessageUtil.send(
                             sender,
                             maceRules.assignmentLimit.limitReachedMessage,
-                            Map.of("count", String.valueOf(count), "max", String.valueOf(maceRules.assignmentLimit.maxAssignedPlayers))
+                            "count", String.valueOf(count),
+                            "max", String.valueOf(maceRules.assignmentLimit.maxAssignedPlayers)
                         );
                         return;
                     }

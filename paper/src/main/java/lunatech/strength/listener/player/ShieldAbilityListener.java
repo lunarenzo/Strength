@@ -100,7 +100,7 @@ public final class ShieldAbilityListener implements Listener {
         // WorldGuard region check for weapon ability
         if (plugin.getServer().getPluginManager().isPluginEnabled("WorldGuard")) {
             if (!WorldGuardHook.isAbilityAllowed(plugin, victim, victim.getLocation())) {
-                lunatech.strength.utility.MessageUtil.send(victim, plugin.getConfigHandler().getConfig().messages.cannotUseAbilityInRegionMessage);
+                MessageUtil.send(victim, plugin.getConfigHandler().getConfig().messages.cannotUseAbilityInRegionMessage);
                 return;
             }
         }
