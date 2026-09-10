@@ -52,4 +52,7 @@ public class EnchantmentConfig implements VersionedConfig {
 
     @Comment("Sanitize enchantments when players pick up items from the ground")
     public boolean blockOnPickup = true;
+
+    @Comment("Message sent when an enchantment is restricted, level-capped, or removed. Set to '', 'none', 'disabled', or leave empty to disable message.")
+    public String enchantmentRestrictedMessage = "<red>One or more enchantments were restricted or level-capped on this item!</red>";
 }

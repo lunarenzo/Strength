@@ -3,6 +3,7 @@ package lunatech.strength.listener.player;
 import lunatech.strength.Strength;
 import lunatech.strength.config.EnchantmentConfig;
 import lunatech.strength.utility.EnchantmentSanitizer;
+import lunatech.strength.utility.MessageUtil;
 import org.bukkit.entity.Player;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;
@@ -52,6 +53,11 @@ public final class EnchantmentRestrictionListener implements Listener {
         if (!enchantsToAdd.equals(sanitized)) {
             enchantsToAdd.clear();
             enchantsToAdd.putAll(sanitized);
+
+            final Player player = event.getEnchanter();
+            if (player != null) {
+                MessageUtil.send(player, config.enchantmentRestrictedMessage);
+            }
         }
     }
 
@@ -149,6 +155,7 @@ public final class EnchantmentRestrictionListener implements Listener {
         if (item != null && !item.getType().isAir()) {
             if (EnchantmentSanitizer.sanitizeItem(item, config)) {
                 event.getItem().setItemStack(item);
+                MessageUtil.send((Player) event.getEntity(), config.enchantmentRestrictedMessage);
             }
         }
     }
