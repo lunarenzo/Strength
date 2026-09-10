@@ -45,7 +45,10 @@ public final class WeaponsGui {
 
         final int playerStrength = plugin.getStrengthService().getStrength(player);
         final String assignedWeapon = plugin.getStrengthService().getAssignedWeapon(player);
-        final String formattedWeapon = assignedWeapon != null && !assignedWeapon.trim().isEmpty() ? assignedWeapon.toUpperCase() : "NONE";
+        final String formattedWeapon = ItemResolver.resolveWeaponDisplayName(
+            assignedWeapon,
+            plugin.getConfigHandler().getConfig().weapons.weaponCustomMessages
+        );
 
         // 1. Fill background items
         final GuiItemConfig fillerConfig = guiConfig.filler;
@@ -122,7 +125,7 @@ public final class WeaponsGui {
                 weaponItem = new ItemStack(Material.STONE);
             }
 
-            final boolean isAssigned = formattedWeapon.equalsIgnoreCase(weaponKey);
+            final boolean isAssigned = weaponKey.equalsIgnoreCase(assignedWeapon);
             final String statusStr = isAssigned
                 ? "<green><bold>ASSIGNED</bold></green>"
                 : "<gray>Unassigned</gray>";
