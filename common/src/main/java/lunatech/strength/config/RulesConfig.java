@@ -52,16 +52,16 @@ public class RulesConfig implements VersionedConfig {
         @Comment("Prevent players from using Totems of Undying while tagged in active combat (requires PvPManager integration)")
         public boolean preventInCombat = false;
 
-        @Comment("Message sent when a player tries to pick up or hold excess Totems beyond maxInInventory limit")
+        @Comment("Message sent when a player tries to pick up or hold excess Totems beyond maxInInventory limit. Set to '', 'none', 'disabled', or leave empty to disable message.")
         public String maxLimitReachedMessage = "<red>You cannot hold more than <count> Totems of Undying in your inventory!</red>";
 
-        @Comment("Message sent when a Totem pop is denied due to active combat")
+        @Comment("Message sent when a Totem pop is denied due to active combat. Set to '', 'none', 'disabled', or leave empty to disable message.")
         public String totemInCombatMessage = "<red>You cannot use or move Totems of Undying while in active combat!</red>";
 
-        @Comment("Message sent when a Totem pop is denied due to active cooldown")
+        @Comment("Message sent when a Totem pop is denied due to active cooldown. Set to '', 'none', 'disabled', or leave empty to disable message.")
         public String totemOnCooldownMessage = "<red>Your Totem of Undying is on cooldown for another <time>!</red>";
 
-        @Comment("Message sent when a player exhausts their totem quota and enters cooldown")
+        @Comment("Message sent when a player exhausts their totem quota and enters cooldown. Set to '', 'none', 'disabled', or leave empty to disable message.")
         public String quotaExhaustedMessage = "<red>You have exhausted your Totem quota! Totems disabled for <time>.</red>";
     }
 
@@ -85,7 +85,7 @@ public class RulesConfig implements VersionedConfig {
             "SWORD", "AXE", "BOW", "CROSSBOW", "TRIDENT", "MACE", "SHIELD"
         );
 
-        @Comment("Message sent to killer when strength reward is denied because the victim was naked")
+        @Comment("Message sent to killer when strength reward is denied because the victim was naked. Set to '', 'none', 'disabled', or leave empty to disable message.")
         public String nakedKillNoRewardMessage = "<red>You did not receive strength for killing <victim> because they were naked!</red>";
     }
 
@@ -117,7 +117,7 @@ public class RulesConfig implements VersionedConfig {
             @Comment("Maximum number of players that can be assigned to the Mace weapon globally across the server.")
             public int maxAssignedPlayers = 3;
 
-            @Comment("Message sent when admin tries to assign Mace but player limit is reached.")
+            @Comment("Message sent when admin tries to assign Mace but player limit is reached. Set to '', 'none', 'disabled', or leave empty to disable message.")
             public String limitReachedMessage = "<red>Cannot assign Mace! Global player limit reached (<count>/<max>).</red>";
         }
 
