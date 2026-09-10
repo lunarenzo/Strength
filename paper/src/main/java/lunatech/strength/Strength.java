@@ -97,6 +97,9 @@ public class Strength extends AbstractStrength {
 
     @Override
     public void onDisable() {
+        if (licenseManager != null) {
+            licenseManager.release();
+        }
         for (Reloadable handler : handlers.reversed()) // If reverse doesn't work implement a new List with your desired disable order
             handler.onDisable(instance);
     }

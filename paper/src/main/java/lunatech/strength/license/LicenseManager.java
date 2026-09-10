@@ -223,13 +223,13 @@ public class LicenseManager {
         return dynamicData.getOrDefault(weaponKey, fallback) * getScale();
     }
 
-    // Hardware MAC + Path + Port Fingerprinting to prevent container cloning
+    // Hardware MAC + Port fingerprinting — stable across restarts on the same machine.
+    // user.dir intentionally excluded: it drifts on shared hosting/containers and causes
+    // false fingerprint changes between quick restarts, triggering the 15-min lockout.
     private String generateFingerprint() {
         try {
-            final StringBuilder raw = new StringBuilder(System.getProperty("user.dir"))
-                    .append(":").append(plugin.getServer().getPort());
+            final StringBuilder raw = new StringBuilder().append(plugin.getServer().getPort());
 
-            // Append hardware network interface MAC address to prevent container/dir cloning
             try {
                 final Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
                 if (interfaces != null) {
@@ -249,6 +249,37 @@ public class LicenseManager {
             return HexFormat.of().formatHex(hash);
         } catch (Exception e) {
             return "fp-" + plugin.getServer().getPort();
+        }
+    }
+
+    /**
+     * Sends a synchronous "release" signal to the backend on clean server shutdown,
+     * clearing the bound fingerprint and last_seen timestamp so the next startup
+     * (even within the 15-minute rebind window) is never blocked by a stale session.
+     * Only the currently bound server instance can release its own session.
+     */
+    public void release() {
+        try {
+            final String key = plugin.getConfigHandler().getConfig().license.key;
+            if (key == null || key.isBlank()) return;
+
+            final JsonObject requestBody = new JsonObject();
+            requestBody.addProperty("action", "release");
+            requestBody.addProperty("license_key", key);
+            requestBody.addProperty("fingerprint", generateFingerprint());
+            requestBody.addProperty("port", plugin.getServer().getPort());
+
+            final HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(SERVER_URL))
+                    .timeout(Duration.ofSeconds(5))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(requestBody.toString(), StandardCharsets.UTF_8))
+                    .build();
+
+            HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            Logger.get().info("[DRM] License session released cleanly.");
+        } catch (Exception e) {
+            Logger.get().warn("[DRM] Unable to release license session: " + e.getMessage());
         }
     }
 }
