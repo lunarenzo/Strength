@@ -24,7 +24,9 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -346,17 +348,32 @@ public final class SwordAbilityListener implements Listener {
         player.swingOffHand();
     }
 
-    // Anti-Duplication Guardrails
+    // Targeted Anti-Duplication Guardrails
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onInventoryClick(InventoryClickEvent event) {
-        if (isClone(event.getCurrentItem()) || isClone(event.getCursor()) || activeDualWield.containsKey(event.getWhoClicked().getUniqueId())) {
+        if (isClone(event.getCurrentItem()) || isClone(event.getCursor())) {
             event.setCancelled(true);
+            return;
+        }
+
+        if (activeDualWield.containsKey(event.getWhoClicked().getUniqueId())) {
+            if (event.getClick() == ClickType.SWAP_OFFHAND) {
+                event.setCancelled(true);
+                return;
+            }
+            if (event.getSlot() == 40 || event.getRawSlot() == 45) {
+                event.setCancelled(true);
+                return;
+            }
+            if (event.getClickedInventory() != null && event.getClickedInventory().getType() == InventoryType.PLAYER && event.getSlot() == 40) {
+                event.setCancelled(true);
+            }
         }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onPlayerDropItem(PlayerDropItemEvent event) {
-        if (isClone(event.getItemDrop().getItemStack()) || activeDualWield.containsKey(event.getPlayer().getUniqueId())) {
+        if (isClone(event.getItemDrop().getItemStack())) {
             event.setCancelled(true);
         }
     }
