@@ -22,10 +22,10 @@ public class WeaponsGuiConfig implements VersionedConfig {
     }
 
     @Comment("Title of the Weapons Chest GUI (MiniMessage supported)")
-    public String title = "<gradient:#FF5555:#FFAA00><bold>STRENGTH WEAPONS</bold></gradient>";
+    public String title = "<color:#ff0000><bold>ᴡᴇᴀᴘᴏɴ ᴄʟᴀѕѕ ɪɴꜰᴏ</bold></color>";
 
     @Comment("Rows of chest inventory (1 to 6)")
-    public int rows = 3;
+    public int rows = 5;
 
     @Comment("Filler background item settings")
     public GuiItemConfig filler = new GuiItemConfig(
@@ -40,201 +40,282 @@ public class WeaponsGuiConfig implements VersionedConfig {
         4,
         "PLAYER_HEAD",
         0,
-        "<yellow><bold>{player}'s Profile</bold></yellow>",
+        "<color:#ff0000><bold>ʏᴏᴜʀ ᴘʀᴏꜰɪʟᴇ</bold></color>",
         List.of(
-            "<gray>Current Strength: <red><bold>{strength}</bold></red>",
-            "<gray>Assigned Weapon: <gold><bold>{weapon}</bold></gold>",
             "",
-            "<dark_gray>Use weapon abilities to fight!</dark_gray>"
+            "<color:#ff0000>ᴄᴜʀʀᴇɴᴛ ѕᴛʀᴇɴɢᴛʜ: <white>{strength}</white></color>",
+            "<color:#ff0000>ᴀѕѕɪɢɴᴇᴅ ᴡᴇᴀᴘᴏɴ: <white>{weapon}</white></color>",
+            ""
         )
     );
 
     @Comment("Strength Item display settings in the Weapons GUI")
     public GuiSlotItemConfig strengthItem = new GuiSlotItemConfig(
-        20,
+        12,
         "NAUTILUS_SHELL",
         12345,
-        "<gold><bold>⚡ STRENGTH SHARD</bold></gold>",
+        "<color:#ff0000><bold>ѕᴛʀᴇɴɢᴛʜ ѕʜᴀʀᴅ</bold></color>",
         List.of(
-            "<gray>Physical shard containing player strength.</gray>",
-            "<gray>Right-click in hand to consume & gain strength.</gray>",
+            "<white>ᴘʜʏѕɪᴄᴀʟ ѕʜᴀʀᴅ ᴄᴏɴᴛᴀɪɴɪɴɢ</white>",
+            "<white>  ᴘʟᴀʏᴇʀ ѕᴛʀᴇɴɢᴛʜ.</white>",
             "",
-            "<yellow>Click to view crafting recipe!</yellow>"
+            "<white>ᴄʟɪᴄᴋ ᴛᴏ ᴠɪᴇᴡ ᴄʀᴀꜰᴛɪɴɢ</white>",
+            "<white>  ʀᴇᴄɪᴘᴇ!</white>"
         ),
-        "<dark_purple><bold>Recipe: Strength Shard</bold></dark_purple>"
+        ""
     );
 
     @Comment("Reroll Book display item settings in the Weapons GUI")
     public GuiSlotItemConfig rerollItem = new GuiSlotItemConfig(
-        22,
+        14,
         "BOOK",
         12347,
-        "<light_purple><bold>📜 WEAPON REROLL BOOK</bold></light_purple>",
+        "<color:#ff0000><bold>ᴡᴇᴀᴘᴏɴ ᴄʟᴀѕѕ ʀᴇʀᴏʟʟ ʙᴏᴏᴋ</bold></color>",
         List.of(
-            "<gray>Used to reroll your assigned weapon.</gray>",
-            "<gray>Consume in hand to open reroll menu.</gray>",
+            "<white>ᴜѕᴇᴅ ᴛᴏ ʀᴇʀᴏʟʟ ʏᴏᴜʀ ᴀѕѕɪɢɴᴇᴅ</white>",
+            "<white>  ᴡᴇᴀᴘᴏɴ.</white>",
+            "<white>ᴄᴏɴѕᴜᴍᴇ ɪɴ ʜᴀɴᴅ ᴛᴏ ᴏᴘᴇɴ</white>",
+            "<white>  ʀᴇʀᴏʟʟ ᴍᴇɴᴜ.</white>",
             "",
-            "<yellow>Click to view crafting recipe!</yellow>"
+            "<white>ᴄʟɪᴄᴋ ᴛᴏ ᴠɪᴇᴡ ᴄʀᴀꜰᴛɪɴɢ</white>",
+            "<white>  ʀᴇᴄɪᴘᴇ!</white>"
         ),
-        "<light_purple><bold>Recipe: Weapon Reroll Book</bold></light_purple>"
+        ""
     );
 
-    @Comment("Weapons display items in the GUI mapped by weapon key (trident, bow, shield, crossbow, sword, axe)")
+    @Comment("Weapons display items in the GUI mapped by weapon key (trident, bow, shield, crossbow, sword, axe, spear, trident2, crossbow2, mace, armors)")
     public Map<String, GuiSlotItemConfig> weapons = defaultWeaponsMap();
 
     private static Map<String, GuiSlotItemConfig> defaultWeaponsMap() {
         final Map<String, GuiSlotItemConfig> map = new HashMap<>();
 
-        map.put("trident", new GuiSlotItemConfig(
-            10,
-            "TRIDENT",
-            0,
-            "<cyan><bold>⚡ TRIDENT OF POSEIDON</bold></cyan>",
-            List.of(
-                "<yellow><bold>Passive Ability:</bold></yellow> <white>Lightning Strike</white>",
-                "<gray>Every <gold>3 hits</gold> summons lightning dealing <red>2.0x</red> damage + <red>3.0</red> bonus damage.</gray>",
-                "",
-                "<yellow><bold>Ultimate Ability:</bold></yellow> <gold>Thunderous Barrage</gold>",
-                "<gray>Activation: <yellow>/ability</yellow> | Req: Strength <red>5</red> | Charges: <gold>8 hits</gold> | CD: <green>16s</green></gray>",
-                "<gray>Unleashes 9 thrust strikes (5.0 dmg) with particle surges in a 4-block zone.</gray>",
-                "",
-                "<dark_gray>Status: {status}</dark_gray>"
-            )
-        ));
-
-        map.put("bow", new GuiSlotItemConfig(
-            11,
-            "BOW",
-            0,
-            "<green><bold>🏹 BOW OF ARTEMIS</bold></green>",
-            List.of(
-                "<yellow><bold>Passive Ability:</bold></yellow> <white>Cobweb Trap</white>",
-                "<gray>Every <gold>2 hits</gold>, next arrow traps target in cobwebs for <gold>5s</gold>.</gray>",
-                "",
-                "<yellow><bold>Ultimate Ability:</bold></yellow> <gold>Face Spiral Ring (Beam)</gold>",
-                "<gray>Activation: <yellow>/ability</yellow> | Req: Strength <red>5</red> | Charges: <gold>10 hits</gold> | CD: <green>60s</green></gray>",
-                "<gray>Primes <gold>3 beam shots</gold> (full draw fires a 20-block laser dealing 8.0 dmg).</gray>",
-                "",
-                "<dark_gray>Status: {status}</dark_gray>"
-            )
-        ));
-
-        map.put("shield", new GuiSlotItemConfig(
-            12,
-            "SHIELD",
-            0,
-            "<blue><bold>🛡️ SHIELD OF ATHENA</bold></blue>",
-            List.of(
-                "<yellow><bold>Passive Ability:</bold></yellow> <white>Disable Safeguard</white>",
-                "<gray>Shield disable/break grants <green>20% damage reduction</green> for <gold>5s</gold>.</gray>",
-                "",
-                "<yellow><bold>Ultimate Ability:</bold></yellow> <gold>Aegis Barrier (God Mode)</gold>",
-                "<gray>Activation: <yellow>/ability</yellow> | Req: Strength <red>5</red> | Charges: <gold>10 blocks</gold> | CD: <green>60s</green></gray>",
-                "<gray>Spawns bubble barrier granting <gold>100% invulnerability</gold> for <gold>15s</gold>.</gray>",
-                "",
-                "<dark_gray>Status: {status}</dark_gray>"
-            )
-        ));
-
-        map.put("crossbow", new GuiSlotItemConfig(
-            13,
-            "CROSSBOW",
-            0,
-            "<gold><bold>🏹 CROSSBOW OF APOLLO</bold></gold>",
-            List.of(
-                "<yellow><bold>Passive Ability:</bold></yellow> <white>2x Damage Shot</white>",
-                "<gray>Every <gold>3 hits</gold>, next crossbow shot deals <red>2.0x damage</red>.</gray>",
-                "",
-                "<yellow><bold>Ultimate Ability:</bold></yellow> <gold>Tranquilizer Shot</gold>",
-                "<gray>Activation: <yellow>/ability</yellow> | Req: Strength <red>5</red> | Charges: <gold>3 passives</gold> | CD: <green>60s</green></gray>",
-                "<gray>Primes next arrow to freeze & immobilize target for <gold>5s</gold>.</gray>",
-                "",
-                "<dark_gray>Status: {status}</dark_gray>"
-            )
-        ));
-
         map.put("sword", new GuiSlotItemConfig(
-            14,
-            "DIAMOND_SWORD",
+            20,
+            "NETHERITE_SWORD",
             0,
-            "<red><bold>⚔️ SWORD OF ARES</bold></red>",
+            "<color:#ff0000> <bold>ѕᴡᴏʀᴅ</bold></color>",
             List.of(
-                "<yellow><bold>Passive Ability:</bold></yellow> <white>Auto-Crit Combo</white>",
-                "<gray>Every <gold>3 hits</gold> within 3s triggers a guaranteed <red>1.5x Auto-Crit</red> strike.</gray>",
+                "<color:#ff0000> <bold>ᴘᴀѕѕɪᴠᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ᴅᴏ ᴀ 3-ʜɪᴛ ѕᴡᴏʀᴅ ᴄᴏᴍʙᴏ</white></color>",
+                "<white>  ᴡɪᴛʜɪɴ 3 ѕᴇᴄᴏɴᴅѕ ᴛᴏ ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ</white>",
+                "<white>  ᴅᴇᴀʟ 2x ᴄʀɪᴛ ᴅᴀᴍᴀɢᴇ</white>",
                 "",
-                "<yellow><bold>Ultimate Ability:</bold></yellow> <gold>Dual Wielding (Berserker Stance)</gold>",
-                "<gray>Activation: <yellow>/ability</yellow> | Req: Strength <red>5</red> | Charges: <gold>5 hits</gold> | CD: <green>18s</green></gray>",
-                "<gray>Clones sword into off-hand for <gold>10s</gold>, granting +100% attack speed & dual-hand strikes.</gray>",
+                "<color:#ff0000> <bold>ᴜʟᴛɪᴍᴀᴛᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ᴀᴄᴛɪᴠᴀᴛᴇѕ ᴅᴜᴀʟ ᴡɪᴇʟᴅ</white></color>",
+                "<white>  ɢʀᴀɴᴛɪɴɢ +100% ᴀᴛᴛᴀᴄᴋ ѕᴘᴇᴇᴅ</white>",
+                "<white>  ᴀɴᴅ ᴅᴜᴀʟ-ʜᴀɴᴅ ѕᴛʀɪᴋᴇѕ</white>",
+                "<dark_gray>  ᴄᴏᴏʟᴅᴏᴡɴ: 60 ѕᴇᴄᴏɴᴅѕ</dark_gray>",
                 "",
-                "<dark_gray>Status: {status}</dark_gray>"
+                "<dark_gray>ѕᴛᴀᴛᴜѕ: {status}</dark_gray>"
             )
         ));
 
         map.put("axe", new GuiSlotItemConfig(
-            15,
+            21,
             "NETHERITE_AXE",
             0,
-            "<dark_red><bold>🪓 AXE OF HEPHAESTUS</bold></dark_red>",
+            "<color:#ff0000> <bold>ᴀxᴇ</bold></color>",
             List.of(
-                "<yellow><bold>Passive Ability:</bold></yellow> <white>Seismic Stun</white>",
-                "<gray>Every <gold>4 critical hits</gold> completely freezes & stuns target for <gold>3s</gold>.</gray>",
+                "<color:#ff0000> <bold>ᴘᴀѕѕɪᴠᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ᴅᴏ ᴀ 3 ᴄʀɪᴛ ʜɪᴛѕ ᴛᴏ ᴀɴ</white></color>",
+                "<white>  ᴇɴᴇᴍʏ ᴀɴᴅ ѕᴛᴜɴ ᴛʜᴇᴍ ꜰᴏʀ 1</white>",
+                "<white>  ѕᴇᴄᴏɴᴅ.</white>",
                 "",
-                "<yellow><bold>Ultimate Ability:</bold></yellow> <gold>Executioner's Mark</gold>",
-                "<gray>Activation: <yellow>/ability</yellow> | Req: Strength <red>5</red> | Charges: <gold>5 crits</gold> | CD: <green>25s</green></gray>",
-                "<gray>Marks target for <gold>10s</gold>, storing 100% damage & detonating for <red>150% burst</red>.</gray>",
+                "<color:#ff0000> <bold>ᴜʟᴛɪᴍᴀᴛᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ᴍᴀʀᴋѕ ᴛᴀʀɢᴇᴛ ꜰᴏʀ 10 ѕᴇᴄᴏɴᴅѕ</white></color>",
+                "<white>  ѕᴛᴏʀɪɴɢ 100% ᴅᴀᴍᴀɢᴇ ᴀɴᴅ</white>",
+                "<white>  ᴅᴇᴛᴏɴᴀᴛɪɴɢ ꜰᴏʀ 150% ʙᴜʀѕᴛ</white>",
+                "<white>  ᴏꜰ ᴅᴀᴍᴀɢᴇ</white>",
+                "<dark_gray>  ᴄᴏᴏʟᴅᴏᴡɴ: 60 ѕᴇᴄᴏɴᴅѕ</dark_gray>",
                 "",
-                "<dark_gray>Status: {status}</dark_gray>"
+                "<dark_gray>ѕᴛᴀᴛᴜѕ: {status}</dark_gray>"
             )
         ));
 
-        map.put("trident2", new GuiSlotItemConfig(
-            16,
+        map.put("trident", new GuiSlotItemConfig(
+            22,
             "TRIDENT",
             0,
-            "<gold><bold>⚡ THUNDERSTORM TRIDENT (TRIDENT 2)</bold></gold>",
+            "<color:#ff0000> <bold>ᴛʀɪᴅᴇɴᴛ ᴏꜰ ᴘᴏѕᴇɪᴅᴏɴ</bold></color>",
             List.of(
-                "<yellow><bold>Passive Ability:</bold></yellow> <white>Sword Speed & Shield Crack</white>",
-                "<gray>Matches <gold>Sword Attack Speed (1.6)</gold> and <red>stuns blocking shields for 5s</red> on hit.</gray>",
+                "<color:#ff0000> <bold>ᴘᴀѕѕɪᴠᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ᴇᴠᴇʀʏ 3 ʜɪᴛѕ ѕᴜᴍᴍᴏɴѕ ʟɪɢʜᴛɴɪɴɢ</white></color>",
+                "<white>  ᴅᴇᴀʟɪɴɢ 2.0x ᴅᴀᴍᴀɢᴇ + 3.0</white>",
+                "<white>  ʙᴏɴᴜѕ ᴅᴀᴍᴀɢᴇ.</white>",
                 "",
-                "<yellow><bold>Ultimate Ability:</bold></yellow> <gold>Thunderstorm Domain</gold>",
-                "<gray>Activation: <yellow>/ability</yellow> | Req: Strength <red>5</red> | CD: <green>60s</green></gray>",
-                "<gray>Summons a 15s thunderstorm where <gold>every critical strike</gold> strikes target with lightning.</gray>",
+                "<color:#ff0000> <bold>ᴜʟᴛɪᴍᴀᴛᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ᴜɴʟᴇᴀѕʜᴇѕ 9 ᴛʜʀᴜѕᴛ ѕᴛʀɪᴋᴇѕ</white></color>",
+                "<white>  (5.0 ᴅᴍɢ) ᴡɪᴛʜ ᴘᴀʀᴛɪᴄʟᴇ ѕᴜʀɢᴇѕ</white>",
+                "<white>  ɪɴ ᴀ 4-ʙʟᴏᴄᴋ ᴢᴏɴᴇ.</white>",
+                "<dark_gray>  ᴄᴏᴏʟᴅᴏᴡɴ: 60 ѕᴇᴄᴏɴᴅѕ</dark_gray>",
                 "",
-                "<dark_gray>Status: {status}</dark_gray>"
+                "<dark_gray>ѕᴛᴀᴛᴜѕ: {status}</dark_gray>"
             )
         ));
 
-        map.put("armors", new GuiSlotItemConfig(
-            17,
-            "DIAMOND_CHESTPLATE",
+        map.put("bow", new GuiSlotItemConfig(
+            23,
+            "BOW",
             0,
-            "<light_purple><bold>🛡️ ARMOR MASTER (GEAR SET)</bold></light_purple>",
+            "<color:#ff0000> <bold>ʙᴏᴡ ᴏꜰ ᴀʀᴛᴇᴍɪѕ</bold></color>",
             List.of(
-                "<yellow><bold>Passive Ability:</bold></yellow> <white>Gear Auto-Upgrade</white>",
-                "<gray>Equipping base armor pieces automatically upgrades them to superior armor.</gray>",
+                "<color:#ff0000> <bold>ᴘᴀѕѕɪᴠᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ᴇᴠᴇʀʏ 2 ʜɪᴛѕ, ɴᴇxᴛ ᴀʀʀᴏᴡ</white></color>",
+                "<white>  ᴛʀᴀᴘѕ ᴛᴀʀɢᴇᴛ ɪɴ ᴄᴏʙᴡᴇʙѕ</white>",
+                "<white>  ꜰᴏʀ 5ѕ.</white>",
                 "",
-                "<yellow><bold>Ultimate Ability:</bold></yellow> <gold>Juggernaut Stance</gold>",
-                "<gray>Activation: <yellow>/ability</yellow> | Req: Strength <red>5</red> | CD: <green>60s</green></gray>",
-                "<gray>Grants <gold>100% knockback immunity</gold> & boosts <gold>Golden Apple Absorption</gold> for <gold>20s</gold>.</gray>",
+                "<color:#ff0000> <bold>ᴜʟᴛɪᴍᴀᴛᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ᴘʀɪᴍᴇѕ 3 ʙᴇᴀᴍ ѕʜᴏᴛѕ</white></color>",
+                "<white>  (ꜰᴜʟʟ ᴅʀᴀᴡ ꜰɪʀᴇѕ ᴀ 20-ʙʟᴏᴄᴋ</white>",
+                "<white>  ʟᴀѕᴇʀ ᴅᴇᴀʟɪɴɢ 8.0 ᴅᴍɢ).</white>",
+                "<dark_gray>  ᴄᴏᴏʟᴅᴏᴡɴ: 60 ѕᴇᴄᴏɴᴅѕ</dark_gray>",
                 "",
-                "<dark_gray>Status: {status}</dark_gray>"
+                "<dark_gray>ѕᴛᴀᴛᴜѕ: {status}</dark_gray>"
+            )
+        ));
+
+        map.put("crossbow", new GuiSlotItemConfig(
+            24,
+            "CROSSBOW",
+            0,
+            "<color:#ff0000> <bold>ᴄʀᴏѕѕʙᴏᴡ ᴏꜰ ᴀᴘᴏʟʟᴏ</bold></color>",
+            List.of(
+                "<color:#ff0000> <bold>ᴘᴀѕѕɪᴠᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ᴇᴠᴇʀʏ 3 ʜɪᴛѕ, ɴᴇxᴛ ᴄʀᴏѕѕʙᴏᴡ</white></color>",
+                "<white>  ѕʜᴏᴛ ᴅᴇᴀʟѕ 2.0x ᴅᴀᴍᴀɢᴇ.</white>",
+                "",
+                "<color:#ff0000> <bold>ᴜʟᴛɪᴍᴀᴛᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ᴘʀɪᴍᴇѕ ɴᴇxᴛ ᴀʀʀᴏᴡ ᴛᴏ ꜰʀᴇᴇᴢᴇ</white></color>",
+                "<white>  & ɪᴍᴍᴏʙɪʟɪᴢᴇ ᴛᴀʀɢᴇᴛ ꜰᴏʀ 5ѕ.</white>",
+                "<dark_gray>  ᴄᴏᴏʟᴅᴏᴡɴ: 60 ѕᴇᴄᴏɴᴅѕ</dark_gray>",
+                "",
+                "<dark_gray>ѕᴛᴀᴛᴜѕ: {status}</dark_gray>"
             )
         ));
 
         map.put("spear", new GuiSlotItemConfig(
-            18,
+            29,
             "DIAMOND_SPEAR",
             0,
-            "<gold><bold>🗡️ SPEAR OF ACHILLES</bold></gold>",
+            "<color:#ff0000> <bold>ѕᴘᴇᴀʀ ᴏꜰ ᴀᴄʜɪʟʟᴇѕ</bold></color>",
             List.of(
-                "<yellow><bold>Passive Ability:</bold></yellow> <white>Sword Speed & Poke Bonus</white>",
-                "<gray>Boosts attack speed to <gold>Sword Speed (1.6)</gold> and deals <red>+2.0 bonus damage</red> on strikes.</gray>",
+                "<color:#ff0000> <bold>ᴘᴀѕѕɪᴠᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ʙᴏᴏѕᴛѕ ᴀᴛᴛᴀᴄᴋ ѕᴘᴇᴇᴅ ᴛᴏ ѕᴡᴏʀᴅ</white></color>",
+                "<white>  ѕᴘᴇᴇᴅ (1.6) ᴀɴᴅ ᴅᴇᴀʟѕ +2.0</white>",
+                "<white>  ʙᴏɴᴜѕ ᴅᴀᴍᴀɢᴇ ᴏɴ ѕᴛʀɪᴋᴇѕ.</white>",
                 "",
-                "<yellow><bold>Ultimate Ability:</bold></yellow> <gold>Relentless Thrust (Zero Hunger Lunge)</gold>",
-                "<gray>Activation: <yellow>/ability</yellow> | Req: Strength <red>5</red> | Charges: <gold>5 hits</gold> | CD: <green>60s</green></gray>",
-                "<gray>Auto-enchants spear & removes hunger consumption during lunges for <gold>15s</gold>.</gray>",
+                "<color:#ff0000> <bold>ᴜʟᴛɪᴍᴀᴛᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ᴀᴜᴛᴏ-ᴇɴᴄʜᴀɴᴛѕ ѕᴘᴇᴀʀ &</white></color>",
+                "<white>  ʀᴇᴍᴏᴠᴇѕ ʜᴜɴɢᴇʀ ᴄᴏɴѕᴜᴍᴘᴛɪᴏɴ</white>",
+                "<white>  ᴅᴜʀɪɴɢ ʟᴜɴɢᴇѕ ꜰᴏʀ 15ѕ.</white>",
+                "<dark_gray>  ᴄᴏᴏʟᴅᴏᴡɴ: 60 ѕᴇᴄᴏɴᴅѕ</dark_gray>",
                 "",
-                "<dark_gray>Status: {status}</dark_gray>"
+                "<dark_gray>ѕᴛᴀᴛᴜѕ: {status}</dark_gray>"
+            )
+        ));
+
+        map.put("trident2", new GuiSlotItemConfig(
+            30,
+            "TRIDENT",
+            0,
+            "<color:#ff0000> <bold>ᴛʜᴜɴᴅᴇʀѕᴛᴏʀᴍ ᴛʀɪᴅᴇɴᴛ</bold></color>",
+            List.of(
+                "<color:#ff0000> <bold>ᴘᴀѕѕɪᴠᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ᴍᴀᴛᴄʜᴇѕ ѕᴡᴏʀᴅ ᴀᴛᴛᴀᴄᴋ ѕᴘᴇᴇᴅ</white></color>",
+                "<white>  (1.6) ᴀɴᴅ ѕᴛᴜɴѕ ʙʟᴏᴄᴋɪɴɢ</white>",
+                "<white>  ѕʜɪᴇʟᴅѕ ꜰᴏʀ 5ѕ ᴏɴ ʜɪᴛ.</white>",
+                "",
+                "<color:#ff0000> <bold>ᴜʟᴛɪᴍᴀᴛᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ѕᴜᴍᴍᴏɴѕ ᴀ 15ѕ ᴛʜᴜɴᴅᴇʀѕᴛᴏʀᴍ</white></color>",
+                "<white>  ᴡʜᴇʀᴇ ᴇᴠᴇʀʏ ᴄʀɪᴛɪᴄᴀʟ ѕᴛʀɪᴋᴇ</white>",
+                "<white>  ѕᴛʀɪᴋᴇѕ ᴛᴀʀɢᴇᴛ ᴡɪᴛʜ ʟɪɢʜᴛɴɪɴɢ.</white>",
+                "<dark_gray>  ᴄᴏᴏʟᴅᴏᴡɴ: 60 ѕᴇᴄᴏɴᴅѕ</dark_gray>",
+                "",
+                "<dark_gray>ѕᴛᴀᴛᴜѕ: {status}</dark_gray>"
+            )
+        ));
+
+        map.put("crossbow2", new GuiSlotItemConfig(
+            31,
+            "CROSSBOW",
+            0,
+            "<color:#ff0000> <bold>ᴄʀᴏѕѕʙᴏᴡ2</bold></color>",
+            List.of(
+                "<color:#ff0000> <bold>ᴘᴀѕѕɪᴠᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ᴀʀʀᴏws ʙʏᴘᴀѕѕ ѕʜɪᴇʟᴅ ʙʟᴏᴄᴋѕ</white></color>",
+                "<white>  ᴀɴᴅ ѕᴇᴛѕ ᴛᴀʀɢᴇᴛ ᴏɴ ꜰɪʀᴇ</white>",
+                "<white>  ꜰᴏʀ 5ѕ.</white>",
+                "",
+                "<color:#ff0000> <bold>ᴜʟᴛɪᴍᴀᴛᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ᴀᴜᴛᴏ-ᴇɴᴄʜᴀɴᴛѕ ᴄʀᴏѕѕʙᴏᴡ &</white></color>",
+                "<white>  ɢʀᴀɴᴛѕ ᴘᴏᴡᴇʀ v & ǫᴜɪᴄᴋ</white>",
+                "<white>  ᴄʜᴀʀɢᴇ v ꜰᴏʀ 15ѕ.</white>",
+                "<dark_gray>  ᴄᴏᴏʟᴅᴏᴡɴ: 60 ѕᴇᴄᴏɴᴅѕ</dark_gray>",
+                "",
+                "<dark_gray>ѕᴛᴀᴛᴜѕ: {status}</dark_gray>"
+            )
+        ));
+
+        map.put("mace", new GuiSlotItemConfig(
+            32,
+            "MACE",
+            0,
+            "<color:#ff0000> <bold>ᴍᴀᴄᴇ</bold></color>",
+            List.of(
+                "<color:#ff0000> <bold>ᴘᴀѕѕɪᴠᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ѕᴍᴀѕʜ ᴀᴛᴛᴀᴄᴋ ᴄᴏᴏʟᴅᴏᴡɴ ɪѕ</white></color>",
+                "<white>  ʀᴇᴅᴜᴄᴇᴅ ʙʏ 50% ᴏɴ</white>",
+                "<white>  ѕᴍᴀѕʜ ѕᴛʀɪᴋᴇѕ.</white>",
+                "",
+                "<color:#ff0000> <bold>ᴜʟᴛɪᴍᴀᴛᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ᴀᴜᴛᴏ-ᴇɴᴄʜᴀɴᴛѕ ᴍᴀᴄᴇ &</white></color>",
+                "<white>  ɢʀᴀɴᴛѕ ᴢᴇʀᴏ ѕᴍᴀѕʜ ᴄᴏᴏʟᴅᴏᴡɴ</white>",
+                "<white>  ꜰᴏʀ 15ѕ.</white>",
+                "<dark_gray>  ᴄᴏᴏʟᴅᴏᴡɴ: 60 ѕᴇᴄᴏɴᴅѕ</dark_gray>",
+                "",
+                "<dark_gray>ѕᴛᴀᴛᴜѕ: {status}</dark_gray>"
+            )
+        ));
+
+        map.put("armors", new GuiSlotItemConfig(
+            33,
+            "DIAMOND_CHESTPLATE",
+            0,
+            "<color:#ff0000> <bold>ᴀʀᴍᴏʀ ᴍᴀѕᴛᴇʀ (ɢᴇᴀʀ ѕᴇᴛ)</bold></color>",
+            List.of(
+                "<color:#ff0000> <bold>ᴘᴀѕѕɪᴠᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ᴇǫᴜɪᴘᴘɪɴɢ ʙᴀѕᴇ ᴀʀᴍᴏʀ ᴘɪᴇᴄᴇѕ</white></color>",
+                "<white>  ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ ᴜᴘɢʀᴀᴅᴇѕ ᴛʜᴇᴍ</white>",
+                "<white>  ᴛᴏ ѕᴜᴘᴇʀɪᴏʀ ᴀʀᴍᴏʀ.</white>",
+                "",
+                "<color:#ff0000> <bold>ᴜʟᴛɪᴍᴀᴛᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ɢʀᴀɴᴛѕ 100% ᴋɴᴏᴄᴋʙᴀᴄᴋ</white></color>",
+                "<white>  ɪᴍᴍᴜɴɪᴛʏ & ʙᴏᴏѕᴛѕ ɢᴏʟᴅᴇɴ</white>",
+                "<white>  ᴀᴘᴘʟᴇ ᴀʙѕᴏʀᴘᴛɪᴏɴ ꜰᴏʀ 20ѕ.</white>",
+                "<dark_gray>  ᴄᴏᴏʟᴅᴏᴡɴ: 60 ѕᴇᴄᴏɴᴅѕ</dark_gray>",
+                "",
+                "<dark_gray>ѕᴛᴀᴛᴜѕ: {status}</dark_gray>"
+            )
+        ));
+
+        map.put("shield", new GuiSlotItemConfig(
+            40,
+            "SHIELD",
+            0,
+            "<color:#ff0000> <bold>ѕʜɪᴇʟᴅ ᴏꜰ ᴀᴛʜᴇɴᴀ</bold></color>",
+            List.of(
+                "<color:#ff0000> <bold>ᴘᴀѕѕɪᴠᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ѕʜɪᴇʟᴅ ᴅɪѕᴀʙʟᴇ/ʙʀᴇᴀᴋ</white></color>",
+                "<white>  ɢʀᴀɴᴛѕ 20% ᴅᴀᴍᴀɢᴇ</white>",
+                "<white>  ʀᴇᴅᴜᴄᴛɪᴏɴ ꜰᴏʀ 5ѕ.</white>",
+                "",
+                "<color:#ff0000> <bold>ᴜʟᴛɪᴍᴀᴛᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ѕᴘᴀᴡɴѕ ʙᴜʙʙʟᴇ ʙᴀʀʀɪᴇʀ</white></color>",
+                "<white>  ɢʀᴀɴᴛɪɴɢ 100% ɪɴᴠᴜʟɴᴇʀᴀʙɪʟɪᴛʏ</white>",
+                "<white>  ꜰᴏʀ 15ѕ.</white>",
+                "<dark_gray>  ᴄᴏᴏʟᴅᴏᴡɴ: 60 ѕᴇᴄᴏɴᴅѕ</dark_gray>",
+                "",
+                "<dark_gray>ѕᴛᴀᴛᴜѕ: {status}</dark_gray>"
             )
         ));
 
