@@ -102,6 +102,9 @@ public class BowConfig implements VersionedConfig {
         @Comment("Damage dealt by the ultimate beam (in hearts / half-hearts)")
         public double damage = 8.0;
 
+        @Comment("Multiplier applied per player strength point to scale ultimate damage (e.g. 0.1 for +10% damage per strength point, set to 0.0 to disable strength scaling)")
+        public double strengthDamageMultiplier = 0.1;
+
         @Comment("Number of beams shot per ultimate activation")
         public int beams = 3;
 

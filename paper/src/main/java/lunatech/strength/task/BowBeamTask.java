@@ -122,7 +122,10 @@ public final class BowBeamTask extends BukkitRunnable {
                             continue;
                         }
                         if (damaged.add(living)) {
-                            living.damage(settings.ultimate.damage * ((Strength) Strength.getInstance()).getStrengthService().getScale(), player);
+                            final int playerStrength = ((Strength) Strength.getInstance()).getStrengthService().getStrength(player);
+                            final double strengthBonusMultiplier = 1.0 + (playerStrength * Math.max(0.0, settings.ultimate.strengthDamageMultiplier));
+                            final double finalDamage = settings.ultimate.damage * strengthBonusMultiplier * ((Strength) Strength.getInstance()).getStrengthService().getScale();
+                            living.damage(finalDamage, player);
                             living.getWorld().playSound(living.getLocation(), Sound.ENTITY_GENERIC_HURT, 1.0f, 1.0f);
                         }
                     }
