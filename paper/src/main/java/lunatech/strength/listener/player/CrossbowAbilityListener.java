@@ -24,6 +24,8 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
@@ -139,6 +141,21 @@ public final class CrossbowAbilityListener implements Listener {
 
             // 1. Passive Hit Tracker: Every Nth shot hit deals configurable damage multiplier
             if (settings.passive.enabled) {
+                // Check if target is running away (sprinting and facing back towards direction of arrow flight)
+                if (settings.passive.enableSlownessOnFleeing && victim.isSprinting()) {
+                    final Vector toVictim = victim.getLocation().toVector().subtract(shooter.getLocation().toVector());
+                    if (toVictim.lengthSquared() > 1e-4) {
+                        toVictim.normalize();
+                        final Vector victimFacing = victim.getLocation().getDirection().normalize();
+                        if (toVictim.dot(victimFacing) > 0.0) { // Facing away (back is turned to shooter)
+                            final int durationTicks = settings.passive.slownessDurationSeconds * 20;
+                            final int amplifier = Math.max(0, settings.passive.slownessAmplifier);
+                            victim.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, durationTicks, amplifier, false, true, true));
+                            MessageUtil.send(shooter, settings.passive.slownessAppliedMessage);
+                        }
+                    }
+                }
+
                 final int currentPassiveHits = passiveHits.merge(shooterUuid, strengthService.scaleInt(1), Integer::sum);
                 if (currentPassiveHits >= settings.passive.hitsRequired) {
                     passiveHits.put(shooterUuid, 0); // reset count

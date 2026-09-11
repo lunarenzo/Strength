@@ -57,6 +57,15 @@ public class CrossbowConfig implements VersionedConfig {
         @Comment("Message sent when crossbow passive 3rd shot deals 2x damage")
         public String passiveTriggeredShooterMessage = "<gold><bold>Crossbow Passive triggered! 2x damage dealt!</bold></gold>";
 
+        @Comment("Enable or disable slowness infliction when shooting a running player facing away")
+        public boolean enableSlownessOnFleeing = true;
+
+        @Comment("Duration of slowness effect in seconds applied to fleeing targets")
+        public int slownessDurationSeconds = 3;
+
+        @Comment("Amplifier level of slowness effect (0 = Slowness I, 1 = Slowness II)")
+        public int slownessAmplifier = 0;
+
         @Comment("Message sent when slowness is applied to a fleeing target")
         public String slownessAppliedMessage = "<gray>Target was running away! Inflicted slowness.</gray>";
     }
