@@ -50,14 +50,14 @@ public class ArmorsConfig implements VersionedConfig {
 
         @Comment("Mapping of base armor material to upgraded target armor material.")
         public Map<String, String> upgrades = Map.of(
-            "IRON_HELMET", "DIAMOND_HELMET",
-            "IRON_CHESTPLATE", "DIAMOND_CHESTPLATE",
-            "IRON_LEGGINGS", "DIAMOND_LEGGINGS",
-            "IRON_BOOTS", "DIAMOND_BOOTS"
+            "DIAMOND_HELMET", "NETHERITE_HELMET",
+            "DIAMOND_CHESTPLATE", "NETHERITE_CHESTPLATE",
+            "DIAMOND_LEGGINGS", "NETHERITE_LEGGINGS",
+            "DIAMOND_BOOTS", "NETHERITE_BOOTS"
         );
 
         @Comment("Message sent when an armor piece is auto-upgraded.")
-        public String armorUpgradedMessage = "<gold><bold>ARMOR PASSIVE!</bold> Your equipped <old_armor> was upgraded to <new_armor>!</gold>";
+        public String armorUpgradedMessage = "<color:#ff0000>  <white>Armor Passive triggered!</color>";
     }
 
     @ConfigSerializable
@@ -81,25 +81,25 @@ public class ArmorsConfig implements VersionedConfig {
         public int goldenAppleAbsorptionDurationSeconds = 120;
 
         @Comment("Message sent when Armors ultimate is activated.")
-        public String ultimateActivatedMessage = "<gold><bold>ARMORS ULTIMATE ACTIVATED!</bold> Granted knockback immunity & Golden Apple absorption boost for <duration>s!</gold>";
+        public String ultimateActivatedMessage = "<color:#ff0000>  <white>Armor Ultimate Activated!</color>";
 
         @Comment("Message sent when Armors ultimate expires.")
-        public String ultimateExpiredMessage = "<red>Your Armors Ultimate has expired.</red>";
+        public String ultimateExpiredMessage = "<color:#ff0000>  <white>Armor Ultimate Deactivated!</color>";
 
         @Comment("Message sent when player is not equipping a full valid armor set.")
-        public String mustEquipFullSetMessage = "<red>You must be equipping a full set of armor to activate your ultimate!</red>";
+        public String mustEquipFullSetMessage = "<color:#ff0000> ᴇʀʀᴏʀ <gray>| <white>You must be equipping a full set of diamond armor to activate your ultimate!</color>";
 
         @Comment("Message sent when player does not have enough strength.")
         public String notEnoughStrengthMessage = "<red>You do not have enough strength to activate your ultimate! (Required: <req>, Current: <current>)</red>";
 
         @Comment("Message sent when ultimate is on cooldown.")
-        public String ultimateCooldownMessage = "<red>Your Ultimate is on cooldown for another <seconds>s!</red>";
+        public String ultimateCooldownMessage = "<color:#ff0000>  <white>Ultimate Cooldown Remaining: <seconds>s</color>";
 
         @Comment("Message sent in chat when ultimate cooldown completes and becomes ready")
-        public String ultimateReadyMessage = "<gold><bold>⚡ ULTIMATE READY!</bold> Your <yellow>{weapon}</yellow> ultimate is ready to use! Type <yellow>/ability</yellow>!</gold>";
+        public String ultimateReadyMessage = "<color:#ff0000>  <white>ULTIMATE READY!</color>";
 
         @Comment("Message sent in actionbar when ultimate cooldown completes and becomes ready")
-        public String ultimateReadyActionbarMessage = "<gold><bold>⚡ {weapon} ULTIMATE READY!</bold></gold>";
+        public String ultimateReadyActionbarMessage = "";
     }
 }
 
