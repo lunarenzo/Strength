@@ -183,7 +183,7 @@ public final class AbilityCommand extends Command {
         // Activate Spear Ultimate
         SpearAbilityListener.ultimateHits.put(uuid, 0);
         SpearAbilityListener.ultimateCooldowns.put(uuid, now);
-        scheduleCooldownReadyNotification(player, "spear", settings.ultimate.cooldownSeconds);
+        scheduleCooldownReadyNotification(player, "spear", settings.ultimate.cooldownSeconds, settings.ultimate.ultimateReadyMessage, settings.ultimate.ultimateReadyActionbarMessage);
 
         new SpearUltimateTask(player, plugin, settings.ultimate).launch();
     }
@@ -231,7 +231,7 @@ public final class AbilityCommand extends Command {
 
         // Activate Crossbow2 Ultimate
         Crossbow2AbilityListener.ultimateCooldowns.put(uuid, now);
-        scheduleCooldownReadyNotification(player, "crossbow2", settings.ultimate.cooldownSeconds);
+        scheduleCooldownReadyNotification(player, "crossbow2", settings.ultimate.cooldownSeconds, settings.ultimate.ultimateReadyMessage, settings.ultimate.ultimateReadyActionbarMessage);
 
         new Crossbow2UltimateTask(player, plugin, settings.ultimate).launch();
     }
@@ -276,7 +276,7 @@ public final class AbilityCommand extends Command {
 
         // Activate Armors Ultimate
         ArmorsAbilityListener.ultimateCooldowns.put(uuid, now);
-        scheduleCooldownReadyNotification(player, "armors", settings.ultimate.cooldownSeconds);
+        scheduleCooldownReadyNotification(player, "armors", settings.ultimate.cooldownSeconds, settings.ultimate.ultimateReadyMessage, settings.ultimate.ultimateReadyActionbarMessage);
 
         new ArmorsUltimateTask(player, plugin, settings.ultimate).launch();
     }
@@ -322,7 +322,7 @@ public final class AbilityCommand extends Command {
 
         // Activate Mace Ultimate
         MaceAbilityListener.ultimateCooldowns.put(uuid, now);
-        scheduleCooldownReadyNotification(player, "mace", settings.ultimate.cooldownSeconds);
+        scheduleCooldownReadyNotification(player, "mace", settings.ultimate.cooldownSeconds, settings.ultimate.ultimateReadyMessage, settings.ultimate.ultimateReadyActionbarMessage);
 
         new MaceUltimateTask(player, plugin, settings.ultimate).launch();
     }
@@ -389,7 +389,7 @@ public final class AbilityCommand extends Command {
         // Reset charge, set cooldown timestamp & activate ultimate
         AxeAbilityListener.ultimateHitsMap.put(uuid, 0);
         AxeAbilityListener.ultimateCooldowns.put(uuid, now);
-        scheduleCooldownReadyNotification(player, "axe", settings.ultimate.durationSeconds > 0 ? settings.ultimate.cooldownSeconds : 60);
+        scheduleCooldownReadyNotification(player, "axe", settings.ultimate.durationSeconds > 0 ? settings.ultimate.cooldownSeconds : 60, settings.ultimate.ultimateReadyMessage, settings.ultimate.ultimateReadyActionbarMessage);
         AxeAbilityListener.activeUltimateAttackers.put(uuid, true);
 
         MessageUtil.send(
@@ -464,7 +464,7 @@ public final class AbilityCommand extends Command {
         // 6. Clear Ultimate Charge and record cooldown timestamp
         TridentAbilityListener.ultimateHits.put(uuid, 0);
         TridentAbilityListener.ultimateCooldowns.put(uuid, now);
-        scheduleCooldownReadyNotification(player, "trident", settings.ultimate.cooldownSeconds);
+        scheduleCooldownReadyNotification(player, "trident", settings.ultimate.cooldownSeconds, settings.ultimate.ultimateReadyMessage, settings.ultimate.ultimateReadyActionbarMessage);
 
         // 7. Trigger Poseidon's Calling Ability Task
         new TridentUltimateTask(player, plugin, settings.ultimate)
@@ -530,7 +530,7 @@ public final class AbilityCommand extends Command {
         // 5. Clear Ultimate Charge, set remaining shots, and record cooldown timestamp
         BowAbilityListener.ultimateHits.put(uuid, 0);
         BowAbilityListener.ultimateCooldowns.put(uuid, now);
-        scheduleCooldownReadyNotification(player, "bow", settings.ultimate.cooldownSeconds);
+        scheduleCooldownReadyNotification(player, "bow", settings.ultimate.cooldownSeconds, settings.ultimate.ultimateReadyMessage, settings.ultimate.ultimateReadyActionbarMessage);
         BowAbilityListener.remainingUltShots.put(uuid, settings.ultimate.beams);
 
         // Sound cue for arming ultimate
@@ -597,7 +597,7 @@ public final class AbilityCommand extends Command {
         // 5. Clear Ultimate Charge and record cooldown timestamp
         ShieldAbilityListener.ultimateHits.put(uuid, 0);
         ShieldAbilityListener.ultimateCooldowns.put(uuid, now);
-        scheduleCooldownReadyNotification(player, "shield", settings.ultimate.cooldownSeconds);
+        scheduleCooldownReadyNotification(player, "shield", settings.ultimate.cooldownSeconds, settings.ultimate.ultimateReadyMessage, settings.ultimate.ultimateReadyActionbarMessage);
 
         // 6. Trigger Ability Task (Bubble Shield & God Mode task)
         new ShieldUltimateTask(player, plugin, settings.ultimate)
@@ -664,7 +664,7 @@ public final class AbilityCommand extends Command {
         // 5. Clear Ultimate Charge, record cooldown timestamp & prime crossbow
         CrossbowAbilityListener.ultimateHits.put(uuid, 0);
         CrossbowAbilityListener.ultimateCooldowns.put(uuid, now);
-        scheduleCooldownReadyNotification(player, "crossbow", settings.ultimate.cooldownSeconds);
+        scheduleCooldownReadyNotification(player, "crossbow", settings.ultimate.cooldownSeconds, settings.ultimate.ultimateReadyMessage, settings.ultimate.ultimateReadyActionbarMessage);
         CrossbowAbilityListener.crossbowUltimatePrimed.put(uuid, true);
 
         // Feedbacks
@@ -729,7 +729,7 @@ public final class AbilityCommand extends Command {
         // Clear charge & record cooldown timestamp
         SwordAbilityListener.ultimateHits.put(uuid, 0);
         SwordAbilityListener.ultimateCooldowns.put(uuid, now);
-        scheduleCooldownReadyNotification(player, "sword", settings.ultimate.cooldownSeconds);
+        scheduleCooldownReadyNotification(player, "sword", settings.ultimate.cooldownSeconds, settings.ultimate.ultimateReadyMessage, settings.ultimate.ultimateReadyActionbarMessage);
 
         // Save original offhand item if present
         final ItemStack originalOffhand = player.getInventory().getItemInOffHand();
@@ -800,7 +800,7 @@ public final class AbilityCommand extends Command {
 
         // 4. Record active ultimate and cooldown timestamp
         Trident2AbilityListener.ultimateCooldowns.put(uuid, now);
-        scheduleCooldownReadyNotification(player, "trident2", settings.ultimate.cooldownSeconds);
+        scheduleCooldownReadyNotification(player, "trident2", settings.ultimate.cooldownSeconds, settings.ultimate.ultimateReadyMessage, settings.ultimate.ultimateReadyActionbarMessage);
         Trident2AbilityListener.activeUltimatePlayers.put(uuid, now + settings.ultimate.durationSeconds * 1000L);
 
         // 5. Trigger Thunderstorm Ultimate Task
@@ -818,8 +818,10 @@ public final class AbilityCommand extends Command {
      * @param player player to notify
      * @param weaponKey raw weapon key
      * @param cooldownSeconds cooldown duration in seconds
+     * @param readyChatMessage chat message string from config
+     * @param readyActionbarMessage actionbar message string from config
      */
-    private void scheduleCooldownReadyNotification(Player player, String weaponKey, int cooldownSeconds) {
+    private void scheduleCooldownReadyNotification(Player player, String weaponKey, int cooldownSeconds, String readyChatMessage, String readyActionbarMessage) {
         if (player == null || cooldownSeconds <= 0) return;
         final long delayTicks = cooldownSeconds * 20L;
 
@@ -835,12 +837,20 @@ public final class AbilityCommand extends Command {
             player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.2f);
 
             // Actionbar Notification
-            final String barText = "<gold><bold>⚡ " + weaponDisplay + " ULTIMATE READY!</bold></gold>";
-            player.sendActionBar(ColorParser.of(barText).build());
+            if (!MessageUtil.isNullOrEmpty(readyActionbarMessage)) {
+                final String formattedBar = readyActionbarMessage
+                    .replace("{weapon}", weaponDisplay)
+                    .replace("<weapon>", weaponDisplay);
+                player.sendActionBar(ColorParser.of(ItemResolver.translateUnicodeEscapes(formattedBar)).build());
+            }
 
             // Chat Notification
-            final String chatText = "<gold><bold>⚡ ULTIMATE READY!</bold> Your <yellow>" + weaponDisplay + "</yellow> ultimate is ready to use! Type <yellow>/ability</yellow>!</gold>";
-            player.sendMessage(ColorParser.of(chatText).build());
+            if (!MessageUtil.isNullOrEmpty(readyChatMessage)) {
+                final String formattedChat = readyChatMessage
+                    .replace("{weapon}", weaponDisplay)
+                    .replace("<weapon>", weaponDisplay);
+                player.sendMessage(ColorParser.of(ItemResolver.translateUnicodeEscapes(formattedChat)).build());
+            }
         }, null, delayTicks);
     }
 }

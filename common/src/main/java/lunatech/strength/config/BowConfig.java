@@ -137,5 +137,11 @@ public class BowConfig implements VersionedConfig {
 
         @Comment("Message sent when player ultimate is not fully charged")
         public String notChargedMessage = "<red>Your ultimate is not charged yet! (Required: <req>, Current: <current> hits)</red>";
+
+        @Comment("Message sent in chat when ultimate cooldown completes and becomes ready")
+        public String ultimateReadyMessage = "<gold><bold>⚡ ULTIMATE READY!</bold> Your <yellow>{weapon}</yellow> ultimate is ready to use! Type <yellow>/ability</yellow>!</gold>";
+
+        @Comment("Message sent in actionbar when ultimate cooldown completes and becomes ready")
+        public String ultimateReadyActionbarMessage = "<gold><bold>⚡ {weapon} ULTIMATE READY!</bold></gold>";
     }
 }

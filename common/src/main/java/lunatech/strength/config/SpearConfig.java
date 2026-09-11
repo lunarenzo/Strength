@@ -108,5 +108,11 @@ public class SpearConfig implements VersionedConfig {
 
         @Comment("Message sent when ultimate is on cooldown.")
         public String ultimateCooldownMessage = "<red>Your Ultimate is on cooldown for another <seconds>s!</red>";
+
+        @Comment("Message sent in chat when ultimate cooldown completes and becomes ready")
+        public String ultimateReadyMessage = "<gold><bold>⚡ ULTIMATE READY!</bold> Your <yellow>{weapon}</yellow> ultimate is ready to use! Type <yellow>/ability</yellow>!</gold>";
+
+        @Comment("Message sent in actionbar when ultimate cooldown completes and becomes ready")
+        public String ultimateReadyActionbarMessage = "<gold><bold>⚡ {weapon} ULTIMATE READY!</bold></gold>";
     }
 }
