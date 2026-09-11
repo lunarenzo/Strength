@@ -49,10 +49,10 @@ public class AxeConfig implements VersionedConfig {
         public boolean enabled = true;
 
         @Comment("Critical hits required using an Axe to trigger Seismic Stun passive")
-        public int critsRequired = 4;
+        public int critsRequired = 5;
 
         @Comment("Duration in seconds of the stun effect")
-        public int stunDurationSeconds = 3;
+        public int stunDurationSeconds = 1;
 
         @Comment("Whether stunned players are prevented from attacking during the stun duration")
         public boolean cancelAttacksWhenStunned = true;
@@ -61,10 +61,10 @@ public class AxeConfig implements VersionedConfig {
         public boolean countShieldHitsAsCrit = false;
 
         @Comment("Message sent when Axe passive stun triggers")
-        public String passiveTriggeredAttackerMessage = "<gold><bold>Axe Passive Triggered!</bold> Target stunned for {seconds}s!</gold>";
+        public String passiveTriggeredAttackerMessage = "<color:#ff0000>  <white>Axe Passive triggered!</color>";
 
         @Comment("Actionbar displayed on stunned target player")
-        public String stunActionbarMessage = "<red><bold>⚡ STUNNED ({seconds}s)</bold></red>";
+        public String stunActionbarMessage = "";
     }
 
     @ConfigSerializable
@@ -76,7 +76,7 @@ public class AxeConfig implements VersionedConfig {
         public int strengthRequired = 5;
 
         @Comment("Critical hits required using an Axe to charge Ultimate")
-        public int critsRequired = 5;
+        public int critsRequired = 0;
 
         @Comment("Duration of Executioner's Mark ultimate in seconds")
         public int durationSeconds = 10;
@@ -129,19 +129,19 @@ public class AxeConfig implements VersionedConfig {
         public String ultimateChargedMessage = "<green><bold>Axe Ultimate fully charged! Use /ability to activate!</bold></green>";
 
         @Comment("Message sent when Axe ultimate is activated")
-        public String ultimateActivatedMessage = "<dark_red><bold>AXE ULTIMATE ACTIVATED!</bold> All damage dealt for {seconds}s is stored and multiplied by {multiplier}x!</dark_red>";
+        public String ultimateActivatedMessage = "<color:#ff0000>  <white>Axe Ultimate Activated!</color>";
 
         @Comment("Message sent when Axe ultimate expires and triggers burst damage")
-        public String ultimateExpiredMessage = "<red><bold>AXE ULTIMATE FINISHED!</bold> Executioner's Mark triggered!</red>";
+        public String ultimateExpiredMessage = "<color:#ff0000>  <white>Axe Ultimate triggered!</color>";
 
         @Comment("Actionbar displayed on target accumulating pending damage")
-        public String pendingDamageActionbarMessage = "<dark_red><bold>☠ PENDING BURST DAMAGE: {amount}</bold></dark_red>";
+        public String pendingDamageActionbarMessage = "";
 
         @Comment("Message sent when Axe Ultimate is on cooldown")
-        public String ultimateCooldownMessage = "<red>Your Ultimate is on cooldown for another <seconds>s!</red>";
+        public String ultimateCooldownMessage = "<color:#ff0000>  <white>Ultimate Cooldown Remaining: <seconds>s</color>";
 
         @Comment("Message sent when player is not holding an Axe")
-        public String mustHoldAxeMessage = "<red>You must be holding an Axe in your main hand to activate this ultimate!</red>";
+        public String mustHoldAxeMessage = "<color:#ff0000> ᴇʀʀᴏʀ <gray>| <white>You must be holding an Axe to activate your ultimate!</color>";
 
         @Comment("Message sent when player does not have enough strength")
         public String notEnoughStrengthMessage = "<red>You do not have enough strength to activate your ultimate! (Required: {req}, Current: {current})</red>";
@@ -150,12 +150,12 @@ public class AxeConfig implements VersionedConfig {
         public String notChargedMessage = "<red>Your ultimate is not charged yet! (Required: {req}, Current: {current} critical hits)</red>";
 
         @Comment("Message sent when Axe ultimate is already active")
-        public String alreadyActiveMessage = "<red>Your Axe ultimate is already active!</red>";
+        public String alreadyActiveMessage = "<color:#ff0000>  <white>Ultimate already activated</color>";
 
         @Comment("Message sent in chat when ultimate cooldown completes and becomes ready")
-        public String ultimateReadyMessage = "<gold><bold>⚡ ULTIMATE READY!</bold> Your <yellow>{weapon}</yellow> ultimate is ready to use! Type <yellow>/ability</yellow>!</gold>";
+        public String ultimateReadyMessage = "<color:#ff0000>  <white>ULTIMATE READY!</color>";
 
         @Comment("Message sent in actionbar when ultimate cooldown completes and becomes ready")
-        public String ultimateReadyActionbarMessage = "<gold><bold>⚡ {weapon} ULTIMATE READY!</bold></gold>";
+        public String ultimateReadyActionbarMessage = "";
     }
 }
