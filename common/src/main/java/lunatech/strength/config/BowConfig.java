@@ -49,7 +49,7 @@ public class BowConfig implements VersionedConfig {
         public boolean enabled = true;
 
         @Comment("Hits required using bow to activate Passive (llama spit trail + cobweb)")
-        public int hitsRequired = 2;
+        public int hitsRequired = 3;
 
         @Comment("Particle type used for Bow passive web arrow trail (e.g. ITEM, CLOUD, POOF)")
         public String trailParticleType = "ITEM";
@@ -61,13 +61,13 @@ public class BowConfig implements VersionedConfig {
         public int cobwebDurationSeconds = 5;
 
         @Comment("Message sent to shooter when bow passive is triggered")
-        public String passiveTriggeredShooterMessage = "<gold>Fired a Llama Spit Web Arrow!</gold>";
+        public String passiveTriggeredShooterMessage = "";
 
         @Comment("Message sent to shooter when bow passive becomes ready")
-        public String passiveReadyShooterMessage = "<gold><bold>Bow Passive is ready! Your next shot will trap the target in a cobweb!</bold></gold>";
+        public String passiveReadyShooterMessage = "<color:#ff0000>  <white>Bow Passive ready!</color>";
 
         @Comment("Message sent to victim when trapped in a cobweb")
-        public String passiveTrappedVictimMessage = "<red><bold>TRAPPED! You are caught in a cobweb!</bold></red>";
+        public String passiveTrappedVictimMessage = "";
     }
 
     @ConfigSerializable
@@ -79,7 +79,7 @@ public class BowConfig implements VersionedConfig {
         public int strengthRequired = 5;
 
         @Comment("Hits required using bow to charge Ultimate")
-        public int hitsRequired = 10;
+        public int hitsRequired = 0;
 
         @Comment("Cooldown in seconds for the Bow Ultimate")
         public int cooldownSeconds = 60;
@@ -100,10 +100,10 @@ public class BowConfig implements VersionedConfig {
         public double width = 1.5;
 
         @Comment("Damage dealt by the ultimate beam (in hearts / half-hearts)")
-        public double damage = 8.0;
+        public double damage = 40.0;
 
         @Comment("Multiplier applied per player strength point to scale ultimate damage (e.g. 0.1 for +10% damage per strength point, set to 0.0 to disable strength scaling)")
-        public double strengthDamageMultiplier = 0.1;
+        public double strengthDamageMultiplier = 0.0;
 
         @Comment("Number of beams shot per ultimate activation")
         public int beams = 3;
@@ -127,10 +127,10 @@ public class BowConfig implements VersionedConfig {
         public String ultimateChargeProgressMessage = "<gray>Ultimate Charge: <gold><charge>/<target></gold></gray>";
 
         @Comment("Message sent when bow ultimate is activated")
-        public String ultimateActivatedMessage = "<gold><bold>BOW ULTIMATE ARMED!</bold> Draw your bow and release to fire a laser beam shot!</gold>";
+        public String ultimateActivatedMessage = "<color:#ff0000>  <white>Bow Ultimate Activated! Next 3 shots will fire a beam</color>";
 
         @Comment("Message sent when bow ultimate is on cooldown")
-        public String ultimateCooldownMessage = "<red>Your Ultimate is on cooldown for another <seconds>s!</red>";
+        public String ultimateCooldownMessage = "<color:#ff0000>  <white>Ultimate Cooldown Remaining: <seconds>s</color>";
 
         @Comment("Message sent when player is not holding a Bow for ultimate")
         public String mustHoldBowMessage = "<red>You must be holding a Bow to activate your ultimate!</red>";
@@ -142,12 +142,12 @@ public class BowConfig implements VersionedConfig {
         public String notChargedMessage = "<red>Your ultimate is not charged yet! (Required: <req>, Current: <current> hits)</red>";
 
         @Comment("Message sent in chat when ultimate cooldown completes and becomes ready")
-        public String ultimateReadyMessage = "<gold><bold>⚡ ULTIMATE READY!</bold> Your <yellow>{weapon}</yellow> ultimate is ready to use! Type <yellow>/ability</yellow>!</gold>";
+        public String ultimateReadyMessage = "<color:#ff0000>  <white>ULTIMATE READY!</color>";
 
         @Comment("Message sent in actionbar when ultimate cooldown completes and becomes ready")
-        public String ultimateReadyActionbarMessage = "<gold><bold>⚡ {weapon} ULTIMATE READY!</bold></gold>";
+        public String ultimateReadyActionbarMessage = "";
 
         @Comment("Message sent when firing a bow beam shot (supports <remaining>/<total> and {remaining}/{total} placeholders)")
-        public String ultimateBeamFiredMessage = "<gold><bold>Fired Bow Beam!</bold> (<remaining>/<total> shots remaining)</gold>";
+        public String ultimateBeamFiredMessage = "<color:#ff0000>  <white><remaining>/<total> beams remaining";
     }
 }
