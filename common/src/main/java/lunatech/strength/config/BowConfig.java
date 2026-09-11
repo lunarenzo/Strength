@@ -146,5 +146,8 @@ public class BowConfig implements VersionedConfig {
 
         @Comment("Message sent in actionbar when ultimate cooldown completes and becomes ready")
         public String ultimateReadyActionbarMessage = "<gold><bold>⚡ {weapon} ULTIMATE READY!</bold></gold>";
+
+        @Comment("Message sent when firing a bow beam shot (supports <remaining>/<total> and {remaining}/{total} placeholders)")
+        public String ultimateBeamFiredMessage = "<gold><bold>Fired Bow Beam!</bold> (<remaining>/<total> shots remaining)</gold>";
     }
 }

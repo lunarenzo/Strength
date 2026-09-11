@@ -203,10 +203,15 @@ public final class BowAbilityListener implements Listener {
         new lunatech.strength.task.BowBeamTask(shooter, settings, activeSpiral)
             .runTaskTimer(plugin, 0L, 1L);
 
-        MessageUtil.send(
-            shooter,
-            "<gold><bold>Fired Bow Beam!</bold> (" + Math.max(0, left) + "/" + settings.ultimate.beams + " shots remaining)</gold>"
-        );
+        final String remainingStr = String.valueOf(Math.max(0, left));
+        final String totalStr = String.valueOf(settings.ultimate.beams);
+        final String beamMsg = settings.ultimate.ultimateBeamFiredMessage
+            .replace("<remaining>", remainingStr)
+            .replace("{remaining}", remainingStr)
+            .replace("<total>", totalStr)
+            .replace("{total}", totalStr);
+
+        MessageUtil.send(shooter, beamMsg);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
