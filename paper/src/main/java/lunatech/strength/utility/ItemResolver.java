@@ -11,15 +11,40 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * High-performance resolver for item configurations supporting Bukkit Materials, CustomModelData,
  * ItemsAdder, Nexo, Oraxen, and plugin custom Strength Shards.
  */
 public final class ItemResolver {
+    private static final Pattern UNICODE_PATTERN = Pattern.compile("\\\\u([0-9a-fA-F]{4})");
 
     private ItemResolver() {
         throw new UnsupportedOperationException("Utility class");
+    }
+
+    /**
+     * Translates literal unicode escape sequences (backslash-uXXXX) into actual Unicode characters.
+     * Handles string inputs from YAML/configs where single quotes or raw escapes keep backslashes literal.
+     *
+     * @param input raw string containing potential unicode escape sequences
+     * @return string with all unicode escape sequences translated to unicode characters
+     */
+    @Nullable
+    public static String translateUnicodeEscapes(@Nullable String input) {
+        if (input == null || !input.contains("\\u")) {
+            return input;
+        }
+        final Matcher matcher = UNICODE_PATTERN.matcher(input);
+        final StringBuilder sb = new StringBuilder(input.length());
+        while (matcher.find()) {
+            final char ch = (char) Integer.parseInt(matcher.group(1), 16);
+            matcher.appendReplacement(sb, Matcher.quoteReplacement(String.valueOf(ch)));
+        }
+        matcher.appendTail(sb);
+        return sb.toString();
     }
 
     /**
@@ -179,10 +204,10 @@ public final class ItemResolver {
         if (customMessages != null && !customMessages.isEmpty()) {
             for (Map.Entry<String, String> entry : customMessages.entrySet()) {
                 if (entry.getKey().equalsIgnoreCase(trimmed)) {
-                    return entry.getValue();
+                    return translateUnicodeEscapes(entry.getValue());
                 }
             }
         }
-        return trimmed.toUpperCase();
+        return translateUnicodeEscapes(trimmed.toUpperCase());
     }
 }

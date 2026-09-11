@@ -1,5 +1,6 @@
 package lunatech.strength.gui;
 
+import io.github.milkdrinkers.colorparser.paper.ColorParser;
 import lunatech.strength.Strength;
 import lunatech.strength.config.WeaponsGuiConfig;
 import lunatech.strength.config.WeaponsGuiConfig.GuiItemConfig;
@@ -7,7 +8,6 @@ import lunatech.strength.config.WeaponsGuiConfig.GuiSlotItemConfig;
 import lunatech.strength.utility.ItemResolver;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -33,9 +33,8 @@ public final class WeaponsGui {
 
     public static void open(@NotNull Strength plugin, @NotNull Player player) {
         final WeaponsGuiConfig guiConfig = plugin.getConfigHandler().getWeaponsGuiConfig();
-        final MiniMessage mm = MiniMessage.miniMessage();
 
-        final Component title = mm.deserialize(guiConfig.title);
+        final Component title = parseComponent(guiConfig.title);
         final int rows = Math.max(1, Math.min(6, guiConfig.rows));
         final int totalSlots = rows * 9;
 
@@ -65,7 +64,7 @@ public final class WeaponsGui {
                 meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             }
             if (fillerConfig.displayName != null && !fillerConfig.displayName.isEmpty()) {
-                meta.displayName(mm.deserialize(fillerConfig.displayName).decoration(TextDecoration.ITALIC, false));
+                meta.displayName(parseComponent(fillerConfig.displayName));
             } else {
                 meta.displayName(Component.empty());
             }
@@ -96,13 +95,13 @@ public final class WeaponsGui {
                 }
 
                 final String rawName = replacePlaceholders(skullConfig.displayName, player.getName(), playerStrength, formattedWeapon, "");
-                meta.displayName(mm.deserialize(rawName).decoration(TextDecoration.ITALIC, false));
+                meta.displayName(parseComponent(rawName));
 
                 if (skullConfig.lore != null && !skullConfig.lore.isEmpty()) {
                     final List<Component> loreList = new ArrayList<>(skullConfig.lore.size());
                     for (String line : skullConfig.lore) {
                         final String replaced = replacePlaceholders(line, player.getName(), playerStrength, formattedWeapon, "");
-                        loreList.add(mm.deserialize(replaced).decoration(TextDecoration.ITALIC, false));
+                        loreList.add(parseComponent(replaced));
                     }
                     meta.lore(loreList);
                 }
@@ -141,13 +140,13 @@ public final class WeaponsGui {
                 }
 
                 final String rawName = replacePlaceholders(weaponCfg.displayName, player.getName(), playerStrength, formattedWeapon, statusStr);
-                meta.displayName(mm.deserialize(rawName).decoration(TextDecoration.ITALIC, false));
+                meta.displayName(parseComponent(rawName));
 
                 if (weaponCfg.lore != null && !weaponCfg.lore.isEmpty()) {
                     final List<Component> loreList = new ArrayList<>(weaponCfg.lore.size());
                     for (String line : weaponCfg.lore) {
                         final String replaced = replacePlaceholders(line, player.getName(), playerStrength, formattedWeapon, statusStr);
-                        loreList.add(mm.deserialize(replaced).decoration(TextDecoration.ITALIC, false));
+                        loreList.add(parseComponent(replaced));
                     }
                     meta.lore(loreList);
                 }
@@ -174,13 +173,13 @@ public final class WeaponsGui {
                 }
 
                 final String rawName = replacePlaceholders(strengthConfig.displayName, player.getName(), playerStrength, formattedWeapon, "");
-                meta.displayName(mm.deserialize(rawName).decoration(TextDecoration.ITALIC, false));
+                meta.displayName(parseComponent(rawName));
 
                 if (strengthConfig.lore != null && !strengthConfig.lore.isEmpty()) {
                     final List<Component> loreList = new ArrayList<>(strengthConfig.lore.size());
                     for (String line : strengthConfig.lore) {
                         final String replaced = replacePlaceholders(line, player.getName(), playerStrength, formattedWeapon, "");
-                        loreList.add(mm.deserialize(replaced).decoration(TextDecoration.ITALIC, false));
+                        loreList.add(parseComponent(replaced));
                     }
                     meta.lore(loreList);
                 }
@@ -207,13 +206,13 @@ public final class WeaponsGui {
                 }
 
                 final String rawName = replacePlaceholders(rerollConfig.displayName, player.getName(), playerStrength, formattedWeapon, "");
-                meta.displayName(mm.deserialize(rawName).decoration(TextDecoration.ITALIC, false));
+                meta.displayName(parseComponent(rawName));
 
                 if (rerollConfig.lore != null && !rerollConfig.lore.isEmpty()) {
                     final List<Component> loreList = new ArrayList<>(rerollConfig.lore.size());
                     for (String line : rerollConfig.lore) {
                         final String replaced = replacePlaceholders(line, player.getName(), playerStrength, formattedWeapon, "");
-                        loreList.add(mm.deserialize(replaced).decoration(TextDecoration.ITALIC, false));
+                        loreList.add(parseComponent(replaced));
                     }
                     meta.lore(loreList);
                 }
@@ -225,13 +224,27 @@ public final class WeaponsGui {
         player.openInventory(inv);
     }
 
+    private static Component parseComponent(String text) {
+        if (text == null || text.isEmpty()) {
+            return Component.empty();
+        }
+        final String unescaped = ItemResolver.translateUnicodeEscapes(text);
+        return ColorParser.of(unescaped).build().decoration(TextDecoration.ITALIC, false);
+    }
+
     private static String replacePlaceholders(String text, String playerName, int strength, String weapon, String status) {
         if (text == null || text.isEmpty()) {
             return "";
         }
-        return text.replace("{player}", playerName)
+        final String replaced = text
+            .replace("{player}", playerName)
+            .replace("<player>", playerName)
             .replace("{strength}", String.valueOf(strength))
+            .replace("<strength>", String.valueOf(strength))
             .replace("{weapon}", weapon)
-            .replace("{status}", status);
+            .replace("<weapon>", weapon)
+            .replace("{status}", status)
+            .replace("<status>", status);
+        return ItemResolver.translateUnicodeEscapes(replaced);
     }
 }
