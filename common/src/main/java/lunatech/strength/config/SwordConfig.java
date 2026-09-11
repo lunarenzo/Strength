@@ -52,16 +52,16 @@ public class SwordConfig implements VersionedConfig {
         public int comboHitsRequired = 4;
 
         @Comment("Maximum interval in seconds between hits before combo resets")
-        public double comboTimeoutSeconds = 2.5;
+        public double comboTimeoutSeconds = 3.0;
 
         @Comment("Damage multiplier applied when Auto-Crit passive triggers")
         public double critDamageMultiplier = 1.5;
 
         @Comment("Message sent when sword passive Auto-Crit is triggered")
-        public String passiveAutoCritMessage = "<gold><bold>Sword Passive triggered! AUTO-CRIT!</bold></gold>";
+        public String passiveAutoCritMessage = "<color:#ff0000>  <white>Sword Passive triggered!</color>";
 
         @Comment("Message sent indicating combo progress")
-        public String passiveComboProgressMessage = "<gray>Sword Combo: <yellow>{combo}/{required}</yellow></gray>";
+        public String passiveComboProgressMessage = "<color:#ff0000>  <white>Sword Combo: {combo}/{required}</color>";
     }
 
     @ConfigSerializable
@@ -73,7 +73,7 @@ public class SwordConfig implements VersionedConfig {
         public int strengthRequired = 5;
 
         @Comment("Sword passive auto-crit triggers required to charge Ultimate")
-        public int hitsRequired = 3;
+        public int hitsRequired = 0;
 
         @Comment("Duration of Dual Wielding ultimate in seconds")
         public int durationSeconds = 10;
@@ -98,13 +98,13 @@ public class SwordConfig implements VersionedConfig {
         public String ultimateChargeProgressMessage = "<gray>Ultimate Charge: <gold>{charge}/{target}</gold> passive crits</gray>";
 
         @Comment("Message sent when sword ultimate is activated")
-        public String ultimateActivatedMessage = "<gold><bold>SWORD ULTIMATE ACTIVATED!</bold> Dual Wielding enabled (+50% Cooldown Reduction)!</gold>";
+        public String ultimateActivatedMessage = "<color:#ff0000>  <white>Sword Ultimate Activated!</color>";
 
         @Comment("Message sent when sword ultimate expires")
-        public String ultimateExpiredMessage = "<red>Your Dual Wielding Sword Ultimate has expired!</red>";
+        public String ultimateExpiredMessage = "<color:#ff0000>  <white>Sword Ultimate Deactivated!</color>";
 
         @Comment("Message sent when player is not holding a Sword")
-        public String mustHoldSwordMessage = "<red>You must be holding a Sword to activate your ultimate!</red>";
+        public String mustHoldSwordMessage = "<color:#ff0000> ᴇʀʀᴏʀ <gray>| <white>You must be holding a Sword to activate your ultimate!</color>";
 
         @Comment("Message sent when player does not have enough strength")
         public String notEnoughStrengthMessage = "<red>You do not have enough strength to activate your ultimate! (Required: <req>, Current: <current>)</red>";
@@ -116,15 +116,15 @@ public class SwordConfig implements VersionedConfig {
         public String offhandChargingActionbarMessage = "<gray>Offhand: <gold><bar></gold></gray>";
 
         @Comment("Actionbar ready message displayed when offhand attack is fully charged during Dual Wielding")
-        public String offhandReadyActionbarMessage = "<green><bold>⚔ OFFHAND READY</bold></green>";
+        public String offhandReadyActionbarMessage = "";
 
         @Comment("Message sent when Sword Ultimate is on cooldown")
-        public String ultimateCooldownMessage = "<red>Your Ultimate is on cooldown for another <seconds>s!</red>";
+        public String ultimateCooldownMessage = "<color:#ff0000>  <white>Ultimate Cooldown Remaining: <seconds>s</color>";
 
         @Comment("Message sent in chat when ultimate cooldown completes and becomes ready")
-        public String ultimateReadyMessage = "<gold><bold>⚡ ULTIMATE READY!</bold> Your <yellow>{weapon}</yellow> ultimate is ready to use! Type <yellow>/ability</yellow>!</gold>";
+        public String ultimateReadyMessage = "<color:#ff0000>  <white>ULTIMATE READY!</color>";
 
         @Comment("Message sent in actionbar when ultimate cooldown completes and becomes ready")
-        public String ultimateReadyActionbarMessage = "<gold><bold>⚡ {weapon} ULTIMATE READY!</bold></gold>";
+        public String ultimateReadyActionbarMessage = "";
     }
 }
