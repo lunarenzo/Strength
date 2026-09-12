@@ -55,7 +55,7 @@ public class ShieldConfig implements VersionedConfig {
         public double damageReductionPercentage = 20.0;
 
         @Comment("Message sent when shield passive protection activates.")
-        public String passiveActivatedMessage = "<gold><bold>SHIELD DISABLED!</bold> Gained <reduction>% damage reduction for <seconds> seconds!</gold>";
+        public String passiveActivatedMessage = "<color:#ff0000> ⛨ <white>Shield Passive triggered!</color>";
     }
 
     @ConfigSerializable
@@ -67,7 +67,7 @@ public class ShieldConfig implements VersionedConfig {
         public int strengthRequired = 5;
 
         @Comment("Shield blocks required to charge Ultimate.")
-        public int hitsRequired = 10;
+        public int hitsRequired = 0;
 
         @Comment("Cooldown in seconds for the Shield Ultimate.")
         public int cooldownSeconds = 60;
@@ -85,7 +85,7 @@ public class ShieldConfig implements VersionedConfig {
         public float bubbleOffsetX = 0.0f;
 
         @Comment("Ultimate bubble visual translation offset Y.")
-        public float bubbleOffsetY = -0.5f;
+        public float bubbleOffsetY = 0.10000000149011612f;
 
         @Comment("Ultimate bubble visual translation offset Z.")
         public float bubbleOffsetZ = 0.0f;
@@ -100,16 +100,16 @@ public class ShieldConfig implements VersionedConfig {
         public String ultimateChargeProgressMessage = "<gray>Ultimate Charge: <gold><charge>/<target></gold> blocks</gray>";
 
         @Comment("Message sent when shield ultimate is activated.")
-        public String ultimateActivatedMessage = "<green><bold>SHIELD ULTIMATE ACTIVATED!</bold> Gained God Mode bubble barrier!</green>";
+        public String ultimateActivatedMessage = "<color:#ff0000> ⛨ <white>Shield Ultimate Activated!</color>";
 
         @Comment("Message sent when shield ultimate expires.")
-        public String ultimateExpiredMessage = "<red>Your Shield Ultimate bubble has expired!</red>";
+        public String ultimateExpiredMessage = "<color:#ff0000> ⛨ <white>Shield Ultimate Deactivated!</color>";
 
         @Comment("Message sent when shield ultimate is on cooldown.")
-        public String ultimateCooldownMessage = "<red>Your Ultimate is on cooldown for another <seconds>s!</red>";
+        public String ultimateCooldownMessage = "<color:#ff0000> ⛨ <white>Ultimate Cooldown Remaining: <seconds>s</color>";
 
         @Comment("Message sent when player is not holding a Shield for ultimate.")
-        public String mustHoldShieldMessage = "<red>You must be holding a Shield to activate your ultimate!</red>";
+        public String mustHoldShieldMessage = "<color:#ff0000> ᴇʀʀᴏʀ <gray>| <white>You must be holding a Shield to activate your ultimate!</color>";
 
         @Comment("Message sent when player does not have enough strength for ultimate.")
         public String notEnoughStrengthMessage = "<red>You do not have enough strength to activate your ultimate! (Required: <req>, Current: <current>)</red>";
@@ -118,9 +118,9 @@ public class ShieldConfig implements VersionedConfig {
         public String notChargedMessage = "<red>Your ultimate is not charged yet! (Required: <req>, Current: <current> blocks)</red>";
 
         @Comment("Message sent in chat when ultimate cooldown completes and becomes ready")
-        public String ultimateReadyMessage = "<gold><bold>⚡ ULTIMATE READY!</bold> Your <yellow>{weapon}</yellow> ultimate is ready to use! Type <yellow>/ability</yellow>!</gold>";
+        public String ultimateReadyMessage = "<color:#ff0000> ⛨ <white>ULTIMATE READY!</color>";
 
         @Comment("Message sent in actionbar when ultimate cooldown completes and becomes ready")
-        public String ultimateReadyActionbarMessage = "<gold><bold>⚡ {weapon} ULTIMATE READY!</bold></gold>";
+        public String ultimateReadyActionbarMessage = "";
     }
 }
