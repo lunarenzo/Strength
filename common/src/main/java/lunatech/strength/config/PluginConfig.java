@@ -71,7 +71,7 @@ public class PluginConfig implements VersionedConfig {
         public int deathLoss = 1;
 
         @Comment("Should the strength lost on death be dropped as a physical strength item?")
-        public boolean dropItemOnDeath = false;
+        public boolean dropItemOnDeath = true;
 
         @Comment("If dropItemOnDeath is enabled, should the killer ALSO receive direct strength added to their base? (Set false to prevent strength inflation)")
         public boolean giveDirectRewardWhenItemDropped = false;
@@ -80,16 +80,16 @@ public class PluginConfig implements VersionedConfig {
         public boolean requireVictimStrengthForReward = true;
 
         @Comment("Should players lose strength (and drop strength items if enabled) on natural/non-PvP deaths (e.g. mobs, lava, fall)?")
-        public boolean loseStrengthOnNaturalDeath = true;
+        public boolean loseStrengthOnNaturalDeath = false;
 
         @Comment("Minimum strength value a player can have")
         public int minStrength = 0;
 
         @Comment("Maximum strength value a player can have")
-        public int maxStrength = 100;
+        public int maxStrength = 5;
 
         @Comment("Default strength value for new players")
-        public int defaultStrength = 0;
+        public int defaultStrength = 1;
 
         @Comment("Physical item settings for withdrawn strength")
         public WithdrawItemSettings withdrawItem = new WithdrawItemSettings();
@@ -104,12 +104,12 @@ public class PluginConfig implements VersionedConfig {
         public int customModelData = 12345;
 
         @Comment("The display name of the strength item (MiniMessage format)")
-        public String displayName = "<gold><bold>Strength Shard</bold></gold>";
+        public String displayName = "<color:#ff0000><bold>Strength Shard</bold></color>";
 
         @Comment("The lore of the strength item (MiniMessage format, <amount> will be replaced)")
         public List<String> lore = List.of(
-            "<gray>Value: <gold><amount> Strength</gold></gray>",
-            "<gray>Right-click to consume.</gray>"
+            "<white>Value: <color:#ff0000><amount> <white>Strength</color></white>",
+            "<white>Right-click to consume</white>"
         );
     }
 
@@ -151,11 +151,11 @@ public class PluginConfig implements VersionedConfig {
         public int customModelData = 12346;
 
         @Comment("The display name of the reroll item (MiniMessage format)")
-        public String displayName = "<light_purple><bold>Weapon Reroll Book</bold></light_purple>";
+        public String displayName = "<color:#ff0000><bold>Weapon Class Reroll Book</bold></color>";
 
         @Comment("The lore of the reroll item (MiniMessage format)")
         public List<String> lore = List.of(
-            "<gray>Right-click to reroll your assigned weapon.</gray>"
+            "<white>Right-click to reroll your assigned weapon</white>"
         );
     }
 
@@ -169,15 +169,16 @@ public class PluginConfig implements VersionedConfig {
 
         @Comment("Crafting grid shape (3 lines of 3 characters each)")
         public List<String> shape = List.of(
-            "SSS",
-            "SBS",
-            "SSS"
+            "IGI",
+            "GDG",
+            "IGI"
         );
 
         @Comment("Ingredients mapping for recipe shape characters. Supported formats:\n- STRENGTH_ITEM / STRENGTH_SHARD (Custom Strength Shard with CustomModelData 12345 & PDC)\n- cmd:12345:MATERIAL (CustomModelData format)\n- itemsadder:namespace:item_id\n- nexo:item_id\n- oraxen:item_id\n- Standard Bukkit Material (e.g. BOOK, DIAMOND_BLOCK)")
         public Map<String, String> ingredients = Map.of(
-            "S", "STRENGTH_ITEM",
-            "B", "BOOK"
+            "I", "IRON_BLOCK",
+            "G", "GOLD_BLOCK",
+            "D", "DIAMOND_BLOCK"
         );
     }
 
@@ -313,7 +314,7 @@ public class PluginConfig implements VersionedConfig {
         public int rollDelaySeconds = 5;
 
         @Comment("The list of weapons available for rolling")
-        public List<String> availableWeapons = List.of("Trident", "Trident2", "Sword", "Axe", "Bow", "Shield", "Crossbow", "Mace", "Armors", "Spear");
+        public List<String> availableWeapons = List.of("Trident", "Trident2", "Sword", "Axe", "Bow", "Shield", "Crossbow", "Crossbow2", "Mace", "Armors", "Spear");
 
         @Comment("Total number of animation steps during rolling")
         public int rollSteps = 15;
@@ -361,13 +362,18 @@ public class PluginConfig implements VersionedConfig {
         public int assignedAnimationFrameDelayTicks = 3;
 
         @Comment("Custom display messages for specific weapons (overrides <weapon> placeholder if present)")
-        public Map<String, String> weaponCustomMessages = Map.of(
-            "Bow", "ʙᴏᴡ",
-            "Axe", "ᴀxᴇ",
-            "Trident", "ᴛʀɪᴅᴇɴᴛ",
-            "Shield", "ѕʜɪᴇʟᴅ",
-            "Crossbow", "ᴄʀᴏѕѕʙᴏᴡ",
-            "Sword", "ѕᴡᴏʀᴅ"
+        public Map<String, String> weaponCustomMessages = Map.ofEntries(
+            Map.entry("Crossbow", "ᴄʀᴏѕѕʙᴏᴡ"),
+            Map.entry("Crossbow2", "S5 ᴄʀᴏѕѕʙᴏᴡ"),
+            Map.entry("Sword", "ѕᴡᴏʀᴅ"),
+            Map.entry("Bow", "ʙᴏᴡ"),
+            Map.entry("Trident", "ᴛʀɪᴅᴇɴᴛ"),
+            Map.entry("Trident2", "S5 ᴛʀɪᴅᴇɴᴛ"),
+            Map.entry("Axe", "ᴀxᴇ"),
+            Map.entry("Shield", "ѕʜɪᴇʟᴅ"),
+            Map.entry("Spear", "S5 ѕᴘᴇᴀʀ"),
+            Map.entry("Mace", "S5 ᴍᴀᴄᴇ"),
+            Map.entry("Armors", "S5 ᴀʀᴍᴏʀ")
         );
 
         @Comment("Sound played during each animation step")
@@ -411,22 +417,22 @@ public class PluginConfig implements VersionedConfig {
         public String strengthDisabledMessage = "<red>Strength leveling and economy features are disabled on this server!</red>";
 
         @Comment("Message sent to victim when losing strength on death")
-        public String deathLossMessage = "<red>You lost <loss> Strength on death. (New Strength: <strength>)</red>";
+        public String deathLossMessage = "<color:#ff0000> Strength -1</color>";
 
         @Comment("Message sent to killer when gaining strength for a kill")
-        public String killRewardMessage = "<green>You gained +<reward> Strength for killing <victim>! (New Strength: <strength>)</green>";
+        public String killRewardMessage = "<color:#ff0000> Strength +1</color>";
 
         @Comment("Message sent to killer when victim has 0 strength to lose")
-        public String killNoStrengthMessage = "<yellow><victim> had no Strength to lose, so no Strength was gained!</yellow>";
+        public String killNoStrengthMessage = "<color:#ff0000> Strength +0</color>";
 
         @Comment("Message sent to killer when victim dropped a Strength Shard on death")
-        public String killDroppedItemMessage = "<green>You killed <victim>! A Strength Shard has dropped on the ground!</green>";
+        public String killDroppedItemMessage = "";
 
         @Comment("Message sent when consuming a physical Strength Shard")
-        public String consumeShardMessage = "<green>You consumed a Strength Shard and gained +<amount> Strength!</green>";
+        public String consumeShardMessage = "<color:#ff0000> Strength +1</color>";
 
         @Comment("Message sent when checking own strength (/strength or /strength info). Supports multiline with <newline> or <br>")
-        public String strengthCheckMessage = "<light_purple>Your current Strength is <gold><strength></gold> and your assigned weapon is <gold><weapon></gold>.</light_purple>";
+        public String strengthCheckMessage = "<newline><color:#ff0000> Strength: <white><strength><newline><color:#ff0000> Weapon: <white><weapon></color><newline>";
 
         @Comment("Fallback string for weapon placeholder when player has no weapon assigned")
         public String unassignedWeaponMessage = "None";
@@ -444,13 +450,13 @@ public class PluginConfig implements VersionedConfig {
         public String giveRollItemSuccessTargetMessage = "<green>You received <amount>x Reroll Book(s).</green>";
 
         @Comment("Message sent when failing to withdraw strength due to low balance")
-        public String withdrawNotEnoughMessage = "<red>You do not have enough strength to withdraw <amount>! (Minimum required to keep: <min>, Current: <current>)</red>";
+        public String withdrawNotEnoughMessage = "<color:#ff0000> ᴇʀʀᴏʀ <gray>| <white>You do not have enough strength to withdraw <amount> strength.</color>";
 
         @Comment("Message sent when failing to withdraw strength because inventory is full")
-        public String withdrawFullInventoryMessage = "<red>Your inventory is full!</red>";
+        public String withdrawFullInventoryMessage = "<color:#ff0000> ᴇʀʀᴏʀ <gray>| <white>Your inventory is full!</color>";
 
         @Comment("Message sent upon successfully withdrawing strength into a physical item")
-        public String withdrawSuccessMessage = "<green>Successfully withdrew <amount> Strength into a physical item!</green>";
+        public String withdrawSuccessMessage = "<green> Successfully withdrew <amount> Strength into a physical item!</green>";
 
         @Comment("Message sent to sender when changing a player's assigned weapon")
         public String changeWeaponSuccessSenderMessage = "<green>Successfully changed <target>'s assigned weapon to <weapon>!</green>";
@@ -474,22 +480,22 @@ public class PluginConfig implements VersionedConfig {
         public String weaponNoUltimateMessage = "<red>Your assigned weapon (<weapon>) does not have an ultimate ability implemented.</red>";
 
         @Comment("Message sent when consuming a Weapon Reroll Book")
-        public String consumedRerollBookMessage = "<green>You consumed a Weapon Reroll Book!</green>";
+        public String consumedRerollBookMessage = "<green> You consumed a Weapon Reroll Book!</green>";
 
         @Comment("Message sent when attempting to reroll weapons while in combat")
-        public String cannotRerollInCombatMessage = "<red>You cannot reroll weapons while in combat!</red>";
+        public String cannotRerollInCombatMessage = "<red> You cannot reroll weapons while in combat!</red>";
 
         @Comment("Message sent when attempting to withdraw strength while in combat")
-        public String cannotWithdrawInCombatMessage = "<red>You cannot withdraw strength while in combat!</red>";
+        public String cannotWithdrawInCombatMessage = "<red> You cannot withdraw strength while in combat!</red>";
 
         @Comment("Message sent when combat logging causes strength loss penalty")
-        public String combatLogPenaltyMessage = "<red>You combat logged during PvP and lost <loss> Strength!</red>";
+        public String combatLogPenaltyMessage = "<red> You combat logged during PvP and lost <loss> Strength!</red>";
 
         @Comment("Message sent when attempting to use weapon ability in a WorldGuard protected region")
-        public String cannotUseAbilityInRegionMessage = "<red>Weapon abilities are disabled in this region!</red>";
+        public String cannotUseAbilityInRegionMessage = "<color:#ff0000> ᴇʀʀᴏʀ <gray>| <white>Weapon abilities are disabled in this region!</color>";
 
         @Comment("Message sent when attempting to reroll weapons in a WorldGuard protected region")
-        public String cannotRerollInRegionMessage = "<red>Rerolling weapons is disabled in this region!</red>";
+        public String cannotRerollInRegionMessage = "<color:#ff0000> ᴇʀʀᴏʀ <gray>| <white>Weapons is disabled in this region!</color>";
 
         @Comment("Message sent when crafting a mace is blocked because server mace limit has been reached")
         public String maceLimitCraftBlockedMessage = "<red>Crafting a Mace is disabled because the server limit (<limit>) has been reached!</red>";
