@@ -52,7 +52,7 @@ public class TridentConfig implements VersionedConfig {
         public int hitsRequired = 3;
 
         @Comment("Damage multiplier applied on the Nth passive strike (e.g., 2.0 = 2x damage).")
-        public double damageMultiplier = 2.0;
+        public double damageMultiplier = 1.0;
 
         @Comment("Extra lightning bonus damage dealt on hit (Passive).")
         public double lightningDamage = 3.0;
@@ -61,7 +61,7 @@ public class TridentConfig implements VersionedConfig {
         public String particleType = "WAX_OFF";
 
         @Comment("Message sent when trident passive is triggered.")
-        public String passiveTriggeredMessage = "<yellow><bold>POSEIDON PASSIVE!</bold> Lightning struck for extra damage!</yellow>";
+        public String passiveTriggeredMessage = "<color:#ff0000>  <white>Trident Passive triggered!</color>";
     }
 
     @ConfigSerializable
@@ -73,10 +73,10 @@ public class TridentConfig implements VersionedConfig {
         public int strengthRequired = 5;
 
         @Comment("Hits required using trident to charge Ultimate.")
-        public int hitsRequired = 8;
+        public int hitsRequired = 0;
 
         @Comment("Cooldown in seconds for Poseidon's Calling Ultimate.")
-        public int cooldownSeconds = 16;
+        public int cooldownSeconds = 30;
 
         @Comment("Duration in ticks for Thunderous Barrage sequence (40 ticks = 2 seconds).")
         public int durationTicks = 40;
@@ -94,7 +94,7 @@ public class TridentConfig implements VersionedConfig {
         public boolean scaleDamageWithStrength = true;
 
         @Comment("Flat bonus damage added per player Strength point (e.g., 1.0 = +1.0 damage per Strength point).")
-        public double strengthDamageBonusPerPoint = 1.0;
+        public double strengthDamageBonusPerPoint = 0.0;
 
         @Comment("Interval in ticks between thrust strikes during Thunderous Barrage (e.g. every 4 ticks).")
         public int strikeIntervalTicks = 4;
@@ -127,13 +127,13 @@ public class TridentConfig implements VersionedConfig {
         public String ultimateChargeProgressMessage = "<gray>Ultimate Charge: <gold><charge>/<target></gold> hits</gray>";
 
         @Comment("Message sent when Thunderous Barrage ultimate is activated.")
-        public String ultimateActivatedMessage = "<gold><bold>THUNDEROUS BARRAGE ACTIVATED!</bold> Unleashed a lightning fast strike barrage!</gold>";
+        public String ultimateActivatedMessage = "<color:#ff0000>  <white>Trident Ultimate Activated!</color>";
 
         @Comment("Message sent when player is not on the ground or in water when activating Poseidon's Calling.")
-        public String mustBeOnGroundMessage = "<red>You must be standing on the ground or in water to perform Poseidon's Calling!</red>";
+        public String mustBeOnGroundMessage = "<color:#ff0000> ᴇʀʀᴏʀ <gray>| <white>You must be on ground to use that ability!</color>";
 
         @Comment("Message sent when player is not holding a Trident.")
-        public String mustHoldTridentMessage = "<red>You must be holding a Trident to activate your ultimate!</red>";
+        public String mustHoldTridentMessage = "<color:#ff0000> ᴇʀʀᴏʀ <gray>| <white>You must be holding a Trident to activate your ultimate!</color>";
 
         @Comment("Message sent when player does not have enough strength.")
         public String notEnoughStrengthMessage = "<red>You do not have enough strength to activate your ultimate! (Required: <req>, Current: <current>)</red>";
@@ -142,12 +142,12 @@ public class TridentConfig implements VersionedConfig {
         public String notChargedMessage = "<red>Your ultimate is not charged yet! (Required: <req>, Current: <current> hits)</red>";
 
         @Comment("Message sent when ultimate is on cooldown.")
-        public String ultimateCooldownMessage = "<red>Your Ultimate is on cooldown for another <seconds>s!</red>";
+        public String ultimateCooldownMessage = "<color:#ff0000>  <white>Ultimate Cooldown Remaining: <seconds>s</color>";
 
         @Comment("Message sent in chat when ultimate cooldown completes and becomes ready")
-        public String ultimateReadyMessage = "<gold><bold>⚡ ULTIMATE READY!</bold> Your <yellow>{weapon}</yellow> ultimate is ready to use! Type <yellow>/ability</yellow>!</gold>";
+        public String ultimateReadyMessage = "<color:#ff0000>  <white>ULTIMATE READY!</color>";
 
         @Comment("Message sent in actionbar when ultimate cooldown completes and becomes ready")
-        public String ultimateReadyActionbarMessage = "<gold><bold>⚡ {weapon} ULTIMATE READY!</bold></gold>";
+        public String ultimateReadyActionbarMessage = "";
     }
 }
