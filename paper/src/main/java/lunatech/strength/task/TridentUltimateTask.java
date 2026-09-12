@@ -84,14 +84,10 @@ public final class TridentUltimateTask extends BukkitRunnable {
         this.durationTicks = settings.durationTicks;
 
         final int playerStrength = plugin.getStrengthService().getStrength(player);
-        final double strengthFactor;
-        if (settings.scaleDamageWithStrength && settings.strengthRequired > 0) {
-            final double ratio = (double) playerStrength / (double) settings.strengthRequired;
-            strengthFactor = ratio * settings.strengthScalingMultiplier;
-        } else {
-            strengthFactor = 1.0;
-        }
-        this.perStrikeDamage = settings.damage * strengthFactor * plugin.getStrengthService().getScale();
+        final double strengthBonusMultiplier = (settings.scaleDamageWithStrength)
+            ? 1.0 + (playerStrength * Math.max(0.0, settings.strengthDamageMultiplier))
+            : 1.0;
+        this.perStrikeDamage = settings.damage * strengthBonusMultiplier * plugin.getStrengthService().getScale();
     }
 
     @Override

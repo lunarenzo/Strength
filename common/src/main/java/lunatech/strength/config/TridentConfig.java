@@ -93,8 +93,8 @@ public class TridentConfig implements VersionedConfig {
         @Comment("Scale damage dealt during Thunderous Barrage with the player's current Strength level.")
         public boolean scaleDamageWithStrength = true;
 
-        @Comment("Strength scaling multiplier applied to damage ratio (e.g., 1.0 = 100% linear scaling relative to strength-required).")
-        public double strengthScalingMultiplier = 1.0;
+        @Comment("Bonus damage multiplier per player Strength point (e.g., 0.2 = +20% damage per Strength point).")
+        public double strengthDamageMultiplier = 0.2;
 
         @Comment("Interval in ticks between thrust strikes during Thunderous Barrage (e.g. every 4 ticks).")
         public int strikeIntervalTicks = 4;
