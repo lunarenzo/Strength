@@ -55,7 +55,7 @@ public class CrossbowConfig implements VersionedConfig {
         public double damageMultiplier = 2.0;
 
         @Comment("Message sent when crossbow passive 3rd shot deals 2x damage")
-        public String passiveTriggeredShooterMessage = "<gold><bold>Crossbow Passive triggered! 2x damage dealt!</bold></gold>";
+        public String passiveTriggeredShooterMessage = "<color:#ff0000>  <white>Crossbow Passive triggered!</color>";
 
         @Comment("Enable or disable slowness infliction when shooting a running player facing away")
         public boolean enableSlownessOnFleeing = true;
@@ -67,7 +67,7 @@ public class CrossbowConfig implements VersionedConfig {
         public int slownessAmplifier = 0;
 
         @Comment("Message sent when slowness is applied to a fleeing target")
-        public String slownessAppliedMessage = "<gray>Target was running away! Inflicted slowness.</gray>";
+        public String slownessAppliedMessage = "";
     }
 
     @ConfigSerializable
@@ -79,10 +79,10 @@ public class CrossbowConfig implements VersionedConfig {
         public int strengthRequired = 5;
 
         @Comment("Crossbow passive 3rd-shot triggers required to charge Ultimate")
-        public int hitsRequired = 3;
+        public int hitsRequired = 0;
 
         @Comment("Duration of the tranquilizer immobilization in seconds")
-        public int immobilizeDurationSeconds = 5;
+        public int immobilizeDurationSeconds = 3;
 
         @Comment("Cooldown in seconds before Crossbow Ultimate can be used again")
         public int cooldownSeconds = 60;
@@ -97,19 +97,19 @@ public class CrossbowConfig implements VersionedConfig {
         public String ultimateChargeProgressMessage = "<gray>Ultimate Charge: <gold><charge>/<target></gold> passive hits</gray>";
 
         @Comment("Message sent when crossbow ultimate is activated")
-        public String ultimateActivatedMessage = "<gold><bold>CROSSBOW ULTIMATE ACTIVATED!</bold> Your next arrow shot on an enemy will immobilize them!</gold>";
+        public String ultimateActivatedMessage = "<color:#ff0000>  <white>Crossbow Ultimate Activated! Your next shot will immobilize enemy!</gold>";
 
         @Comment("Message sent to the shooter when ultimate hits an enemy")
-        public String immobilizedShooterMessage = "<green><bold>CROSSBOW ULTIMATE HIT!</bold> Target immobilized!</green>";
+        public String immobilizedShooterMessage = "<color:#ff0000>  <white>Crossbow Ultimate Hit! Target immobilized</color>";
 
         @Comment("Message sent to the victim when hit by ultimate shot")
-        public String immobilizedVictimMessage = "<dark_red><bold>YOU HAVE BEEN IMMOBILIZED BY A TRANQUILIZER SHOT!</bold></dark_red>";
+        public String immobilizedVictimMessage = "";
 
         @Comment("Message sent when Crossbow Ultimate is on cooldown")
-        public String ultimateCooldownMessage = "<red>Your Ultimate is on cooldown for another <seconds>s!</red>";
+        public String ultimateCooldownMessage = "<color:#ff0000>  <white>Ultimate Cooldown Remaining: <seconds>s</color>";
 
         @Comment("Message sent when player is not holding a Crossbow")
-        public String mustHoldCrossbowMessage = "<red>You must be holding a Crossbow to activate your ultimate!</red>";
+        public String mustHoldCrossbowMessage = "<color:#ff0000> ᴇʀʀᴏʀ <gray>| <white>You must be holding a Crossbow to activate your ultimate!</color>";
 
         @Comment("Message sent when player does not have enough strength")
         public String notEnoughStrengthMessage = "<red>You do not have enough strength to activate your ultimate! (Required: <req>, Current: <current>)</red>";
@@ -118,12 +118,12 @@ public class CrossbowConfig implements VersionedConfig {
         public String notChargedMessage = "<red>Your ultimate is not charged yet! (Required: <req>, Current: <current> passive hits)</red>";
 
         @Comment("Message sent to the immobilized player when attempting to move or teleport")
-        public String trapEscapeBlockedMessage = "<red>You are immobilized and cannot move or teleport!</red>";
+        public String trapEscapeBlockedMessage = "";
 
         @Comment("Message sent in chat when ultimate cooldown completes and becomes ready")
-        public String ultimateReadyMessage = "<gold><bold>⚡ ULTIMATE READY!</bold> Your <yellow>{weapon}</yellow> ultimate is ready to use! Type <yellow>/ability</yellow>!</gold>";
+        public String ultimateReadyMessage = "<color:#ff0000>  <white>ULTIMATE READY!</color>";
 
         @Comment("Message sent in actionbar when ultimate cooldown completes and becomes ready")
-        public String ultimateReadyActionbarMessage = "<gold><bold>⚡ {weapon} ULTIMATE READY!</bold></gold>";
+        public String ultimateReadyActionbarMessage = "";
     }
 }
