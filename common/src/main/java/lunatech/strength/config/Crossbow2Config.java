@@ -53,13 +53,13 @@ public class Crossbow2Config implements VersionedConfig {
         public boolean shieldPiercing = true;
 
         @Comment("Percentage chance (0.0 - 100.0) to set target on fire when struck by a Crossbow2 arrow.")
-        public double flameChance = 100.0;
+        public double flameChance = 35.0;
 
         @Comment("Duration in seconds to set target on fire.")
         public int burnDurationSeconds = 5;
 
         @Comment("Message sent when Crossbow2 passive flame shot triggers.")
-        public String passiveTriggeredMessage = "<gold><bold>FLAME SHOT!</bold> Target set on fire!</gold>";
+        public String passiveTriggeredMessage = "";
     }
 
     @ConfigSerializable
@@ -71,7 +71,7 @@ public class Crossbow2Config implements VersionedConfig {
         public int strengthRequired = 5;
 
         @Comment("Ultimate active duration in seconds.")
-        public int durationSeconds = 15;
+        public int durationSeconds = 10;
 
         @Comment("Cooldown in seconds for Crossbow2 Ultimate.")
         public int cooldownSeconds = 60;
@@ -83,24 +83,24 @@ public class Crossbow2Config implements VersionedConfig {
         public String ultimateDisabledMessage = "<red>Crossbow2 ultimate ability is currently disabled!</red>";
 
         @Comment("Message sent when Crossbow2 ultimate is activated.")
-        public String ultimateActivatedMessage = "<gold><bold>CROSSBOW2 ULTIMATE ACTIVATED!</bold> Power V & Quick Charge V enabled for <duration>s!</gold>";
+        public String ultimateActivatedMessage = "<color:#ff0000>  <white>Crossbow Ultimate Activated!</color>";
 
         @Comment("Message sent when Crossbow2 ultimate expires.")
-        public String ultimateExpiredMessage = "<red>Your Crossbow2 Ultimate has expired.</red>";
+        public String ultimateExpiredMessage = "<color:#ff0000>  <white>Crossbow Ultimate Deactivated!</color>";
 
         @Comment("Message sent when player is not holding a Crossbow.")
-        public String mustHoldCrossbowMessage = "<red>You must be holding a Crossbow to activate your ultimate!</red>";
+        public String mustHoldCrossbowMessage = "<color:#ff0000> ᴇʀʀᴏʀ <gray>| <white>You must be holding a Crossbow to activate your ultimate!</color>";
 
         @Comment("Message sent when player does not have enough strength.")
         public String notEnoughStrengthMessage = "<red>You do not have enough strength to activate your ultimate! (Required: <req>, Current: <current>)</red>";
 
         @Comment("Message sent when ultimate is on cooldown.")
-        public String ultimateCooldownMessage = "<red>Your Ultimate is on cooldown for another <seconds>s!</red>";
+        public String ultimateCooldownMessage = "<color:#ff0000>  <white>Ultimate Cooldown Remaining: <seconds>s</color>";
 
         @Comment("Message sent in chat when ultimate cooldown completes and becomes ready")
-        public String ultimateReadyMessage = "<gold><bold>⚡ ULTIMATE READY!</bold> Your <yellow>{weapon}</yellow> ultimate is ready to use! Type <yellow>/ability</yellow>!</gold>";
+        public String ultimateReadyMessage = "<color:#ff0000>  <white>ULTIMATE READY!</color>";
 
         @Comment("Message sent in actionbar when ultimate cooldown completes and becomes ready")
-        public String ultimateReadyActionbarMessage = "<gold><bold>⚡ {weapon} ULTIMATE READY!</bold></gold>";
+        public String ultimateReadyActionbarMessage = "";
     }
 }
