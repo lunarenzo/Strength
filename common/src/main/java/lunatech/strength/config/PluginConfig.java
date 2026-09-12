@@ -426,34 +426,37 @@ public class PluginConfig implements VersionedConfig {
     }
 
     @Comment("""
-        ================================================================================
-         _____ _____     _   _ _____ _       ___ _____ _____ _____ _   _ _____ 
-        |_   _/  ___|   | | | /  ___| |     / _ \\_   _|_   _/  ___| | | /  ___|
-          | | \\ `--.    | |_| \\ `--.| |    / /_\\ \\| |   | | \\ `--.| |_| \\ `--. 
-          | |  `--. \\   |  _  |`--. \\ |___ |  _  || |   | |  `--. \\  _  |`--. \\
-          \\_/ \\____/    |_| |_|____/\\_____/|_| |_|\\_/   \\_/ \\____/|_| |_|____/ 
-        
-        Customize all plugin messages below. Set any message to "" (empty string) to disable sending it.
-        ================================================================================
+        ========================================================================================================================
+                                                                                                                               \s
+         mmmmmmmm  mmmmmm       mm     mmm   mm    mmmm    mm           mm     mmmmmmmm   mmmmmm     mmmm    mmm   mm    mmmm  \s
+         \"\"\"##\"\"\"  ##\"\"\"\"##    ####    ###   ##  m#\"\"\"\"#   ##          ####    \"\"\"##\"\"\"   \"\"##\"\"    ##\"\"##   ###   ##  m#\"\"\"\"# \s
+            ##     ##    ##    ####    ##"#  ##  ##m       ##          ####       ##        ##     ##    ##  ##"#  ##  ##m     \s
+            ##     #######    ##  ##   ## ## ##   \"####m   ##         ##  ##      ##        ##     ##    ##  ## ## ##   \"####m \s
+            ##     ##  \"##m   ######   ##  #m##       \"##  ##         ######      ##        ##     ##    ##  ##  #m##       \"##\s
+            ##     ##    ##  m##  ##m  ##   ###  #mmmmm#\"  ##mmmmmm  m##  ##m     ##      mm##mm    ##mm##   ##   ###  #mmmmm#\"\s
+            \"\"     \"\"    \"\"\" \"\"    \"\"  \"\"   \"\"\"   \"\"\"\"\"    \"\"\"\"\"\"\"\"  \"\"    \"\"     \"\"      \"\"\"\"\"\"     \"\"\"\"    \"\"   \"\"\"   \"\"\"\"\"  \s
+                                                                                                                               \s
+              Customize all plugin messages below. Set any message to "" (empty string) to disable sending it.
+        ========================================================================================================================
         """)
     public MessagesConfig messages = new MessagesConfig();
 
     @ConfigSerializable
     public static class MessagesConfig {
         @Comment("Message sent on join to returning players when they have a pending weapon class roll")
-        public String pendingRollJoinMessage = "<color:#ff0000>  <white>You have a pending weapon class roll! Type <green>/weaponclass roll</green> to roll your weapon class.</white></color>";
+        public String pendingRollJoinMessage = "<color:#ff0000> PvP <gray>| <white>You have a pending weapon class roll! Type <green>/weaponclass roll</green> to roll your weapon class.</white></color>";
 
         @Comment("Message sent on respawn when weapon class was cleared upon death")
-        public String deathClearedMessage = "<color:#ff0000>  <white>Your weapon class was cleared upon death! Type <green>/weaponclass roll</green> to roll a new class.</white></color>";
+        public String deathClearedMessage = "<color:#ff0000> PvP <gray>| <white>Your weapon class was cleared upon death! Type <green>/weaponclass roll</green> to roll a new class.</white></color>";
 
         @Comment("Message sent when attempting to use /weaponclass roll while already having an assigned weapon")
-        public String alreadyAssignedMessage = "<red>You already have an assigned weapon (<weapon>)! You must lose it on death or use a Reroll Book to change your class.</red>";
+        public String alreadyAssignedMessage = "<color:#ff0000> ᴇʀʀᴏʀ <gray>| <white>You already have an assigned weapon (<weapon>)!</color>";
 
         @Comment("Message sent when /weaponclass roll command is disabled")
         public String rollDisabledMessage = "<red>Weapon class rolling is currently disabled on this server!</red>";
 
         @Comment("Message sent when an unassigned player attempts to execute commands or weapon actions")
-        public String unassignedIgnoredMessage = "<red>You have no weapon assigned! Type /weaponclass roll to roll your weapon class.</red>";
+        public String unassignedIgnoredMessage = "<color:#ff0000> ᴇʀʀᴏʀ <gray>| <white>You have no weapon assigned! Type /weaponclass roll to roll your weapon class.</color>";
         @Comment("Message sent when attempting to use strength features while strength module is disabled")
         public String strengthDisabledMessage = "<red>Strength leveling and economy features are disabled on this server!</red>";
 
