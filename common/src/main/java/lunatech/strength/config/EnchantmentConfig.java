@@ -21,7 +21,7 @@ public class EnchantmentConfig implements VersionedConfig {
     }
 
     @Comment("Enable or disable global enchantment restriction submodule")
-    public boolean enabled = true;
+    public boolean enabled = false;
 
     @Comment("Restriction mode: 'BLACKLIST' (blocks blacklisted enchantments or levels exceeding max-levels) or 'WHITELIST' (only allows explicitly whitelisted enchantments)")
     public String mode = "BLACKLIST";

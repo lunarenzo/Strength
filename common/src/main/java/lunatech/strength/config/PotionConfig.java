@@ -36,7 +36,7 @@ public class PotionConfig implements VersionedConfig {
     }
 
     @Comment("Master toggle for the potion & potion effect restriction feature module.")
-    public boolean enabled = true;
+    public boolean enabled = false;
 
     @Comment("Mode engine for potion effect restrictions: BLACKLIST or WHITELIST.")
     public String mode = "BLACKLIST";
