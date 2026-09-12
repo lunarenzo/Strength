@@ -56,7 +56,7 @@ public class SpearConfig implements VersionedConfig {
         public double bonusPokeDamage = 2.0;
 
         @Comment("Message sent on actionbar when Spear passive bonus damage applies.")
-        public String passiveTriggeredMessage = "<gold><bold>SPEAR POKE!</bold> +<damage> bonus damage!</gold>";
+        public String passiveTriggeredMessage = "";
     }
 
     @ConfigSerializable
@@ -68,7 +68,7 @@ public class SpearConfig implements VersionedConfig {
         public int strengthRequired = 5;
 
         @Comment("Number of spear hits required to charge the ultimate.")
-        public int hitsRequired = 5;
+        public int hitsRequired = 0;
 
         @Comment("Ultimate active duration in seconds.")
         public int durationSeconds = 15;
@@ -80,7 +80,7 @@ public class SpearConfig implements VersionedConfig {
         public boolean noHungerOnLunge = true;
 
         @Comment("List of enchantments automatically applied to Spear during ultimate (Format: ENCHANTMENT_KEY:LEVEL).")
-        public List<String> autoEnchantments = List.of("LUNGE:3", "SHARPENED:4");
+        public List<String> autoEnchantments = List.of("LUNGE:3");
 
         @Comment("Message sent when Spear ultimate ability is disabled.")
         public String ultimateDisabledMessage = "<red>Spear ultimate ability is currently disabled!</red>";
@@ -92,13 +92,13 @@ public class SpearConfig implements VersionedConfig {
         public String ultimateChargeProgressMessage = "<gray>Spear Hit Charge: <gold><current>/<req></gold> hits</gray>";
 
         @Comment("Message sent when Spear ultimate is activated.")
-        public String ultimateActivatedMessage = "<gold><bold>SPEAR ULTIMATE ACTIVATED!</bold> Auto-enchanted & zero hunger lunge for <duration>s!</gold>";
+        public String ultimateActivatedMessage = "<color:#ff0000>  <white>Spear Ultimate Activated!</color>";
 
         @Comment("Message sent when Spear ultimate expires.")
-        public String ultimateExpiredMessage = "<red>Your Spear Ultimate has expired.</red>";
+        public String ultimateExpiredMessage = "<color:#ff0000>  <white>Spear Ultimate Deactivated!</color>";
 
         @Comment("Message sent when player is not holding a Spear.")
-        public String mustHoldSpearMessage = "<red>You must be holding a Spear to activate your ultimate!</red>";
+        public String mustHoldSpearMessage = "<color:#ff0000> ᴇʀʀᴏʀ <gray>| <white>You must be holding a Spear to activate your ultimate!</color>";
 
         @Comment("Message sent when player does not have enough strength.")
         public String notEnoughStrengthMessage = "<red>You do not have enough strength to activate your ultimate! (Required: <req>, Current: <current>)</red>";
@@ -107,12 +107,12 @@ public class SpearConfig implements VersionedConfig {
         public String notChargedMessage = "<red>Your Ultimate is not fully charged! (Required: <req> hits, Current: <current>)</red>";
 
         @Comment("Message sent when ultimate is on cooldown.")
-        public String ultimateCooldownMessage = "<red>Your Ultimate is on cooldown for another <seconds>s!</red>";
+        public String ultimateCooldownMessage = "<color:#ff0000>  <white>Ultimate Cooldown Remaining: <seconds>s</color>";
 
         @Comment("Message sent in chat when ultimate cooldown completes and becomes ready")
-        public String ultimateReadyMessage = "<gold><bold>⚡ ULTIMATE READY!</bold> Your <yellow>{weapon}</yellow> ultimate is ready to use! Type <yellow>/ability</yellow>!</gold>";
+        public String ultimateReadyMessage = "<color:#ff0000>  <white>ULTIMATE READY!</color>";
 
         @Comment("Message sent in actionbar when ultimate cooldown completes and becomes ready")
-        public String ultimateReadyActionbarMessage = "<gold><bold>⚡ {weapon} ULTIMATE READY!</bold></gold>";
+        public String ultimateReadyActionbarMessage = "";
     }
 }
