@@ -131,13 +131,14 @@ final class StrengthCommand extends Command {
         final PluginConfig.MessagesConfig messages = config.messages;
 
         if (sender instanceof Player player) {
-            final int strength = strengthService.getStrength(player);
             final String assignedRaw = strengthService.getAssignedWeapon(player);
-
-            String weaponDisplay = messages.unassignedWeaponMessage;
-            if (assignedRaw != null && !assignedRaw.isEmpty()) {
-                weaponDisplay = ItemResolver.resolveWeaponDisplayName(assignedRaw, config.weapons.weaponCustomMessages);
+            if (assignedRaw == null || assignedRaw.isEmpty()) {
+                MessageUtil.send(player, messages.unassignedIgnoredMessage);
+                return;
             }
+
+            final int strength = strengthService.getStrength(player);
+            final String weaponDisplay = ItemResolver.resolveWeaponDisplayName(assignedRaw, config.weapons.weaponCustomMessages);
 
             MessageUtil.send(
                 player,
@@ -252,6 +253,12 @@ final class StrengthCommand extends Command {
 
         final int amount = (int) args.get("amount");
         final StrengthService strengthService = plugin.getStrengthService();
+
+        if (strengthService.getAssignedWeapon(player) == null) {
+            MessageUtil.send(player, messages.unassignedIgnoredMessage);
+            return;
+        }
+
         final int currentStrength = strengthService.getStrength(player);
         final int minStrength = config.strength.minStrength;
 
