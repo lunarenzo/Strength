@@ -46,6 +46,11 @@ public final class TridentAbilityListener implements Listener {
             return;
         }
 
+        // Ignore uncharged spam strikes (must be >= 0.9f full attack strength)
+        if (damager.getCooledAttackStrength(0.5f) < 0.9f) {
+            return;
+        }
+
         final TridentConfig settings = plugin.getConfigHandler().getTridentConfig();
         if (settings == null || !settings.enabled) {
             return;
