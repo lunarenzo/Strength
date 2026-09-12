@@ -32,7 +32,7 @@ public class RulesConfig implements VersionedConfig {
     @ConfigSerializable
     public static class TotemRules {
         @Comment("Enable or disable Totem of Undying rules module")
-        public boolean enabled = true;
+        public boolean enabled = false;
 
         @Comment("Mode: 'ALLOWED' (enforces maxInInventory limit & pop quota cooldown) or 'BANNED' (completely forbids Totem usage and holding)")
         public String mode = "ALLOWED";
@@ -68,7 +68,7 @@ public class RulesConfig implements VersionedConfig {
     @ConfigSerializable
     public static class NakedPlayerRules {
         @Comment("Enable or disable Naked Player Anti-Farming rule")
-        public boolean enabled = true;
+        public boolean enabled = false;
 
         @Comment("Allow strength reward/item drops when killing a naked player (set false to prevent strength farming on naked alts/newbies)")
         public boolean allowNakedKillReward = false;
@@ -86,7 +86,7 @@ public class RulesConfig implements VersionedConfig {
         );
 
         @Comment("Message sent to killer when strength reward is denied because the victim was naked. Set to '', 'none', 'disabled', or leave empty to disable message.")
-        public String nakedKillNoRewardMessage = "<red>You did not receive strength for killing <victim> because they were naked!</red>";
+        public String nakedKillNoRewardMessage = "";
     }
 
     @ConfigSerializable
@@ -124,7 +124,7 @@ public class RulesConfig implements VersionedConfig {
         @ConfigSerializable
         public static class LimitConfig {
             @Comment("Enable or disable the mace limit submodule.")
-            public boolean enabled = true;
+            public boolean enabled = false;
 
             @Comment("Maximum number of maces allowed globally across the server. Set to 0 to completely disable maces (crafting, holding, usage).")
             public int maxAmount = 3;
@@ -136,7 +136,7 @@ public class RulesConfig implements VersionedConfig {
             public boolean enabled = true;
 
             @Comment("Cooldown duration in seconds after performing a mace smash attack.")
-            public int cooldownSeconds = 30;
+            public int cooldownSeconds = 180;
         }
 
         @ConfigSerializable
@@ -164,7 +164,7 @@ public class RulesConfig implements VersionedConfig {
         @ConfigSerializable
         public static class ContainerConfig {
             @Comment("Enable or disable mace container storage restriction submodule.")
-            public boolean enabled = true;
+            public boolean enabled = false;
 
             @Comment("Allow storing maces inside containers?")
             public boolean allowStorage = false;
