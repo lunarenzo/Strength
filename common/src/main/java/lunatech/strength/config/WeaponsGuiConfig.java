@@ -57,12 +57,11 @@ public class WeaponsGuiConfig implements VersionedConfig {
         "<color:#ff0000><bold>ѕᴛʀᴇɴɢᴛʜ ѕʜᴀʀᴅ</bold></color>",
         List.of(
             "<white>ᴘʜʏѕɪᴄᴀʟ ѕʜᴀʀᴅ ᴄᴏɴᴛᴀɪɴɪɴɢ</white>",
-            "<white>  ᴘʟᴀʏᴇʀ ѕᴛʀᴇɴɢᴛʜ.</white>",
+            "<white>ᴘʟᴀʏᴇʀ ѕᴛʀᴇɴɢᴛʜ.</white>",
             "",
-            "<white>ᴄʟɪᴄᴋ ᴛᴏ ᴠɪᴇᴡ ᴄʀᴀꜰᴛɪɴɢ</white>",
-            "<white>  ʀᴇᴄɪᴘᴇ!</white>"
+            "<white>ᴄʟɪᴄᴋ ᴛᴏ ᴠɪᴇᴡ ᴄʀᴀꜰᴛɪɴɢ ʀᴇᴄɪᴘᴇ!</white>"
         ),
-        ""
+        "<white>"
     );
 
     @Comment("Reroll Book display item settings in the Weapons GUI")
@@ -72,15 +71,12 @@ public class WeaponsGuiConfig implements VersionedConfig {
         12347,
         "<color:#ff0000><bold>ᴡᴇᴀᴘᴏɴ ᴄʟᴀѕѕ ʀᴇʀᴏʟʟ ʙᴏᴏᴋ</bold></color>",
         List.of(
-            "<white>ᴜѕᴇᴅ ᴛᴏ ʀᴇʀᴏʟʟ ʏᴏᴜʀ ᴀѕѕɪɢɴᴇᴅ</white>",
-            "<white>  ᴡᴇᴀᴘᴏɴ.</white>",
-            "<white>ᴄᴏɴѕᴜᴍᴇ ɪɴ ʜᴀɴᴅ ᴛᴏ ᴏᴘᴇɴ</white>",
-            "<white>  ʀᴇʀᴏʟʟ ᴍᴇɴᴜ.</white>",
+            "<white>ᴜѕᴇᴅ ᴛᴏ ʀᴇʀᴏʟʟ ʏᴏᴜʀ ᴀѕѕɪɢɴᴇᴅ ᴡᴇᴀᴘᴏɴ</white>",
+            "<white>ᴄᴏɴѕᴜᴍᴇ ɪɴ ʜᴀɴᴅ ᴛᴏ ᴏᴘᴇɴ ʀᴇʀᴏʟʟ ᴍᴇɴᴜ</white>",
             "",
-            "<white>ᴄʟɪᴄᴋ ᴛᴏ ᴠɪᴇᴡ ᴄʀᴀꜰᴛɪɴɢ</white>",
-            "<white>  ʀᴇᴄɪᴘᴇ!</white>"
+            "<white>ᴄʟɪᴄᴋ ᴛᴏ ᴠɪᴇᴡ ᴄʀᴀꜰᴛɪɴɢ ʀᴇᴄɪᴘᴇ!</white>"
         ),
-        ""
+        "<white>"
     );
 
     @Comment("Weapons display items in the GUI mapped by weapon key (trident, bow, shield, crossbow, sword, axe, spear, trident2, crossbow2, mace, armors)")
@@ -89,104 +85,41 @@ public class WeaponsGuiConfig implements VersionedConfig {
     private static Map<String, GuiSlotItemConfig> defaultWeaponsMap() {
         final Map<String, GuiSlotItemConfig> map = new HashMap<>();
 
+        map.put("shield", new GuiSlotItemConfig(
+            40,
+            "SHIELD",
+            0,
+            "<color:#ff0000>⛨ <bold>ѕʜɪᴇʟᴅ</bold></color>",
+            List.of(
+                "<color:#ff0000>⛨ <bold>ᴘᴀѕѕɪᴠᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ѕʜɪᴇʟᴅ ᴅɪѕᴀʙʟᴇ ɢʀᴀɴᴛѕ 20%</white></color>",
+                "  ᴅᴀᴍᴀɢᴇ ʀᴇᴅᴜᴄᴛɪᴏɴ ꜰᴏʀ 5ѕ",
+                "",
+                "<color:#ff0000>⛨ <bold>ᴜʟᴛɪᴍᴀᴛᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ѕᴘᴀᴡɴѕ ᴀ ʙᴀʀʀɪᴇʀ</white></color>",
+                "  ᴛʜᴀᴛ ɢʀᴀɴᴛѕ 100%",
+                "  ɪɴᴠᴜʟɴᴇʀᴀʙɪʟɪᴛʏ ꜰᴏʀ 15ѕ.",
+                "<dark_gray>  ᴄᴏᴏʟᴅᴏᴡɴ: 60 ѕᴇᴄᴏɴᴅѕ</dark_gray>",
+                "",
+                "<dark_gray>ѕᴛᴀᴛᴜѕ: {status}</dark_gray>"
+            )
+        ));
+
         map.put("sword", new GuiSlotItemConfig(
             20,
-            "NETHERITE_SWORD",
+            "DIAMOND_SWORD",
             0,
             "<color:#ff0000> <bold>ѕᴡᴏʀᴅ</bold></color>",
             List.of(
                 "<color:#ff0000> <bold>ᴘᴀѕѕɪᴠᴇ</bold></color>",
-                "<color:#ff0000>▪ <white>ᴅᴏ ᴀ 3-ʜɪᴛ ѕᴡᴏʀᴅ ᴄᴏᴍʙᴏ</white></color>",
-                "<white>  ᴡɪᴛʜɪɴ 3 ѕᴇᴄᴏɴᴅѕ ᴛᴏ ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ</white>",
-                "<white>  ᴅᴇᴀʟ 2x ᴄʀɪᴛ ᴅᴀᴍᴀɢᴇ</white>",
+                "<color:#ff0000>▪ <white>ᴅᴏ ᴀ 4-ʜɪᴛ ѕᴡᴏʀᴅ ᴄᴏᴍʙᴏ</white></color>",
+                "  ᴡɪᴛʜɪɴ 3 ѕᴇᴄᴏɴᴅѕ ᴛᴏ",
+                "  ᴅᴇᴀʟ 1.5x ᴄʀɪᴛ ᴅᴀᴍᴀɢᴇ.",
                 "",
                 "<color:#ff0000> <bold>ᴜʟᴛɪᴍᴀᴛᴇ</bold></color>",
                 "<color:#ff0000>▪ <white>ᴀᴄᴛɪᴠᴀᴛᴇѕ ᴅᴜᴀʟ ᴡɪᴇʟᴅ</white></color>",
-                "<white>  ɢʀᴀɴᴛɪɴɢ +100% ᴀᴛᴛᴀᴄᴋ ѕᴘᴇᴇᴅ</white>",
-                "<white>  ᴀɴᴅ ᴅᴜᴀʟ-ʜᴀɴᴅ ѕᴛʀɪᴋᴇѕ</white>",
-                "<dark_gray>  ᴄᴏᴏʟᴅᴏᴡɴ: 60 ѕᴇᴄᴏɴᴅѕ</dark_gray>",
-                "",
-                "<dark_gray>ѕᴛᴀᴛᴜѕ: {status}</dark_gray>"
-            )
-        ));
-
-        map.put("axe", new GuiSlotItemConfig(
-            21,
-            "NETHERITE_AXE",
-            0,
-            "<color:#ff0000> <bold>ᴀxᴇ</bold></color>",
-            List.of(
-                "<color:#ff0000> <bold>ᴘᴀѕѕɪᴠᴇ</bold></color>",
-                "<color:#ff0000>▪ <white>ᴅᴏ ᴀ 3 ᴄʀɪᴛ ʜɪᴛѕ ᴛᴏ ᴀɴ</white></color>",
-                "<white>  ᴇɴᴇᴍʏ ᴀɴᴅ ѕᴛᴜɴ ᴛʜᴇᴍ ꜰᴏʀ 1</white>",
-                "<white>  ѕᴇᴄᴏɴᴅ.</white>",
-                "",
-                "<color:#ff0000> <bold>ᴜʟᴛɪᴍᴀᴛᴇ</bold></color>",
-                "<color:#ff0000>▪ <white>ᴍᴀʀᴋѕ ᴛᴀʀɢᴇᴛ ꜰᴏʀ 10 ѕᴇᴄᴏɴᴅѕ</white></color>",
-                "<white>  ѕᴛᴏʀɪɴɢ 100% ᴅᴀᴍᴀɢᴇ ᴀɴᴅ</white>",
-                "<white>  ᴅᴇᴛᴏɴᴀᴛɪɴɢ ꜰᴏʀ 150% ʙᴜʀѕᴛ</white>",
-                "<white>  ᴏꜰ ᴅᴀᴍᴀɢᴇ</white>",
-                "<dark_gray>  ᴄᴏᴏʟᴅᴏᴡɴ: 60 ѕᴇᴄᴏɴᴅѕ</dark_gray>",
-                "",
-                "<dark_gray>ѕᴛᴀᴛᴜѕ: {status}</dark_gray>"
-            )
-        ));
-
-        map.put("trident", new GuiSlotItemConfig(
-            22,
-            "TRIDENT",
-            0,
-            "<color:#ff0000> <bold>ᴛʀɪᴅᴇɴᴛ ᴏꜰ ᴘᴏѕᴇɪᴅᴏɴ</bold></color>",
-            List.of(
-                "<color:#ff0000> <bold>ᴘᴀѕѕɪᴠᴇ</bold></color>",
-                "<color:#ff0000>▪ <white>ᴇᴠᴇʀʏ 3 ʜɪᴛѕ ѕᴜᴍᴍᴏɴѕ ʟɪɢʜᴛɴɪɴɢ</white></color>",
-                "<white>  ᴅᴇᴀʟɪɴɢ 2.0x ᴅᴀᴍᴀɢᴇ + 3.0</white>",
-                "<white>  ʙᴏɴᴜѕ ᴅᴀᴍᴀɢᴇ.</white>",
-                "",
-                "<color:#ff0000> <bold>ᴜʟᴛɪᴍᴀᴛᴇ</bold></color>",
-                "<color:#ff0000>▪ <white>ᴜɴʟᴇᴀѕʜᴇѕ 9 ᴛʜʀᴜѕᴛ ѕᴛʀɪᴋᴇѕ</white></color>",
-                "<white>  (5.0 ᴅᴍɢ) ᴡɪᴛʜ ᴘᴀʀᴛɪᴄʟᴇ ѕᴜʀɢᴇѕ</white>",
-                "<white>  ɪɴ ᴀ 4-ʙʟᴏᴄᴋ ᴢᴏɴᴇ.</white>",
-                "<dark_gray>  ᴄᴏᴏʟᴅᴏᴡɴ: 60 ѕᴇᴄᴏɴᴅѕ</dark_gray>",
-                "",
-                "<dark_gray>ѕᴛᴀᴛᴜѕ: {status}</dark_gray>"
-            )
-        ));
-
-        map.put("bow", new GuiSlotItemConfig(
-            23,
-            "BOW",
-            0,
-            "<color:#ff0000> <bold>ʙᴏᴡ ᴏꜰ ᴀʀᴛᴇᴍɪѕ</bold></color>",
-            List.of(
-                "<color:#ff0000> <bold>ᴘᴀѕѕɪᴠᴇ</bold></color>",
-                "<color:#ff0000>▪ <white>ᴇᴠᴇʀʏ 2 ʜɪᴛѕ, ɴᴇxᴛ ᴀʀʀᴏᴡ</white></color>",
-                "<white>  ᴛʀᴀᴘѕ ᴛᴀʀɢᴇᴛ ɪɴ ᴄᴏʙᴡᴇʙѕ</white>",
-                "<white>  ꜰᴏʀ 5ѕ.</white>",
-                "",
-                "<color:#ff0000> <bold>ᴜʟᴛɪᴍᴀᴛᴇ</bold></color>",
-                "<color:#ff0000>▪ <white>ᴘʀɪᴍᴇѕ 3 ʙᴇᴀᴍ ѕʜᴏᴛѕ</white></color>",
-                "<white>  (ꜰᴜʟʟ ᴅʀᴀᴡ ꜰɪʀᴇѕ ᴀ 20-ʙʟᴏᴄᴋ</white>",
-                "<white>  ʟᴀѕᴇʀ ᴅᴇᴀʟɪɴɢ 8.0 ᴅᴍɢ).</white>",
-                "<dark_gray>  ᴄᴏᴏʟᴅᴏᴡɴ: 60 ѕᴇᴄᴏɴᴅѕ</dark_gray>",
-                "",
-                "<dark_gray>ѕᴛᴀᴛᴜѕ: {status}</dark_gray>"
-            )
-        ));
-
-        map.put("crossbow", new GuiSlotItemConfig(
-            24,
-            "CROSSBOW",
-            0,
-            "<color:#ff0000> <bold>ᴄʀᴏѕѕʙᴏᴡ ᴏꜰ ᴀᴘᴏʟʟᴏ</bold></color>",
-            List.of(
-                "<color:#ff0000> <bold>ᴘᴀѕѕɪᴠᴇ</bold></color>",
-                "<color:#ff0000>▪ <white>ᴇᴠᴇʀʏ 3 ʜɪᴛѕ, ɴᴇxᴛ ᴄʀᴏѕѕʙᴏᴡ</white></color>",
-                "<white>  ѕʜᴏᴛ ᴅᴇᴀʟѕ 2.0x ᴅᴀᴍᴀɢᴇ.</white>",
-                "",
-                "<color:#ff0000> <bold>ᴜʟᴛɪᴍᴀᴛᴇ</bold></color>",
-                "<color:#ff0000>▪ <white>ᴘʀɪᴍᴇѕ ɴᴇxᴛ ᴀʀʀᴏᴡ ᴛᴏ ꜰʀᴇᴇᴢᴇ</white></color>",
-                "<white>  & ɪᴍᴍᴏʙɪʟɪᴢᴇ ᴛᴀʀɢᴇᴛ ꜰᴏʀ 5ѕ.</white>",
+                "  ɢʀᴀɴᴛѕ +100% ᴀᴛᴛᴀᴄᴋ ѕᴘᴇᴇᴅ",
+                "  ᴀɴᴅ ᴅᴜᴀʟ-ʜᴀɴᴅ ѕᴛʀɪᴋᴇѕ",
                 "<dark_gray>  ᴄᴏᴏʟᴅᴏᴡɴ: 60 ѕᴇᴄᴏɴᴅѕ</dark_gray>",
                 "",
                 "<dark_gray>ѕᴛᴀᴛᴜѕ: {status}</dark_gray>"
@@ -197,80 +130,76 @@ public class WeaponsGuiConfig implements VersionedConfig {
             29,
             "DIAMOND_SPEAR",
             0,
-            "<color:#ff0000> <bold>ѕᴘᴇᴀʀ ᴏꜰ ᴀᴄʜɪʟʟᴇѕ</bold></color>",
+            "<color:#ff0000> <bold>ѕᴘᴇᴀʀ</bold></color>",
             List.of(
-                "<color:#ff0000> <bold>ᴘᴀѕѕɪᴠᴇ</bold></color>",
-                "<color:#ff0000>▪ <white>ʙᴏᴏѕᴛѕ ᴀᴛᴛᴀᴄᴋ ѕᴘᴇᴇᴅ ᴛᴏ ѕᴡᴏʀᴅ</white></color>",
-                "<white>  ѕᴘᴇᴇᴅ (1.6) ᴀɴᴅ ᴅᴇᴀʟѕ +2.0</white>",
-                "<white>  ʙᴏɴᴜѕ ᴅᴀᴍᴀɢᴇ ᴏɴ ѕᴛʀɪᴋᴇѕ.</white>",
+                "<color:#ff0000> <bold>ᴘᴀѕѕɪᴠᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ʙᴏᴏѕᴛѕ ᴀᴛᴛᴀᴄᴋ ѕᴘᴇᴇᴅ ᴛᴏ ʙᴇᴄᴏᴍᴇ ʟɪᴋᴇ</white></color>",
+                "  ᴀ ѕᴡᴏʀᴅ ᴀɴᴅ ᴅᴇᴀʟѕ +2.0 ʙᴏɴᴜѕ",
+                "  ᴅᴀᴍᴀɢᴇ ᴏɴ ᴘᴏᴋᴇ.",
                 "",
-                "<color:#ff0000> <bold>ᴜʟᴛɪᴍᴀᴛᴇ</bold></color>",
-                "<color:#ff0000>▪ <white>ᴀᴜᴛᴏ-ᴇɴᴄʜᴀɴᴛѕ ѕᴘᴇᴀʀ &</white></color>",
-                "<white>  ʀᴇᴍᴏᴠᴇѕ ʜᴜɴɢᴇʀ ᴄᴏɴѕᴜᴍᴘᴛɪᴏɴ</white>",
-                "<white>  ᴅᴜʀɪɴɢ ʟᴜɴɢᴇѕ ꜰᴏʀ 15ѕ.</white>",
+                "<color:#ff0000> <bold>ᴜʟᴛɪᴍᴀᴛᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ᴀᴜᴛᴏ-ᴇɴᴄʜᴀɴᴛѕ ѕᴘᴇᴀʀ with ʟᴜɴɢᴇ 3</white></color>",
+                "  ᴀɴᴅ ʀᴇᴍᴏᴠᴇѕ ʜᴜɴɢᴇʀ ᴄᴏɴѕᴜᴍᴘᴛɪᴏɴ ᴅᴜʀɪɴɢ",
+                "  ʟᴜɴɢᴇѕ ꜰᴏʀ 15ѕ.",
                 "<dark_gray>  ᴄᴏᴏʟᴅᴏᴡɴ: 60 ѕᴇᴄᴏɴᴅѕ</dark_gray>",
                 "",
                 "<dark_gray>ѕᴛᴀᴛᴜѕ: {status}</dark_gray>"
             )
         ));
 
-        map.put("trident2", new GuiSlotItemConfig(
-            30,
+        map.put("trident", new GuiSlotItemConfig(
+            22,
             "TRIDENT",
             0,
-            "<color:#ff0000> <bold>ᴛʜᴜɴᴅᴇʀѕᴛᴏʀᴍ ᴛʀɪᴅᴇɴᴛ</bold></color>",
+            "<color:#ff0000> <bold>ᴛʀɪᴅᴇɴᴛ</bold></color>",
             List.of(
-                "<color:#ff0000> <bold>ᴘᴀѕѕɪᴠᴇ</bold></color>",
-                "<color:#ff0000>▪ <white>ᴍᴀᴛᴄʜᴇѕ ѕᴡᴏʀᴅ ᴀᴛᴛᴀᴄᴋ ѕᴘᴇᴇᴅ</white></color>",
-                "<white>  (1.6) ᴀɴᴅ ѕᴛᴜɴѕ ʙʟᴏᴄᴋɪɴɢ</white>",
-                "<white>  ѕʜɪᴇʟᴅѕ ꜰᴏʀ 5ѕ ᴏɴ ʜɪᴛ.</white>",
+                "<color:#ff0000> <bold>ᴘᴀѕѕɪᴠᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ᴇᴠᴇʀʏ 3 ʜɪᴛѕ ѕᴜᴍᴍᴏɴѕ</white></color>",
+                "  ʟɪɢʜᴛɴɪɴɢ, ᴅᴇᴀʟɪɴɢ 4.0 ᴀᴅᴅɪᴛɪᴏɴᴀʟ ᴅᴍɢ",
                 "",
-                "<color:#ff0000> <bold>ᴜʟᴛɪᴍᴀᴛᴇ</bold></color>",
-                "<color:#ff0000>▪ <white>ѕᴜᴍᴍᴏɴѕ ᴀ 15ѕ ᴛʜᴜɴᴅᴇʀѕᴛᴏʀᴍ</white></color>",
-                "<white>  ᴡʜᴇʀᴇ ᴇᴠᴇʀʏ ᴄʀɪᴛɪᴄᴀʟ ѕᴛʀɪᴋᴇ</white>",
-                "<white>  ѕᴛʀɪᴋᴇѕ ᴛᴀʀɢᴇᴛ ᴡɪᴛʜ ʟɪɢʜᴛɴɪɴɢ.</white>",
-                "<dark_gray>  ᴄᴏᴏʟᴅᴏᴡɴ: 60 ѕᴇᴄᴏɴᴅѕ</dark_gray>",
+                "<color:#ff0000> <bold>ᴜʟᴛɪᴍᴀᴛᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ᴜɴʟᴇᴀѕʜᴇѕ 9 ᴛʜʀᴜѕᴛ ѕᴛʀɪᴋᴇѕ ᴡɪᴛʜ</white></color>",
+                "  ᴇᴀᴄʜ ѕᴛʀɪᴋᴇ ᴅᴇᴀʟɪɴɢ 5.0 ᴅᴍɢ",
+                "<dark_gray>  ᴄᴏᴏʟᴅᴏᴡɴ: 30 ѕᴇᴄᴏɴᴅѕ</dark_gray>",
                 "",
                 "<dark_gray>ѕᴛᴀᴛᴜѕ: {status}</dark_gray>"
             )
         ));
 
-        map.put("crossbow2", new GuiSlotItemConfig(
-            31,
+        map.put("crossbow", new GuiSlotItemConfig(
+            24,
             "CROSSBOW",
             0,
-            "<color:#ff0000> <bold>ᴄʀᴏѕѕʙᴏᴡ2</bold></color>",
+            "<color:#ff0000> <bold>ᴄʀᴏѕѕʙᴏᴡ</bold></color>",
             List.of(
-                "<color:#ff0000> <bold>ᴘᴀѕѕɪᴠᴇ</bold></color>",
-                "<color:#ff0000>▪ <white>ᴀʀʀᴏws ʙʏᴘᴀѕѕ ѕʜɪᴇʟᴅ ʙʟᴏᴄᴋѕ</white></color>",
-                "<white>  ᴀɴᴅ ѕᴇᴛѕ ᴛᴀʀɢᴇᴛ ᴏɴ ꜰɪʀᴇ</white>",
-                "<white>  ꜰᴏʀ 5ѕ.</white>",
+                "<color:#ff0000> <bold>ᴘᴀѕѕɪᴠᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ᴇᴠᴇʀʏ 3 ʜɪᴛѕ ᴅᴇᴀʟѕ 2.0x ᴅᴍɢ.</white></color>",
+                "  ѕʜᴏᴏᴛɪɴɢ ꜰʟᴇᴇɪɴɢ ᴛᴀʀɢᴇᴛѕ",
+                "  ɪɴꜰʟɪᴄᴛѕ ѕʟᴏᴡɴᴇѕѕ ꜰᴏʀ 3ѕ.",
                 "",
-                "<color:#ff0000> <bold>ᴜʟᴛɪᴍᴀᴛᴇ</bold></color>",
-                "<color:#ff0000>▪ <white>ᴀᴜᴛᴏ-ᴇɴᴄʜᴀɴᴛѕ ᴄʀᴏѕѕʙᴏᴡ &</white></color>",
-                "<white>  ɢʀᴀɴᴛѕ ᴘᴏᴡᴇʀ v & ǫᴜɪᴄᴋ</white>",
-                "<white>  ᴄʜᴀʀɢᴇ v ꜰᴏʀ 15ѕ.</white>",
+                "<color:#ff0000> <bold>ᴜʟᴛɪᴍᴀᴛᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ᴘʀɪᴍᴇѕ ɴᴇxᴛ ᴀʀʀᴏᴡ ᴛʜᴀᴛ</white></color>",
+                "  ᴛᴀᴋᴇѕ ᴛʜᴇᴍ ᴅᴏᴡɴ ꜰᴏʀ 3ѕ.",
                 "<dark_gray>  ᴄᴏᴏʟᴅᴏᴡɴ: 60 ѕᴇᴄᴏɴᴅѕ</dark_gray>",
                 "",
                 "<dark_gray>ѕᴛᴀᴛᴜѕ: {status}</dark_gray>"
             )
         ));
 
-        map.put("mace", new GuiSlotItemConfig(
-            32,
-            "MACE",
+        map.put("bow", new GuiSlotItemConfig(
+            23,
+            "BOW",
             0,
-            "<color:#ff0000> <bold>ᴍᴀᴄᴇ</bold></color>",
+            "<color:#ff0000>🏹 <bold>ʙᴏᴡ</bold></color>",
             List.of(
-                "<color:#ff0000> <bold>ᴘᴀѕѕɪᴠᴇ</bold></color>",
-                "<color:#ff0000>▪ <white>ѕᴍᴀѕʜ ᴀᴛᴛᴀᴄᴋ ᴄᴏᴏʟᴅᴏᴡɴ ɪѕ</white></color>",
-                "<white>  ʀᴇᴅᴜᴄᴇᴅ ʙʏ 50% ᴏɴ</white>",
-                "<white>  ѕᴍᴀѕʜ ѕᴛʀɪᴋᴇѕ.</white>",
+                "<color:#ff0000>🏹 <bold>ᴘᴀѕѕɪᴠᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ᴇᴠᴇʀʏ 3 ʜɪᴛѕ, ɴᴇxᴛ ᴀʀʀᴏᴡ</white></color>",
+                "  ᴛʀᴀᴘѕ ᴛᴀʀɢᴇᴛ ɪɴ ᴄᴏʙᴡᴇbs ғᴏʀ 5s",
                 "",
-                "<color:#ff0000> <bold>ᴜʟᴛɪᴍᴀᴛᴇ</bold></color>",
-                "<color:#ff0000>▪ <white>ᴀᴜᴛᴏ-ᴇɴᴄʜᴀɴᴛѕ ᴍᴀᴄᴇ &</white></color>",
-                "<white>  ɢʀᴀɴᴛѕ ᴢᴇʀᴏ ѕᴍᴀѕʜ ᴄᴏᴏʟᴅᴏᴡɴ</white>",
-                "<white>  ꜰᴏʀ 15ѕ.</white>",
+                "<color:#ff0000>🏹 <bold>ᴜʟᴛɪᴍᴀᴛᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ᴘʀɪᴍᴇѕ 3 ʙᴇᴀᴍ ѕʜᴏᴛѕ</white></color>",
+                "  (ꜰᴜʟʟ ᴅʀᴀws ꜰɪʀᴇѕ ᴀ 20-ʙʟᴏᴄᴋ",
+                "  ʟᴀѕᴇʀ ᴅᴇᴀʟɪɴɢ 40.0 ᴅᴍɢ)",
                 "<dark_gray>  ᴄᴏᴏʟᴅᴏᴡɴ: 60 ѕᴇᴄᴏɴᴅѕ</dark_gray>",
                 "",
                 "<dark_gray>ѕᴛᴀᴛᴜѕ: {status}</dark_gray>"
@@ -281,38 +210,102 @@ public class WeaponsGuiConfig implements VersionedConfig {
             33,
             "DIAMOND_CHESTPLATE",
             0,
-            "<color:#ff0000> <bold>ᴀʀᴍᴏʀ ᴍᴀѕᴛᴇʀ (ɢᴇᴀʀ ѕᴇᴛ)</bold></color>",
+            "<color:#ff0000> <bold>ᴀʀᴍᴏʀ (ɢᴇᴀʀ ѕᴇᴛ)</bold></color>",
             List.of(
-                "<color:#ff0000> <bold>ᴘᴀѕѕɪᴠᴇ</bold></color>",
-                "<color:#ff0000>▪ <white>ᴇǫᴜɪᴘᴘɪɴɢ ʙᴀѕᴇ ᴀʀᴍᴏʀ ᴘɪᴇᴄᴇѕ</white></color>",
-                "<white>  ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ ᴜᴘɢʀᴀᴅᴇѕ ᴛʜᴇᴍ</white>",
-                "<white>  ᴛᴏ ѕᴜᴘᴇʀɪᴏʀ ᴀʀᴍᴏʀ.</white>",
+                "<color:#ff0000> <bold>ᴘᴀѕѕɪᴠᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ᴇǫᴜɪᴘᴘɪɴɢ ᴅɪᴀᴍᴏɴᴅ ᴀʀᴍᴏʀ</white></color>",
+                "  ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ ᴜᴘɢʀᴀᴅᴇѕ ɪᴛ",
+                "  ᴛᴏ ɴᴇᴛʜᴇʀɪᴛᴇ ᴀʀᴍᴏʀ.",
                 "",
-                "<color:#ff0000> <bold>ᴜʟᴛɪᴍᴀᴛᴇ</bold></color>",
-                "<color:#ff0000>▪ <white>ɢʀᴀɴᴛѕ 100% ᴋɴᴏᴄᴋʙᴀᴄᴋ</white></color>",
-                "<white>  ɪᴍᴍᴜɴɪᴛʏ & ʙᴏᴏѕᴛѕ ɢᴏʟᴅᴇɴ</white>",
-                "<white>  ᴀᴘᴘʟᴇ ᴀʙѕᴏʀᴘᴛɪᴏɴ ꜰᴏʀ 20ѕ.</white>",
+                "<color:#ff0000> <bold>ᴜʟᴛɪᴍᴀᴛᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ɢʀᴀɴᴛѕ 100% ᴋɴᴏᴄᴋʙᴀᴄᴋ ɪᴍᴍᴜɴɪᴛʏ</white></color>",
+                "  ᴀɴᴅ ᴀᴍᴘʟɪғʏ ɢᴏʟᴅᴇɴ ᴀᴘᴘʟᴇ",
+                "  ᴀʙѕᴏʀᴘᴛɪᴏɴ ᴇғғᴇᴄᴛ ᴛᴏ 4 ꜰᴏʀ 20ѕ.",
                 "<dark_gray>  ᴄᴏᴏʟᴅᴏᴡɴ: 60 ѕᴇᴄᴏɴᴅѕ</dark_gray>",
                 "",
                 "<dark_gray>ѕᴛᴀᴛᴜѕ: {status}</dark_gray>"
             )
         ));
 
-        map.put("shield", new GuiSlotItemConfig(
-            40,
-            "SHIELD",
+        map.put("trident2", new GuiSlotItemConfig(
+            30,
+            "TRIDENT",
             0,
-            "<color:#ff0000> <bold>ѕʜɪᴇʟᴅ ᴏꜰ ᴀᴛʜᴇɴᴀ</bold></color>",
+            "<color:#ff0000> <bold>S5 ᴛʀɪᴅᴇɴᴛ</bold></color>",
             List.of(
-                "<color:#ff0000> <bold>ᴘᴀѕѕɪᴠᴇ</bold></color>",
-                "<color:#ff0000>▪ <white>ѕʜɪᴇʟᴅ ᴅɪѕᴀʙʟᴇ/ʙʀᴇᴀᴋ</white></color>",
-                "<white>  ɢʀᴀɴᴛѕ 20% ᴅᴀᴍᴀɢᴇ</white>",
-                "<white>  ʀᴇᴅᴜᴄᴛɪᴏɴ ꜰᴏʀ 5ѕ.</white>",
+                "<color:#ff0000> <bold>ᴘᴀѕѕɪᴠᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ᴍᴀᴛᴄʜᴇѕ ѕᴡᴏʀᴅ ᴀᴛᴛᴀᴄᴋ ѕᴘᴇᴇᴅ</white></color>",
+                "  ᴀɴᴅ ѕᴛᴜɴѕ ʙʟᴏᴄᴋɪɴɢ ѕʜɪᴇʟᴅѕ",
+                "  ꜰᴏʀ 5ѕ ᴏɴ ʜɪᴛ.",
                 "",
-                "<color:#ff0000> <bold>ᴜʟᴛɪᴍᴀᴛᴇ</bold></color>",
-                "<color:#ff0000>▪ <white>ѕᴘᴀᴡɴѕ ʙᴜʙʙʟᴇ ʙᴀʀʀɪᴇʀ</white></color>",
-                "<white>  ɢʀᴀɴᴛɪɴɢ 100% ɪɴᴠᴜʟɴᴇʀᴀʙɪʟɪᴛʏ</white>",
-                "<white>  ꜰᴏʀ 15ѕ.</white>",
+                "<color:#ff0000> <bold>ᴜʟᴛɪᴍᴀᴛᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ѕᴜᴍᴍᴏɴѕ ᴀ 15ѕ ᴛʜᴜɴᴅᴇʀѕᴛᴏʀᴍ</white></color>",
+                "  ᴡʜᴇʀᴇ ᴇᴠᴇʀʏ ᴄʀɪᴛɪᴄᴀʟ ѕᴛʀɪᴋᴇ",
+                "  ᴅᴇᴀʟѕ +4.0 ʙᴏɴᴜѕ ᴅᴍɢ ᴡɪᴛʜ",
+                "  ʟɪɢʜᴛɴɪɴɢ ѕᴛʀɪᴋᴇѕ.",
+                "<dark_gray>  ᴄᴏᴏʟᴅᴏᴡɴ: 60 ѕᴇᴄᴏɴᴅѕ</dark_gray>",
+                "",
+                "<dark_gray>ѕᴛᴀᴛᴜѕ: {status}</dark_gray>"
+            )
+        ));
+
+        map.put("axe", new GuiSlotItemConfig(
+            21,
+            "DIAMOND_AXE",
+            0,
+            "<color:#ff0000> <bold>ᴀxᴇ</bold></color>",
+            List.of(
+                "<color:#ff0000> <bold>ᴘᴀѕѕɪᴠᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ᴅᴏ 5 ᴄʀɪᴛ ʜɪᴛѕ ᴛᴏ ᴀɴ ᴇɴᴇᴍʏ</white></color>",
+                "  ᴛᴏ ѕᴛᴜɴ ᴛʜᴇᴍ ꜰᴏʀ 1 ѕᴇᴄᴏɴᴅ",
+                "",
+                "<color:#ff0000> <bold>ᴜʟᴛɪᴍᴀᴛᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ᴍᴀʀᴋѕ ᴛᴀʀɢᴇᴛ ꜰᴏʀ 10ѕ</white></color>",
+                "  ѕᴛᴏʀɪɴɢ 100% ᴅᴀᴍᴀɢᴇ ᴀɴᴅ",
+                "  ᴅᴇᴛᴏɴᴀᴛɪɴɢ ɪᴛ ꜰᴏʀ 1.5x",
+                "  ʙᴜʀѕᴛ ᴅᴀᴍᴀɢᴇ.",
+                "<dark_gray>  ᴄᴏᴏʟᴅᴏᴡɴ: 60 ѕᴇᴄᴏɴᴅѕ</dark_gray>",
+                "",
+                "<dark_gray>ѕᴛᴀᴛᴜѕ: {status}</dark_gray>"
+            )
+        ));
+
+        map.put("crossbow2", new GuiSlotItemConfig(
+            31,
+            "CROSSBOW",
+            0,
+            "<color:#ff0000> <bold>S5 ᴄʀᴏѕѕʙᴏᴡ</bold></color>",
+            List.of(
+                "<color:#ff0000> <bold>ᴘᴀѕѕɪᴠᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ᴀʀʀᴏws ʙʏᴘᴀѕѕ ѕʜɪᴇʟᴅ ʙʟᴏᴄᴋѕ</white></color>",
+                "  ᴀɴᴅ 35% ᴄʜᴀɴᴄᴇ ᴛᴏ ѕᴇᴛ ꜰɪʀᴇ",
+                "  ꜰᴏʀ 5ѕ.",
+                "",
+                "<color:#ff0000> <bold>ᴜʟᴛɪᴍᴀᴛᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ᴀᴜᴛᴏ-ᴇɴᴄʜᴀɴᴛѕ ᴄʀᴏѕѕʙᴏᴡ ᴀɴᴅ</white></color>",
+                "  ɢʀᴀɴᴛѕ ᴘᴏᴡᴇʀ 5 ᴀɴᴅ ǫᴜɪᴄᴋ",
+                "  ᴄʜᴀʀɢᴇ 5 ꜰᴏʀ 10s.",
+                "<dark_gray>  ᴄᴏᴏʟᴅᴏᴡɴ: 60 ѕᴇᴄᴏɴᴅѕ</dark_gray>",
+                "",
+                "<dark_gray>ѕᴛᴀᴛᴜѕ: {status}</dark_gray>"
+            )
+        ));
+
+        map.put("mace", new GuiSlotItemConfig(
+            32,
+            "MACE",
+            0,
+            "<color:#ff0000> <bold>ᴍᴀᴄᴇ</bold></color>",
+            List.of(
+                "<color:#ff0000> <bold>ᴘᴀѕѕɪᴠᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ѕᴍᴀѕʜ ᴀᴛᴛᴀᴄᴋ ᴄᴏᴏʟᴅᴏᴡɴ ɪѕ</white></color>",
+                "  ʀᴇᴅᴜᴄᴇᴅ ʙʏ 50% ᴏɴ",
+                "  ѕᴍᴀѕʜ ѕᴛʀɪᴋᴇѕ.",
+                "",
+                "<color:#ff0000> <bold>ᴜʟᴛɪᴍᴀᴛᴇ</bold></color>",
+                "<color:#ff0000>▪ <white>ᴀᴜᴛᴏ-ᴇɴᴄʜᴀɴᴛѕ ᴍᴀᴄᴇ with ᴡɪɴᴅ ʙᴜʀѕᴛ 2</white></color>",
+                "  ᴀɴᴅ ɢʀᴀɴᴛѕ ᴢᴇʀᴏ ѕᴍᴀѕʜ ᴄᴏᴏʟᴅᴏᴡɴ",
+                "  ꜰᴏʀ 30ѕ.",
                 "<dark_gray>  ᴄᴏᴏʟᴅᴏᴡɴ: 60 ѕᴇᴄᴏɴᴅѕ</dark_gray>",
                 "",
                 "<dark_gray>ѕᴛᴀᴛᴜѕ: {status}</dark_gray>"
