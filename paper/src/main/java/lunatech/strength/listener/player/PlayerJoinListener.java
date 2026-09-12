@@ -36,6 +36,21 @@ public final class PlayerJoinListener implements Listener {
         // Re-apply modifier on join to synchronize entity state
         strengthService.applyAttributeModifier(player, strength);
 
+        // Defer spear attack-speed modifier application by 2 ticks: PlayerJoinEvent fires before
+        // the server finalizes vanilla item equip attribute modifiers (the item's own attack_speed
+        // modifier is applied in the next server tick after the join packet handshake completes).
+        // Reading speedAttr.getValue() inside the same tick as join returns the base value only
+        // (4.0), making our diff calculation wrong. A 2-tick delay ensures the vanilla pipeline
+        // has settled so our ADD_NUMBER modifier correctly bridges to sword speed (1.6).
+        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+            if (player.isOnline()) {
+                final String assigned = strengthService.getAssignedWeapon(player);
+                if ("spear".equalsIgnoreCase(assigned)) {
+                    SpearAbilityListener.staticUpdateAttackSpeed(player, plugin, strengthService);
+                }
+            }
+        }, 2L);
+
         // Check if player has an assigned weapon, if not trigger the rolling process
         final String assignedWeapon = strengthService.getAssignedWeapon(player);
         if (assignedWeapon == null) {

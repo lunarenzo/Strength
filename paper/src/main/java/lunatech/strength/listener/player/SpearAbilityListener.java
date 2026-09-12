@@ -173,6 +173,41 @@ public final class SpearAbilityListener implements Listener {
         plugin.getServer().getScheduler().runTask(plugin, () -> updateAttackSpeed(player));
     }
 
+    /**
+     * Static entry point for {@link lunatech.strength.listener.player.PlayerJoinListener} to
+     * trigger the spear attack-speed modifier without holding a listener instance reference.
+     * Must only be called from the main server thread.
+     */
+    public static void staticUpdateAttackSpeed(@NotNull Player player, @NotNull Strength plugin, @NotNull StrengthService strengthService) {
+        if (!player.isOnline()) return;
+
+        final AttributeInstance speedAttr = player.getAttribute(Attribute.ATTACK_SPEED);
+        if (speedAttr == null) return;
+
+        // Strip any stale modifier before re-evaluation
+        for (AttributeModifier mod : speedAttr.getModifiers()) {
+            if (ATTACK_SPEED_KEY.equals(mod.getKey())) {
+                speedAttr.removeModifier(mod);
+            }
+        }
+
+        final String assigned = strengthService.getAssignedWeapon(player);
+        if (assigned == null || !"spear".equalsIgnoreCase(assigned)) return;
+
+        final ItemStack mainHand = player.getInventory().getItemInMainHand();
+        if (!isSpear(mainHand)) return;
+
+        final SpearConfig config = plugin.getConfigHandler().getSpearConfig();
+        if (config == null || !config.enabled || !config.passive.enabled || !config.passive.matchSwordAttackSpeed) return;
+
+        final double targetSwordSpeed = 1.6;
+        final double currentEffective = speedAttr.getValue(); // safe: our modifier already stripped
+        final double diff = targetSwordSpeed - currentEffective;
+        if (Math.abs(diff) > 0.0001) {
+            speedAttr.addModifier(new AttributeModifier(ATTACK_SPEED_KEY, diff, AttributeModifier.Operation.ADD_NUMBER));
+        }
+    }
+
     public void updateAttackSpeed(@NotNull Player player) {
         if (!player.isOnline()) return;
 
@@ -193,9 +228,24 @@ public final class SpearAbilityListener implements Listener {
 
         final SpearConfig config = plugin.getConfigHandler().getSpearConfig();
         if (config != null && config.enabled && config.passive.enabled && config.passive.matchSwordAttackSpeed) {
-            final double currentSpeed = speedAttr.getValue();
+            // Compute diff against base value ONLY — not getValue() which includes both the vanilla
+            // item equip modifier AND our own previously-added modifier. Using getValue() here causes
+            // double-stacking: each hot-bar swap compounds the modifier, eventually freezing the
+            // client attack cooldown indicator because the effective speed overshoots valid bounds.
+            // base = 4.0 always for players; vanilla item equip modifier is applied by the server
+            // separately and is NOT included in getBaseValue(). Our modifier must therefore bridge
+            // from (base + item_equip_modifier) to targetSwordSpeed. The only stable read is
+            // (targetSwordSpeed - base) — which equals the total modifier needed, since after we
+            // strip our own modifier with removeAttackSpeedModifier() the remaining effective speed
+            // is exactly (base + item_equip_modifier). Reading it as getBaseValue() gives us just
+            // the base without item equip, so we compute:
+            //   neededModifier = targetSwordSpeed - (base + itemEquipModifier)
+            //                  = targetSwordSpeed - (getValue() after strip)
+            // After removeAttackSpeedModifier(), getValue() no longer contains our modifier, so it
+            // is now safe to read as (base + item_equip_modifier_only).
             final double targetSwordSpeed = 1.6;
-            final double diff = targetSwordSpeed - currentSpeed;
+            final double currentEffective = speedAttr.getValue(); // safe: our modifier is already stripped above
+            final double diff = targetSwordSpeed - currentEffective;
             if (Math.abs(diff) > 0.0001) {
                 speedAttr.addModifier(new AttributeModifier(ATTACK_SPEED_KEY, diff, AttributeModifier.Operation.ADD_NUMBER));
             }
