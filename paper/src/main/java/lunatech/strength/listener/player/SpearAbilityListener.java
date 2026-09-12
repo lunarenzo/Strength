@@ -173,6 +173,33 @@ public final class SpearAbilityListener implements Listener {
         plugin.getServer().getScheduler().runTask(plugin, () -> updateAttackSpeed(player));
     }
 
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPickup(org.bukkit.event.entity.EntityPickupItemEvent event) {
+        if (event.getEntity() instanceof Player player) {
+            plugin.getServer().getScheduler().runTask(plugin, () -> updateAttackSpeed(player));
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onInteract(org.bukkit.event.player.PlayerInteractEvent event) {
+        updateAttackSpeed(event.getPlayer());
+    }
+
+    /**
+     * Calculates the exact attack speed modifier needed to bridge a spear tier's vanilla
+     * attack speed to standard sword attack speed (1.6 attacks per second).
+     */
+    private static double getSpearTargetDiff(@NotNull Material material) {
+        final String name = material.name();
+        if (name.contains("NETHERITE")) return 0.73;
+        if (name.contains("DIAMOND"))   return 0.65;
+        if (name.contains("IRON") || name.contains("GOLD")) return 0.55;
+        if (name.contains("COPPER"))    return 0.42;
+        if (name.contains("STONE"))     return 0.27;
+        if (name.contains("WOOD"))      return 0.06;
+        return 0.55;
+    }
+
     /**
      * Static entry point for {@link lunatech.strength.listener.player.PlayerJoinListener} to
      * trigger the spear attack-speed modifier without holding a listener instance reference.
@@ -184,72 +211,48 @@ public final class SpearAbilityListener implements Listener {
         final AttributeInstance speedAttr = player.getAttribute(Attribute.ATTACK_SPEED);
         if (speedAttr == null) return;
 
-        // Strip any stale modifier before re-evaluation
+        final String assigned = strengthService.getAssignedWeapon(player);
+        final ItemStack mainHand = player.getInventory().getItemInMainHand();
+        final SpearConfig config = plugin.getConfigHandler().getSpearConfig();
+
+        final boolean shouldHaveModifier = config != null && config.enabled && config.passive.enabled 
+            && config.passive.matchSwordAttackSpeed 
+            && "spear".equalsIgnoreCase(assigned) 
+            && isSpear(mainHand);
+
+        AttributeModifier existingMod = null;
         for (AttributeModifier mod : speedAttr.getModifiers()) {
             if (ATTACK_SPEED_KEY.equals(mod.getKey())) {
-                speedAttr.removeModifier(mod);
+                existingMod = mod;
+                break;
             }
         }
 
-        final String assigned = strengthService.getAssignedWeapon(player);
-        if (assigned == null || !"spear".equalsIgnoreCase(assigned)) return;
-
-        final ItemStack mainHand = player.getInventory().getItemInMainHand();
-        if (!isSpear(mainHand)) return;
-
-        final SpearConfig config = plugin.getConfigHandler().getSpearConfig();
-        if (config == null || !config.enabled || !config.passive.enabled || !config.passive.matchSwordAttackSpeed) return;
-
-        final double targetSwordSpeed = 1.6;
-        final double currentEffective = speedAttr.getValue(); // safe: our modifier already stripped
-        final double diff = targetSwordSpeed - currentEffective;
-        if (Math.abs(diff) > 0.0001) {
-            speedAttr.addModifier(new AttributeModifier(ATTACK_SPEED_KEY, diff, AttributeModifier.Operation.ADD_NUMBER));
+        if (!shouldHaveModifier) {
+            if (existingMod != null) {
+                speedAttr.removeModifier(existingMod);
+            }
+            return;
         }
+
+        final double requiredDiff = getSpearTargetDiff(mainHand.getType());
+
+        if (existingMod != null) {
+            if (Math.abs(existingMod.getAmount() - requiredDiff) < 0.0001) {
+                return; // Already present with exact target value — zero packets sent!
+            }
+            speedAttr.removeModifier(existingMod);
+        }
+
+        speedAttr.addTransientModifier(new AttributeModifier(
+            ATTACK_SPEED_KEY,
+            requiredDiff,
+            AttributeModifier.Operation.ADD_NUMBER
+        ));
     }
 
     public void updateAttackSpeed(@NotNull Player player) {
-        if (!player.isOnline()) return;
-
-        final AttributeInstance speedAttr = player.getAttribute(Attribute.ATTACK_SPEED);
-        if (speedAttr == null) return;
-
-        removeAttackSpeedModifier(speedAttr);
-
-        final String assigned = strengthService.getAssignedWeapon(player);
-        if (assigned == null || !"spear".equalsIgnoreCase(assigned)) {
-            return;
-        }
-
-        final ItemStack mainHand = player.getInventory().getItemInMainHand();
-        if (!isSpear(mainHand)) {
-            return;
-        }
-
-        final SpearConfig config = plugin.getConfigHandler().getSpearConfig();
-        if (config != null && config.enabled && config.passive.enabled && config.passive.matchSwordAttackSpeed) {
-            // Compute diff against base value ONLY — not getValue() which includes both the vanilla
-            // item equip modifier AND our own previously-added modifier. Using getValue() here causes
-            // double-stacking: each hot-bar swap compounds the modifier, eventually freezing the
-            // client attack cooldown indicator because the effective speed overshoots valid bounds.
-            // base = 4.0 always for players; vanilla item equip modifier is applied by the server
-            // separately and is NOT included in getBaseValue(). Our modifier must therefore bridge
-            // from (base + item_equip_modifier) to targetSwordSpeed. The only stable read is
-            // (targetSwordSpeed - base) — which equals the total modifier needed, since after we
-            // strip our own modifier with removeAttackSpeedModifier() the remaining effective speed
-            // is exactly (base + item_equip_modifier). Reading it as getBaseValue() gives us just
-            // the base without item equip, so we compute:
-            //   neededModifier = targetSwordSpeed - (base + itemEquipModifier)
-            //                  = targetSwordSpeed - (getValue() after strip)
-            // After removeAttackSpeedModifier(), getValue() no longer contains our modifier, so it
-            // is now safe to read as (base + item_equip_modifier_only).
-            final double targetSwordSpeed = 1.6;
-            final double currentEffective = speedAttr.getValue(); // safe: our modifier is already stripped above
-            final double diff = targetSwordSpeed - currentEffective;
-            if (Math.abs(diff) > 0.0001) {
-                speedAttr.addModifier(new AttributeModifier(ATTACK_SPEED_KEY, diff, AttributeModifier.Operation.ADD_NUMBER));
-            }
-        }
+        staticUpdateAttackSpeed(player, plugin, strengthService);
     }
 
     /* =========================================================================
