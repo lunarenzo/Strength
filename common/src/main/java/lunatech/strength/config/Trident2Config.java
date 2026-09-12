@@ -61,10 +61,10 @@ public class Trident2Config implements VersionedConfig {
         public double shieldStunDurationSeconds = 5.0;
 
         @Comment("Message sent to attacker when breaking target's shield.")
-        public String shieldStunMessage = "<red><bold>SHIELD CRACK!</bold> You stunned <target>'s shield!</red>";
+        public String shieldStunMessage = "<color:#ff0000>  <white>Trident Passive triggered!</color>";
 
         @Comment("Message sent to victim when their shield is broken.")
-        public String shieldStaggeredMessage = "<red><bold>STUNNED!</bold> Your shield was cracked by a Trident!</red>";
+        public String shieldStaggeredMessage = "";
     }
 
     @ConfigSerializable
@@ -88,24 +88,24 @@ public class Trident2Config implements VersionedConfig {
         public String lightningParticleType = "WAX_OFF";
 
         @Comment("Message sent when Thunderstorm Ultimate is activated.")
-        public String ultimateActivatedMessage = "<gold><bold>THUNDERSTORM ULTIMATE ACTIVATED!</bold> Every crit summons lightning!</gold>";
+        public String ultimateActivatedMessage = "<color:#ff0000>  <white>Trident Ultimate Activated!</color>";
 
         @Comment("Message sent when Thunderstorm Ultimate expires.")
-        public String ultimateExpiredMessage = "<red>Your Thunderstorm Ultimate has expired!</red>";
+        public String ultimateExpiredMessage = "<color:#ff0000>  <white>Trident Ultimate Activated!</color>";
 
         @Comment("Message sent when player is not holding a Trident.")
-        public String mustHoldTridentMessage = "<red>You must be holding your Trident to activate your ultimate!</red>";
+        public String mustHoldTridentMessage = "<color:#ff0000> ᴇʀʀᴏʀ <gray>| <white>You must be holding a Trident to activate your ultimate!</color>";
 
         @Comment("Message sent when player does not have enough strength.")
         public String notEnoughStrengthMessage = "<red>You do not have enough strength to activate your ultimate! (Required: <req>, Current: <current>)</red>";
 
         @Comment("Message sent when ultimate is on cooldown.")
-        public String ultimateCooldownMessage = "<red>Your Ultimate is on cooldown for another <seconds>s!</red>";
+        public String ultimateCooldownMessage = "<color:#ff0000>  <white>Ultimate Cooldown Remaining: <seconds>s</color>";
 
         @Comment("Message sent in chat when ultimate cooldown completes and becomes ready")
-        public String ultimateReadyMessage = "<gold><bold>⚡ ULTIMATE READY!</bold> Your <yellow>{weapon}</yellow> ultimate is ready to use! Type <yellow>/ability</yellow>!</gold>";
+        public String ultimateReadyMessage = "<color:#ff0000>  <white>ULTIMATE READY!</color>";
 
         @Comment("Message sent in actionbar when ultimate cooldown completes and becomes ready")
-        public String ultimateReadyActionbarMessage = "<gold><bold>⚡ {weapon} ULTIMATE READY!</bold></gold>";
+        public String ultimateReadyActionbarMessage = "";
     }
 }
