@@ -97,7 +97,7 @@ public class CrossbowConfig implements VersionedConfig {
         public String ultimateChargeProgressMessage = "<gray>Ultimate Charge: <gold><charge>/<target></gold> passive hits</gray>";
 
         @Comment("Message sent when crossbow ultimate is activated")
-        public String ultimateActivatedMessage = "<color:#ff0000>  <white>Crossbow Ultimate Activated! Your next shot will immobilize enemy!</gold>";
+        public String ultimateActivatedMessage = "<color:#ff0000>  <white>Crossbow Ultimate Activated! Your next shot will immobilize enemy!</color>";
 
         @Comment("Message sent to the shooter when ultimate hits an enemy")
         public String immobilizedShooterMessage = "<color:#ff0000>  <white>Crossbow Ultimate Hit! Target immobilized</color>";
