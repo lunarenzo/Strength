@@ -46,6 +46,11 @@ public final class TridentAbilityListener implements Listener {
             return;
         }
 
+        // Option B: Active ultimate barrage strikes are strictly isolated (do not trigger passive lightning or ultimate hits)
+        if (damager.hasMetadata(BARRAGE_ACTIVE_KEY)) {
+            return;
+        }
+
         // Ignore uncharged spam strikes (must be >= 0.9f full attack strength)
         if (damager.getCooledAttackStrength(0.5f) < 0.9f) {
             return;
@@ -114,12 +119,8 @@ public final class TridentAbilityListener implements Listener {
             }
         }
 
-        // 2. Ultimate Charge: Accumulate N hits to unlock Ultimate (skipped during active barrage to prevent infinite loops)
+        // 2. Ultimate Charge: Accumulate N hits to unlock Ultimate
         if (settings.ultimate != null && settings.ultimate.enabled) {
-            if (damager.hasMetadata(BARRAGE_ACTIVE_KEY)) {
-                return;
-            }
-
             final int currentUltHits = ultimateHits.getOrDefault(damagerUuid, 0);
             final int targetUltHits = settings.ultimate.hitsRequired;
             if (currentUltHits < targetUltHits) {
