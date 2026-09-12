@@ -53,7 +53,7 @@ public class MaceConfig implements VersionedConfig {
         public double cooldownReductionPercent = 50.0;
 
         @Comment("Message sent when Mace passive smash cooldown reduction applies.")
-        public String passiveTriggeredMessage = "<gold><bold>MACE PASSIVE!</bold> Smash attack cooldown reduced by <percent>%!</gold>";
+        public String passiveTriggeredMessage = "<color:#ff0000>  <white>Mace Passive triggered!</color>";
     }
 
     @ConfigSerializable
@@ -65,33 +65,33 @@ public class MaceConfig implements VersionedConfig {
         public int strengthRequired = 5;
 
         @Comment("Ultimate active duration in seconds.")
-        public int durationSeconds = 15;
+        public int durationSeconds = 30;
 
         @Comment("Cooldown in seconds for Mace Ultimate.")
         public int cooldownSeconds = 60;
 
         @Comment("List of enchantments automatically applied to Mace during ultimate (Format: ENCHANTMENT_KEY:LEVEL).")
-        public List<String> autoEnchantments = List.of("WIND_BURST:2", "DENSITY:5", "BREACH:4");
+        public List<String> autoEnchantments = List.of("WIND_BURST:2");
 
         @Comment("Message sent when Mace ultimate is activated.")
-        public String ultimateActivatedMessage = "<gold><bold>MACE ULTIMATE ACTIVATED!</bold> Auto-enchanted & zero smash cooldown for <duration>s!</gold>";
+        public String ultimateActivatedMessage = "<color:#ff0000>  <white>Mace Ultimate Activated!</color>";
 
         @Comment("Message sent when Mace ultimate expires.")
-        public String ultimateExpiredMessage = "<red>Your Mace Ultimate has expired.</red>";
+        public String ultimateExpiredMessage = "<color:#ff0000>  <white>Mace Ultimate Activated!</color>";
 
         @Comment("Message sent when player is not holding a Mace.")
-        public String mustHoldMaceMessage = "<red>You must be holding a Mace to activate your ultimate!</red>";
+        public String mustHoldMaceMessage = "<color:#ff0000> ᴇʀʀᴏʀ <gray>| <white>You must be holding a Mace to activate your ultimate!</color>";
 
         @Comment("Message sent when player does not have enough strength.")
         public String notEnoughStrengthMessage = "<red>You do not have enough strength to activate your ultimate! (Required: <req>, Current: <current>)</red>";
 
         @Comment("Message sent when ultimate is on cooldown.")
-        public String ultimateCooldownMessage = "<red>Your Ultimate is on cooldown for another <seconds>s!</red>";
+        public String ultimateCooldownMessage = "<color:#ff0000>  <white>Ultimate Cooldown Remaining: <seconds>s</color>";
 
         @Comment("Message sent in chat when ultimate cooldown completes and becomes ready")
-        public String ultimateReadyMessage = "<gold><bold>⚡ ULTIMATE READY!</bold> Your <yellow>{weapon}</yellow> ultimate is ready to use! Type <yellow>/ability</yellow>!</gold>";
+        public String ultimateReadyMessage = "<color:#ff0000>  <white>ULTIMATE READY!</color>";
 
         @Comment("Message sent in actionbar when ultimate cooldown completes and becomes ready")
-        public String ultimateReadyActionbarMessage = "<gold><bold>⚡ {weapon} ULTIMATE READY!</bold></gold>";
+        public String ultimateReadyActionbarMessage = "";
     }
 }
