@@ -56,6 +56,10 @@ public class CommandHandler implements Reloadable {
         new AbilityCommand(plugin)
             .command()
             .register();
+
+        new WeaponClassCommand(plugin)
+            .command()
+            .register();
     }
 
     @Override

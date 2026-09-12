@@ -51,9 +51,19 @@ public final class PlayerJoinListener implements Listener {
             }
         }, 2L);
 
-        // Check if player has an assigned weapon, if not trigger the rolling process
+        // Check if player has an assigned weapon, if not trigger the rolling process or notify pending roll
         final String assignedWeapon = strengthService.getAssignedWeapon(player);
         if (assignedWeapon == null) {
+            final var weaponConfig = plugin.getConfigHandler().getConfig().weapons;
+            final boolean isOnDeathReset = "ON_DEATH_RESET".equalsIgnoreCase(weaponConfig.assignmentMode);
+
+            if (isOnDeathReset && player.hasPlayedBefore()) {
+                lunatech.strength.utility.MessageUtil.send(player, plugin.getConfigHandler().getConfig().messages.pendingRollJoinMessage);
+                if (!weaponConfig.autoRollOnJoinWhenUnassigned) {
+                    return;
+                }
+            }
+
             // Check if AuthMe integration is enabled and player is not authenticated yet
             final boolean authmeEnabled = plugin.getConfigHandler().getConfig().authme.enabled;
             if (authmeEnabled && plugin.getServer().getPluginManager().isPluginEnabled("AuthMe")) {
@@ -66,13 +76,13 @@ public final class PlayerJoinListener implements Listener {
                 }
             }
 
-            final List<String> available = plugin.getConfigHandler().getConfig().weapons.availableWeapons;
+            final List<String> available = weaponConfig.availableWeapons;
             if (available != null && !available.isEmpty()) {
-                final int delaySeconds = plugin.getConfigHandler().getConfig().weapons.rollDelaySeconds;
+                final int delaySeconds = weaponConfig.rollDelaySeconds;
                 
                 // Run the roll title effect after the configured delay
                 plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-                    if (player.isOnline()) {
+                    if (player.isOnline() && strengthService.getAssignedWeapon(player) == null) {
                         new WeaponRollTask(plugin, player).start();
                     }
                 }, Math.max(0L, delaySeconds * 20L));

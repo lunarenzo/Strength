@@ -310,6 +310,21 @@ public class PluginConfig implements VersionedConfig {
 
     @ConfigSerializable
     public static class WeaponSettings {
+        @Comment("Mode choice: 'DEFAULT' (auto-rolls on first join, persistent across deaths) or 'ON_DEATH_RESET' (clears assigned weapon on death, requires /weaponclass roll on respawn)")
+        public String assignmentMode = "DEFAULT";
+
+        @Comment("When assignmentMode is ON_DEATH_RESET, should weapon be cleared on natural/PvE deaths (lava, mobs, fall)? If false, weapon is ONLY cleared on PvP deaths.")
+        public boolean clearOnNaturalDeath = false;
+
+        @Comment("If enabled, whenever an assigned player leaves the server, their assigned weapon will be cleared just like on death.")
+        public boolean clearOnQuit = false;
+
+        @Comment("Should unassigned players automatically receive a roll on join when assignmentMode is ON_DEATH_RESET?")
+        public boolean autoRollOnJoinWhenUnassigned = false;
+
+        @Comment("Manual roll command settings (/weaponclass roll)")
+        public RollCommandSettings rollCommand = new RollCommandSettings();
+
         @Comment("Delay in seconds before triggering the weapon roll for a first-time player")
         public int rollDelaySeconds = 5;
 
@@ -398,6 +413,18 @@ public class PluginConfig implements VersionedConfig {
         public int completionSoundDelayTicks = 0;
     }
 
+    @ConfigSerializable
+    public static class RollCommandSettings {
+        @Comment("Master toggle for the /weaponclass roll command")
+        public boolean enabled = true;
+
+        @Comment("Cooldown in seconds between using /weaponclass roll (0 to disable cooldown)")
+        public int cooldownSeconds = 0;
+
+        @Comment("Permission node required to run /weaponclass roll (default: true for all players)")
+        public String permission = "strengthsmp.command.roll";
+    }
+
     @Comment("""
         ================================================================================
          _____ _____     _   _ _____ _       ___ _____ _____ _____ _   _ _____ 
@@ -413,6 +440,20 @@ public class PluginConfig implements VersionedConfig {
 
     @ConfigSerializable
     public static class MessagesConfig {
+        @Comment("Message sent on join to returning players when they have a pending weapon class roll")
+        public String pendingRollJoinMessage = "<color:#ff0000>  <white>You have a pending weapon class roll! Type <green>/weaponclass roll</green> to roll your weapon class.</white></color>";
+
+        @Comment("Message sent on respawn when weapon class was cleared upon death")
+        public String deathClearedMessage = "<color:#ff0000>  <white>Your weapon class was cleared upon death! Type <green>/weaponclass roll</green> to roll a new class.</white></color>";
+
+        @Comment("Message sent when attempting to use /weaponclass roll while already having an assigned weapon")
+        public String alreadyAssignedMessage = "<red>You already have an assigned weapon (<weapon>)! You must lose it on death or use a Reroll Book to change your class.</red>";
+
+        @Comment("Message sent when /weaponclass roll command is disabled")
+        public String rollDisabledMessage = "<red>Weapon class rolling is currently disabled on this server!</red>";
+
+        @Comment("Message sent when an unassigned player attempts to execute commands or weapon actions")
+        public String unassignedIgnoredMessage = "<red>You have no weapon assigned! Type /weaponclass roll to roll your weapon class.</red>";
         @Comment("Message sent when attempting to use strength features while strength module is disabled")
         public String strengthDisabledMessage = "<red>Strength leveling and economy features are disabled on this server!</red>";
 

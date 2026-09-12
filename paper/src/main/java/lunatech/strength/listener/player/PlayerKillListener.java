@@ -44,6 +44,16 @@ public final class PlayerKillListener implements Listener {
 
         final boolean isPvp = killer != null && !killer.getUniqueId().equals(victim.getUniqueId());
 
+        // ON_DEATH_RESET weapon assignment clearing logic
+        final var weaponSettings = configHandler.getConfig().weapons;
+        if ("ON_DEATH_RESET".equalsIgnoreCase(weaponSettings.assignmentMode)) {
+            if (isPvp || weaponSettings.clearOnNaturalDeath) {
+                if (strengthService.getAssignedWeapon(victim) != null) {
+                    strengthService.setAssignedWeapon(victim, null);
+                }
+            }
+        }
+
         // WorldGuard region check: if strength loss is disabled in this region, bypass death processing
         if (isPvp && plugin.getServer().getPluginManager().isPluginEnabled("WorldGuard")) {
             if (!lunatech.strength.integration.WorldGuardHook.isPvPLossAllowed(plugin, victim, victim.getLocation())) {
@@ -120,6 +130,17 @@ public final class PlayerKillListener implements Listener {
                     messages.killNoStrengthMessage,
                     Map.of("victim", victim.getName())
                 );
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerRespawn(@NotNull org.bukkit.event.player.PlayerRespawnEvent event) {
+        final Player player = event.getPlayer();
+        final var weaponSettings = configHandler.getConfig().weapons;
+        if ("ON_DEATH_RESET".equalsIgnoreCase(weaponSettings.assignmentMode)) {
+            if (strengthService.getAssignedWeapon(player) == null) {
+                MessageUtil.send(player, configHandler.getConfig().messages.deathClearedMessage);
             }
         }
     }
