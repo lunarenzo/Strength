@@ -70,6 +70,7 @@ public final class TridentUltimateTask extends BukkitRunnable {
     private final Strength plugin;
     private final TridentConfig.UltimateConfig settings;
     private final int durationTicks;
+    private final double perStrikeDamage;
     private int elapsedTicks;
     private int executedHits;
 
@@ -81,6 +82,16 @@ public final class TridentUltimateTask extends BukkitRunnable {
         this.plugin = plugin;
         this.settings = settings;
         this.durationTicks = settings.durationTicks;
+
+        final int playerStrength = plugin.getStrengthService().getStrength(player);
+        final double strengthFactor;
+        if (settings.scaleDamageWithStrength && settings.strengthRequired > 0) {
+            final double ratio = (double) playerStrength / (double) settings.strengthRequired;
+            strengthFactor = ratio * settings.strengthScalingMultiplier;
+        } else {
+            strengthFactor = 1.0;
+        }
+        this.perStrikeDamage = settings.damage * strengthFactor * plugin.getStrengthService().getScale();
     }
 
     @Override
@@ -204,7 +215,7 @@ public final class TridentUltimateTask extends BukkitRunnable {
                 target.setNoDamageTicks(0);
 
                 // Deal barrage thrust damage
-                target.damage(settings.damage * plugin.getStrengthService().getScale(), player);
+                target.damage(perStrikeDamage, player);
                 target.setNoDamageTicks(0);
 
                 // Cancel Spigot knockback impulse on next tick
