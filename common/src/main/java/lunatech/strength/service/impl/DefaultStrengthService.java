@@ -74,7 +74,6 @@ public final class DefaultStrengthService implements StrengthService {
 
     @Override
     public void setAssignedWeapon(@NotNull Player player, @Nullable String weapon) {
-        if (getScale() <= 0.0) return;
         final int currentStrength = getStrength(player);
         playerRepository.save(player, new PlayerData(currentStrength, weapon));
     }

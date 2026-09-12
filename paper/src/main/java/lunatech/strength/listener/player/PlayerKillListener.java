@@ -13,6 +13,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -135,7 +136,7 @@ public final class PlayerKillListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onPlayerRespawn(@NotNull org.bukkit.event.player.PlayerRespawnEvent event) {
+    public void onPlayerRespawn(@NotNull PlayerRespawnEvent event) {
         final Player player = event.getPlayer();
         final var weaponSettings = configHandler.getConfig().weapons;
         if ("ON_DEATH_RESET".equalsIgnoreCase(weaponSettings.assignmentMode)) {

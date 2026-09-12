@@ -3,6 +3,7 @@ package lunatech.strength.listener.player;
 import lunatech.strength.Strength;
 import lunatech.strength.service.StrengthService;
 import lunatech.strength.task.WeaponRollTask;
+import lunatech.strength.utility.MessageUtil;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -58,7 +59,7 @@ public final class PlayerJoinListener implements Listener {
             final boolean isOnDeathReset = "ON_DEATH_RESET".equalsIgnoreCase(weaponConfig.assignmentMode);
 
             if (isOnDeathReset && player.hasPlayedBefore()) {
-                lunatech.strength.utility.MessageUtil.send(player, plugin.getConfigHandler().getConfig().messages.pendingRollJoinMessage);
+                MessageUtil.send(player, plugin.getConfigHandler().getConfig().messages.pendingRollJoinMessage);
                 if (!weaponConfig.autoRollOnJoinWhenUnassigned) {
                     return;
                 }
