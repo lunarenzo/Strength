@@ -1,4 +1,5 @@
 import net.minecrell.pluginyml.paper.PaperPluginDescription
+import proguard.gradle.ProGuardTask
 
 plugins {
     id("pmd")
@@ -88,6 +89,28 @@ tasks {
         reloc("org.spongepowered", "spongepowered")
 
         mergeServiceFiles()
+    }
+
+    register<ProGuardTask>("obfuscate") {
+        dependsOn(shadowJar)
+
+        // Shaded jar input
+        injars(shadowJar.get().archiveFile)
+
+        // Output obfuscated jar
+        val obfuscatedFile = layout.buildDirectory.file("libs/${project.name}-${project.version}-obfuscated.jar")
+        outjars(obfuscatedFile)
+
+        // JDK library modules for Java 21+
+        val javaHome = System.getProperty("java.home")
+        libraryjars("$javaHome/jmods")
+
+        // External compileOnly dependencies
+        val compileClasspath = configurations.compileClasspath.get().files
+        libraryjars(compileClasspath)
+
+        // ProGuard configuration file
+        configuration(rootProject.file("proguard-rules.pro"))
     }
 
     runServer {
