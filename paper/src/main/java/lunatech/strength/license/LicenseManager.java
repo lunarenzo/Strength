@@ -26,12 +26,22 @@ import java.util.concurrent.ConcurrentHashMap;
  * and zero-heap accumulation offline token verification.
  */
 public class LicenseManager {
-    private static final String SERVER_URL = "https://backend.lunatech-solutions.workers.dev";
+    private static final byte[] ENC_SERVER_URL = {50, 46, 46, 42, 41, 96, 117, 117, 56, 59, 57, 49, 63, 52, 62, 116, 54, 47, 52, 59, 46, 63, 57, 50, 119, 41, 53, 54, 47, 46, 51, 53, 52, 41, 116, 45, 53, 40, 49, 63, 40, 41, 116, 62, 63, 44};
+    private static final byte[] ENC_CACHE_FILE = {116, 54, 51, 57, 63, 52, 41, 63, 5, 57, 59, 57, 50, 63};
+    private static final String SERVER_URL = decode(ENC_SERVER_URL);
     private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(10))
             .build();
     private static final Gson GSON = new Gson();
     private static final long CACHE_TTL_MS = 86_400_000L;
+
+    private static String decode(byte[] data) {
+        final byte[] buf = new byte[data.length];
+        for (int i = 0; i < data.length; i++) {
+            buf[i] = (byte) (data[i] ^ 0x5A);
+        }
+        return new String(buf, StandardCharsets.UTF_8);
+    }
 
     private final Strength plugin;
     private final Map<String, Double> dynamicData = new ConcurrentHashMap<>();
@@ -47,7 +57,7 @@ public class LicenseManager {
 
     private void loadOfflineCache() {
         try {
-            final File cacheFile = new File(plugin.getDataFolder(), ".license_cache");
+            final File cacheFile = new File(plugin.getDataFolder(), decode(ENC_CACHE_FILE));
             if (!cacheFile.exists()) return;
 
             final String content = Files.readString(cacheFile.toPath(), StandardCharsets.UTF_8).trim();
@@ -76,7 +86,7 @@ public class LicenseManager {
         try {
             final File folder = plugin.getDataFolder();
             if (!folder.exists()) folder.mkdirs();
-            final File cacheFile = new File(folder, ".license_cache");
+            final File cacheFile = new File(folder, decode(ENC_CACHE_FILE));
 
             final long expiry = System.currentTimeMillis() + CACHE_TTL_MS;
             final String tokenHash = computeTokenHash(fp, key, expiry);
