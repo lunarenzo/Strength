@@ -109,11 +109,11 @@ public class Strength extends AbstractStrength {
      */
     public void onReload() {
         for (Reloadable handler : handlers.reversed()) {
-            if (handler instanceof CommandHandler) continue;
+            if (handler == commandHandler || handler instanceof CommandHandler) continue;
             handler.onDisable(instance);
         }
         for (Reloadable handler : handlers) {
-            if (handler instanceof CommandHandler) continue;
+            if (handler == commandHandler || handler instanceof CommandHandler) continue;
             handler.onLoad(instance);
             handler.onEnable(instance);
         }
