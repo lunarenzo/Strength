@@ -38,8 +38,8 @@ authme = "fr.xephi:authme-core:6.0.0-SNAPSHOT"
 pvpmanager = "me.chancesd.pvpmanager:pvpmanager:4.0.9"
 worldguard = "com.sk89q.worldguard:worldguard-bukkit:7.0.12"
 worldguard-core = "com.sk89q.worldguard:worldguard-core:7.0.12"
-worldedit = "com.sk89q.worldedit:worldedit-bukkit:7.3.0"
-worldedit-core = "com.sk89q.worldedit:worldedit-core:7.3.0"
+worldedit = "com.sk89q.worldedit:worldedit-bukkit:7.4.5"
+worldedit-core = "com.sk89q.worldedit:worldedit-core:7.4.5"
 
 # Testing
 junit-bom = "org.junit:junit-bom:6.1.2"
