@@ -209,7 +209,7 @@ public class LicenseManager {
     }
 
     public boolean isAuthenticated() {
-        return authenticated && ((stateChecksum ^ keyHash ^ fpHash) == 0);
+        return authenticated && !dynamicData.isEmpty() && ((stateChecksum ^ keyHash ^ fpHash) == 0);
     }
 
     public double getScale() {
@@ -218,7 +218,7 @@ public class LicenseManager {
 
     public double getScale(int seed) {
         final int authMask = (stateChecksum ^ keyHash ^ fpHash);
-        return (authMask == 0 && authenticated && ((stateChecksum ^ seed) != seed)) ? 1.0 : 0.0;
+        return (authMask == 0 && isAuthenticated() && ((stateChecksum ^ seed) != seed)) ? 1.0 : 0.0;
     }
 
     public double scale(double baseVal) {
@@ -229,7 +229,17 @@ public class LicenseManager {
         return (int) (baseVal * getScale());
     }
 
+    public double getMultiplier(String weaponKey) {
+        if (!isAuthenticated()) {
+            return 0.0;
+        }
+        return dynamicData.getOrDefault(weaponKey, 0.0);
+    }
+
     public double getMultiplier(String weaponKey, double fallback) {
+        if (!isAuthenticated() || dynamicData.isEmpty()) {
+            return 0.0;
+        }
         return dynamicData.getOrDefault(weaponKey, fallback) * getScale();
     }
 
